@@ -1,0 +1,19 @@
+appId: 'rct.trsz.app'
+productName: '瑞思课堂工具'
+directories:
+  output: './dist'
+  buildResources: 'build'
+  app: './'
+ 
+win:
+  icon: './logo.png'
+ 
+mac:
+  icon: './logo.png'
+ 
+linux:
+  icon: './logo.png'
+ 
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true

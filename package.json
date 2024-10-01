@@ -1,0 +1,17 @@
+{
+  "name": "risclasstool",
+  "version": "0.0.1",
+  "description": "瑞思班级工具",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "build64": "electron-builder --win --x64",
+    "build32": "electron-builder --win --x32"
+  },
+  "author": "PYLXU",
+  "license": "LGPL-3.0-or-later",
+  "devDependencies": {
+    "electron-builder": "^25.0.5",
+    "electron": "^32.1.2"
+  }
+}

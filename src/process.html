@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全局课程进度窗口</title>
+    <style>
+        #progressBar {
+            width: 100%;
+            height: 2px;
+            background-color: transparent;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 9999;
+        }
+
+        #progressBar .bar {
+            width: 0;
+            height: 100%;
+            background-color: #1E9FFF;
+            transition: width 0.5s ease-in-out;
+        }
+        body {
+            overflow-y: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="progressBar">
+        <div class="bar"></div>
+    </div>
+
+    <script>
+        let currentPeriod = null;
+        let currentCourse = null;
+        let startTime = null;
+        let endTime = null;
+        let intervalId = null;
+
+        window.electron.onScheduleData((data) => {
+            console.log('接收到课程表数据:', data);
+
+            const progressBar = document.querySelector('#progressBar .bar');
+
+            function updateProgress() {
+                const now = new Date();
+                const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + now.getMilliseconds() / 1000; // 转换为秒，包括毫秒
+
+                // 检查当前是否在上课时间
+                let inClass = false;
+                let nextPeriodStart = null;
+
+                for (let period in data.timeTable) {
+                    const [startStr, endStr] = data.timeTable[period].split('-');
+                    const start = parseInt(startStr.split(':')[0]) * 3600 + parseInt(startStr.split(':')[1]) * 60; // 转换为秒
+                    const end = parseInt(endStr.split(':')[0]) * 3600 + parseInt(endStr.split(':')[1]) * 60; // 转换为秒
+
+                    if (currentTime >= start && currentTime < end) {
+                        inClass = true;
+                        currentPeriod = period;
+                        currentCourse = data.courseTable[new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase()][parseInt(period) - 1];
+                        startTime = start;
+                        endTime = end;
+                        console.log(`当前在上课: 课程 ${currentCourse}, 节次 ${currentPeriod}, 开始时间 ${startStr}, 结束时间 ${endStr}`);
+                        break;
+                    } else if (currentTime < start) {
+                        if (!nextPeriodStart || start < nextPeriodStart) {
+                            if (endTime === null) {
+                                endTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + now.getMilliseconds() / 1000;
+                            }
+                            nextPeriodStart = start;
+                        }
+                    }
+                }
+
+                if (inClass) {
+                    const totalDuration = endTime - startTime;
+                    const elapsed = currentTime - startTime;
+                    const progress = (elapsed / totalDuration) * 100;
+                    console.log(`上课进度: ${progress.toFixed(2)}%`);
+                    progressBar.style.width = `${progress.toFixed(2)}%`;
+                } else if (nextPeriodStart) {
+                    const totalDuration = nextPeriodStart - endTime;
+                    const elapsed = currentTime - endTime;
+                    const progress = (elapsed / totalDuration) * 100;
+                    console.log(`课间剩余时间: ${100 - progress.toFixed(2)}%`);
+                    progressBar.style.width = `${100 - progress.toFixed(2)}%`;
+                } else {
+                    console.log('不在任何课程或课间时间内');
+                    progressBar.style.width = '0%';
+                }
+            }
+
+            // 每 10 毫秒更新一次进度
+            intervalId = setInterval(updateProgress, 100);
+
+            // 初始更新
+            updateProgress();
+        });
+
+        // 确保在窗口关闭时清除定时器
+        window.addEventListener('beforeunload', () => {
+            clearInterval(intervalId);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课程表窗口</title>
+    <style>
+        body {
+            background-color: rgba(0, 0, 0, .4);
+            color: white;
+            overflow-y: hidden;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .today {
+            margin-left: 10px;
+            margin-right: 5px;
+        }
+
+        .schedule {
+            margin: 0;
+            padding: 0;
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+
+        .current {
+            font-size: 1.25em;
+            color: #1E9FFF;
+        }
+
+        .past {
+            color: rgba(128, 128, 128, 0.705);
+        }
+
+        .future {
+            color: rgba(255, 255, 255, 0.801);
+        }
+
+        #schedules {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            line-height: 100vh;
+        }
+    </style>
+    <link rel="stylesheet" href="./qweather-icons/font/qweather-icons.css">
+</head>
+
+<body>
+    <h2 id="schedules">加载中...</h2>
+    <script>
+        let intervalId = null;
+        let lastWeatherUpdate = 0; // 记录上次更新天气的时间
+        let lastWeather = ''; // 记录上次更新天气的时间
+        const WEATHER_UPDATE_INTERVAL = 3600000; // 天气数据更新间隔（1小时）
+
+        function updateSchedules(data) {
+            const coursesDiv = document.getElementById('schedules');
+            coursesDiv.innerHTML = ''; // 清空之前的内容
+
+            // 获取今天是周几（ZH）
+            const arr = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+            const myDate = new Date();
+            const cycle = arr[myDate.getDay()];
+
+            // 添加周期信息
+            const cycleElement = document.createElement('span');
+            cycleElement.textContent = cycle;
+            cycleElement.className = 'today';
+            coursesDiv.appendChild(cycleElement);
+
+            // 获取当前日期
+            const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase();
+
+            // 获取当天的课程表
+            const dailyCourses = data.courseTable[today];
+            const timeTable = data.timeTable;
+
+            const now = new Date();
+            const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + now.getMilliseconds() / 1000;
+
+            for (let i = 1; i <= 12; i++) {
+                const period = i.toString();
+                const course = dailyCourses[i - 1];
+                const time = timeTable[period];
+                const [startStr, endStr] = time.split('-');
+                const start = parseInt(startStr.split(':')[0]) * 3600 + parseInt(startStr.split(':')[1]) * 60;
+                const end = parseInt(endStr.split(':')[0]) * 3600 + parseInt(endStr.split(':')[1]) * 60;
+
+                const courseElement = document.createElement('span');
+                courseElement.className = 'schedule';
+
+                if (currentTime >= start && currentTime < end) {
+                    courseElement.classList.add('current');
+                } else if (currentTime < start) {
+                    courseElement.classList.add('future');
+                } else {
+                    courseElement.classList.add('past');
+                }
+
+                courseElement.textContent = `${course}`;
+                coursesDiv.appendChild(courseElement);
+            }
+
+            // 更新天气信息
+            if (Date.now() - lastWeatherUpdate > WEATHER_UPDATE_INTERVAL) {
+                updateWeathers(data);
+                lastWeatherUpdate = Date.now(); // 更新最后更新时间
+            } else {
+                coursesDiv.appendChild(lastWeather);
+            }
+        }
+
+        function updateWeathers(data) {
+            fetch("https://api.3r60.top/v2/project/weather/?pos=" + data.posName)
+                .then((response) => response.json())
+                .then((data) => {
+                    const coursesDiv = document.getElementById('schedules');
+                    let weatherElement = coursesDiv.querySelector('.weather'); // 尝试找到已有的天气元素
+
+                    if (!weatherElement) {
+                        weatherElement = document.createElement('span');
+                        weatherElement.className = 'today weather'; // 添加 weather 类以便后续查找
+                        coursesDiv.appendChild(weatherElement);
+                        lastWeather = weatherElement;
+                    }
+
+                    // 更新天气元素的内容
+                    weatherElement.innerHTML = `<i class="qi-${data.icon}"></i>&nbsp;${data.temp}℃`;
+                });
+        }
+
+        window.electron.onScheduleData((data) => {
+            console.log('接收到课程表数据:', data);
+
+            // 初始更新
+            updateSchedules(data);
+
+            // 每 10 秒更新一次
+            intervalId = setInterval(() => updateSchedules(data), 10000);
+        });
+
+        // 确保在窗口关闭时清除定时器
+        window.addEventListener('beforeunload', () => {
+            clearInterval(intervalId);
+        });
+    </script>
+</body>
+
+</html>

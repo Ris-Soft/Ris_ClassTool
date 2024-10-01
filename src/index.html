@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>课程表窗口</title>
     <style>
-        body {
-            background-color: rgba(0, 0, 0, .4);
+        html, body {
+            background-color: transparent;
             color: white;
             overflow-y: hidden;
             font-family: Arial, sans-serif;
@@ -17,7 +17,9 @@
 
         .today {
             margin-left: 10px;
-            margin-right: 5px;
+            margin-right: 10px;
+            margin-top: 0px;
+            vertical-align: middle;
         }
 
         .schedule {
@@ -25,6 +27,11 @@
             padding: 0;
             margin-left: 5px;
             margin-right: 5px;
+            margin-top: auto;
+            margin-bottom: auto;
+            vertical-align: middle;
+            display: inline-block;
+            position: relative;
         }
 
         .current {
@@ -33,7 +40,7 @@
         }
 
         .past {
-            color: rgba(128, 128, 128, 0.705);
+            color: rgba(177, 177, 177, 0.705);
         }
 
         .future {
@@ -41,13 +48,39 @@
         }
 
         #schedules {
-            margin: 0;
+            display: block;
+            margin-top: auto;
+            margin-bottom: auto;
+            margin-left: auto;
+            margin-right: auto;
             padding: 0;
+            padding-left: 10px;
+            padding-right: 10px;
             height: 100vh;
-            line-height: 100vh;
+            width: fit-content;
+            line-height: calc(100vh - 3px);
+            background-color: rgba(0, 0, 0, .4);
+            position: relative;
+            border-radius: 5px;
+        }
+
+        .vertical-divider {
+            margin-right: 15px;
+        }
+
+        .vertical-divider::after {
+            content: '|';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: -8px;
+            width: 1px;
+            color: rgba(190, 190, 190, 0.5);
+            font-size: 20px;
         }
     </style>
     <link rel="stylesheet" href="./qweather-icons/font/qweather-icons.css">
+    <link rel="stylesheet" href="./icons/bootstrap-icons.css">
 </head>
 
 <body>
@@ -56,7 +89,7 @@
         let intervalId = null;
         let lastWeatherUpdate = 0; // 记录上次更新天气的时间
         let lastWeather = ''; // 记录上次更新天气的时间
-        const WEATHER_UPDATE_INTERVAL = 3600000; // 天气数据更新间隔（1小时）
+        const WEATHER_UPDATE_INTERVAL = 1800000; // 天气数据更新间隔（1小时）
 
         function updateSchedules(data) {
             const coursesDiv = document.getElementById('schedules');
@@ -103,6 +136,12 @@
                 }
 
                 courseElement.textContent = `${course}`;
+
+                // 检查是否需要添加垂直分割线
+                if (data.linePos.includes(i)) {
+                    courseElement.classList.add('vertical-divider');
+                }
+
                 coursesDiv.appendChild(courseElement);
             }
 
@@ -116,22 +155,49 @@
         }
 
         function updateWeathers(data) {
-            fetch("https://api.3r60.top/v2/project/weather/?pos=" + data.posName)
-                .then((response) => response.json())
-                .then((data) => {
-                    const coursesDiv = document.getElementById('schedules');
-                    let weatherElement = coursesDiv.querySelector('.weather'); // 尝试找到已有的天气元素
+            function updateWeatherElement(data, countShow) {
+                const coursesDiv = document.getElementById('schedules');
+                let weatherElement = coursesDiv.querySelector('.weather') || document.createElement('span');
 
-                    if (!weatherElement) {
-                        weatherElement = document.createElement('span');
-                        weatherElement.className = 'today weather'; // 添加 weather 类以便后续查找
-                        coursesDiv.appendChild(weatherElement);
-                        lastWeather = weatherElement;
+                if (!weatherElement.classList.contains('today')) {
+                    weatherElement.className = 'today weather';
+                    coursesDiv.appendChild(weatherElement);
+                    lastWeather = weatherElement;
+                }
+
+                if (countShow) {
+                    const today = new Date();
+                    const currentYear = today.getFullYear();
+                    const targetDate = new Date(currentYear, parseInt(data.countTime.split('.')[0] ?? 6) - 1, parseInt(data.countTime.split('.')[1]) ?? 7);
+
+                    if (today > targetDate) {
+                        targetDate.setFullYear(targetDate.getFullYear() + 1);
                     }
 
-                    // 更新天气元素的内容
-                    weatherElement.innerHTML = `<i class="qi-${data.icon}"></i>&nbsp;${data.temp}℃`;
-                });
+                    const oneDay = 24 * 60 * 60 * 1000;
+                    const diffDays = Math.round(Math.abs((targetDate - today) / oneDay));
+
+                    // 更新天气元素的内容为倒计时
+                    weatherElement.innerHTML = `<i class="bi bi-hourglass"></i>&nbsp;${diffDays} 天`;
+                } else {
+                    fetch(`https://api.3r60.top/v2/project/weather/?pos=${data.posName ?? '北京'}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // 更新天气元素的内容为实际天气
+                            weatherElement.innerHTML = `<i class="qi-${data.icon}"></i>&nbsp;${data.temp}℃`;
+                        })
+                        .catch(error => {
+                            console.error('There has been a problem with your fetch operation:', error);
+                        });
+                }
+            }
+
+            updateWeatherElement(data, data.countShow ? data.countShow : false);
         }
 
         window.electron.onScheduleData((data) => {

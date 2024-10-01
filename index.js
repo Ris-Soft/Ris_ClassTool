@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 // 读取课程表数据
-let configDataPath = path.join(process.cwd(), './config.json');
+let configDataPath =  'D:\\config.json';
 
 try {
     // 尝试读取当前工作目录下的 config.json
@@ -27,14 +27,14 @@ try {
 // 创建课程表窗口
 function createScheduleWindow() {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-    const winHeight = Math.round(height * 0.05);
+    const winHeight = Math.round(height * 0.041);
     const winY = Math.round(height * 0.01);
-    const winX = Math.round((width - 580) / 2);
+    // const winX = Math.round((width - 580) / 2);
 
     const scheduleWindow = new BrowserWindow({
-        x: winX,
+        x: 0,
         y: winY,
-        width: 580,
+        width: width,
         height: winHeight,
         frame: false,
         resizable: false,

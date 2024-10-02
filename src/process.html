@@ -98,6 +98,8 @@
                     console.log('不在任何课程或课间时间内');
                     progressBar.style.width = '0%';
                 }
+
+                progressBar.style.backgroundColor = data.progressColor ?? '#1E9FFF';
             }
 
             // 初始更新

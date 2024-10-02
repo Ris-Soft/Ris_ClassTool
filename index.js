@@ -2,27 +2,54 @@ const { app, BrowserWindow, screen, ipcMain, Tray, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-// 读取课程表数据
+// 默认配置数据
+const defaultConfig = {
+    "posName": "北京",
+    "countShow": false,
+    "countTime": "6.7",
+    "timeTable": {
+        "1": "06:40-07:45",
+        "2": "08:00-08:45",
+        "3": "08:55-09:40",
+        "4": "10:10-10:55",
+        "5": "11:05-11:50",
+        "6": "14:00-14:45",
+        "7": "14:55-15:40",
+        "8": "15:55-16:40",
+        "9": "16:50-17:30",
+        "10": "18:40-19:50",
+        "11": "20:00-20:50",
+        "12": "21:00-21:40"
+    },
+    "courseTable": {
+        "Monday": ["数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信", "通"],
+        "Tuesday": ["语", "数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信"],
+        "Wednesday": ["数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信", "通"],
+        "Thursday": ["语", "数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信"],
+        "Friday": ["数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信", "通"],
+        "Saturday": ["数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信", "通"],
+        "Sunday": ["自", "自", "自", "自", "自", "自", "自", "自", "自", "自", "自", "自"]
+    },
+    "linePos": [1, 4, 9]
+};
+
+// 配置文件路径
 let configDataPath = 'D:\\Ris_ClassToolConfig.json';
 
+// 读取课程表数据
 try {
-    // 尝试读取当前工作目录下的 config.json
+    // 尝试读取指定路径下的 config.json
     const configData = fs.readFileSync(configDataPath, 'utf-8');
     var config = JSON.parse(configData);
 } catch (error) {
     if (error.code === 'ENOENT') {
-        // 如果文件不存在，尝试从 __dirname 下读取 config.json
-        configDataPath = path.join(__dirname, './config.json');
-        try {
-            const configData = fs.readFileSync(configDataPath, 'utf-8');
-            const config = JSON.parse(configData);
-        } catch (innerError) {
-            alert("配置为空，即将打开设置");
-            createSetWindow();
-        }
+        // 如果文件不存在，写入默认配置
+        fs.writeFileSync(configDataPath, JSON.stringify(defaultConfig, null, 2), 'utf-8');
+        var config = defaultConfig;
     } else {
-        alert("配置为空，即将打开设置");
+        alert("配置读取失败，即将打开设置");
         createSetWindow();
+        return;
     }
 }
 
@@ -37,7 +64,7 @@ function createTray() {
             click: () => createSetWindow()
         },
         {
-            label: '退出',
+            label: '退出程序',
             click: () => {
                 app.quit();
             }

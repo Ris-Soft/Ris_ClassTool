@@ -194,6 +194,11 @@
             min-width: 80px;
         }
 
+        #scheduleTable td[contenteditable="true"]:focus-visible {
+            border: 2px solid #0097fb;
+            outline: none;
+        }
+
         #scheduleTable td[contenteditable="true"]:hover {
             background-color: #f0f0f0;
         }
@@ -272,6 +277,8 @@
                 <input type="text" id="posName" placeholder="位置名称"><br><br>
                 <label for="countTime">到数目标:</label>
                 <input type="text" id="countTime" placeholder="计时时间"><br><br>
+                <label for="progressColor">进度条色:</label>
+                <input type="text" id="progressColor" placeholder="输入CSS样式，如rgba、rgb、十六进制等"><br><br>
                 <input type="checkbox" id="countShow"><label for="countShow"
                     style="display: unset;display: inline-block;vertical-align: middle;margin-bottom: 0;">替换天气为倒数日</label><br><br>
                 <button type="button" id="saveBasicConfigButton">保存</button>
@@ -326,6 +333,7 @@
             document.getElementById('countShow').checked = config.countShow || false;
             document.getElementById('countTime').value = config.countTime || '';
             document.getElementById('linePos').value = JSON.stringify(config.linePos) || '[0]';
+            document.getElementById('progressColor').value = config.progressColor ?? '';
             loadSchedule(config);
             oldConfig = config;
         });
@@ -423,7 +431,8 @@
                 countTime: document.getElementById('countTime').value,
                 timeTable: oldConfig.timeTable ?? null,
                 courseTable: oldConfig.courseTable ?? null,
-                linePos: oldConfig.linePos ?? null
+                linePos: oldConfig.linePos ?? null,
+                progressColor: document.getElementById('progressColor').value
             };
 
             window.api.saveConfig(newConfig);

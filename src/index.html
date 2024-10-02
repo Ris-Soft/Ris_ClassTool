@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>课程表窗口</title>
     <style>
-        html, body {
+        html,
+        body {
             background-color: transparent;
             color: white;
             overflow-y: hidden;
@@ -91,6 +92,20 @@
         let lastWeather = ''; // 记录上次更新天气的时间
         const WEATHER_UPDATE_INTERVAL = 1800000; // 天气数据更新间隔（1小时）
 
+        function count(o) {
+            var t = typeof o;
+            if (t == 'string') {
+                return o.length;
+            } else if (t == 'object') {
+                var n = 0;
+                for (var i in o) {
+                    n++;
+                }
+                return n;
+            }
+            return false;
+        }
+
         function updateSchedules(data) {
             const coursesDiv = document.getElementById('schedules');
             coursesDiv.innerHTML = ''; // 清空之前的内容
@@ -116,7 +131,7 @@
             const now = new Date();
             const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + now.getMilliseconds() / 1000;
 
-            for (let i = 1; i <= 12; i++) {
+            for (let i = 1; i <= count(data.timeTable); i++) {
                 const period = i.toString();
                 const course = dailyCourses[i - 1];
                 const time = timeTable[period];
@@ -146,7 +161,7 @@
             }
 
             // 更新天气信息
-            if (Date.now() - lastWeatherUpdate > WEATHER_UPDATE_INTERVAL) {
+            if (Date.now() - lastWeatherUpdate > WEATHER_UPDATE_INTERVAL || data.countShow) {
                 updateWeathers(data);
                 lastWeatherUpdate = Date.now(); // 更新最后更新时间
             } else {
@@ -179,6 +194,8 @@
 
                     // 更新天气元素的内容为倒计时
                     weatherElement.innerHTML = `<i class="bi bi-hourglass"></i>&nbsp;${diffDays} 天`;
+
+                    lastWeatherUpdate = 0;
                 } else {
                     fetch(`https://api.3r60.top/v2/project/weather/?pos=${data.posName ?? '北京'}`)
                         .then(response => {
@@ -200,13 +217,16 @@
             updateWeatherElement(data, data.countShow ? data.countShow : false);
         }
 
-        window.electron.onScheduleData((data) => {
+        window.api.onScheduleData((data) => {
             console.log('接收到课程表数据:', data);
 
             // 初始更新
             updateSchedules(data);
 
             // 每 10 秒更新一次
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
             intervalId = setInterval(() => updateSchedules(data), 10000);
         });
 

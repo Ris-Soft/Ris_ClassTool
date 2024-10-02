@@ -40,10 +40,16 @@
         let endTime = null;
         let intervalId = null;
 
-        window.electron.onScheduleData((data) => {
+        window.api.onScheduleData((data) => {
             console.log('接收到课程表数据:', data);
 
             const progressBar = document.querySelector('#progressBar .bar');
+
+            // 重置相关变量
+            currentPeriod = null;
+            currentCourse = null;
+            startTime = null;
+            endTime = null;
 
             function updateProgress() {
                 const now = new Date();
@@ -94,11 +100,14 @@
                 }
             }
 
-            // 每 10 毫秒更新一次进度
-            intervalId = setInterval(updateProgress, 100);
-
             // 初始更新
             updateProgress();
+
+            // 每 10 毫秒更新一次进度
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+            intervalId = setInterval(updateProgress, 100);
         });
 
         // 确保在窗口关闭时清除定时器

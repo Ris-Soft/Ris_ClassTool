@@ -2,10 +2,7 @@
 
 ## 软件介绍
 
-![image](https://github.com/user-attachments/assets/03c4001a-cf81-4432-92b8-cc9cc06749dd)
-![image](https://github.com/user-attachments/assets/4ab64202-714f-4946-a4a8-329071995678)
-![image](https://github.com/user-attachments/assets/abf07fe2-0310-4d62-8e41-6af0f19897dc)
-
+![A2449CFEDA11054ED39AEE271115E9F1](https://github.com/user-attachments/assets/c7c2b95a-22cb-4763-8f37-6cb6db603918)
 
 这是一款适用于Windows的课堂工具，目前功能主要包括课程表与全局课程进度显示以及全可视化配置编辑
 

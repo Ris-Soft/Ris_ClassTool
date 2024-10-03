@@ -75,7 +75,84 @@ function createTray() {
     tray.setContextMenu(contextMenu);
 }
 
+let sidebarWindow;
+let sidebarWindow_isExpanded = false;
+
+function createsidebarWindow() {
+    const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+    const initialWidth = 25;
+    const initialHeight = 60;
+    const expandedWidth = 300;
+    const expandedHeight = 60;
+    const x = width - initialWidth;
+    const y = height - initialHeight - 200;
+
+    sidebarWindow = new BrowserWindow({
+        width: initialWidth,
+        height: initialHeight,
+        x,
+        y,
+        frame: false,
+        alwaysOnTop: true,
+        transparent: true,
+        skipTaskbar: true,
+        resizable: false,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+        }
+    });
+
+    sidebarWindow.loadFile('./src/sidebar.html');
+
+    sidebarWindow.webContents.on('did-finish-load', () => {
+        sidebarWindow.webContents.send('initial-state', sidebarWindow_isExpanded);
+    });
+
+    ipcMain.on('toggle-expand', (event, arg) => {
+        if (sidebarWindow_isExpanded) {
+            sidebarWindow.setContentSize(initialWidth, initialHeight);
+            sidebarWindow.setPosition(x, y);
+        } else {
+            sidebarWindow.setContentSize(expandedWidth, expandedHeight);
+            sidebarWindow.setPosition(width - expandedWidth, height - expandedHeight - 200);
+        }
+        sidebarWindow_isExpanded = !sidebarWindow_isExpanded;
+        sidebarWindow.webContents.send('update-state', sidebarWindow_isExpanded);
+    });
+}
+
+
 let settingsWindow = null;
+
+// 创建WebView窗口
+function createWebViewWindow(url, local) {
+    Menu.setApplicationMenu(null)
+    const targetWindow = new BrowserWindow({
+      width: local ? 400 : 1366,
+      height: local ? 400 :768,
+      alwaysOnTop : local,
+      webPreferences: {
+        preload: path.join(__dirname, 'preload.js'),
+        nodeIntegration: true,
+        contextIsolation: true
+      }
+    });
+  
+    if (local) {
+      targetWindow.loadFile(path.join(__dirname, url)).then(() => {
+        targetWindow.webContents.send('schedule-data', config);
+      });
+    } else {
+      targetWindow.loadURL(url);
+    }
+  
+    targetWindow.show();
+  }
+  
+ipcMain.on('set-webview-url', (event, url, local) => {
+    createWebViewWindow(url, local);
+});
+
 
 // 创建设置窗口
 function createSetWindow() {
@@ -188,6 +265,7 @@ if (!gotTheLock) {
     app.on('ready', () => {
         createTray();
         setTimeout(() => {
+            createsidebarWindow();
             createScheduleWindow();
             createProcessWindow();
         }, 2000);
@@ -195,6 +273,7 @@ if (!gotTheLock) {
         app.on('activate', () => {
             if (BrowserWindow.getAllWindows().length === 0) {
                 setTimeout(() => {
+                    createsidebarWindow();
                     createScheduleWindow();
                     createProcessWindow();
                 }, 2000);
@@ -216,6 +295,8 @@ if (!gotTheLock) {
             fs.writeFile(configDataPath, JSON.stringify(newConfig), err => {
                 if (err) throw err;
                 console.log('配置已保存！');
+
+                config = newConfig;
 
                 // 刷新课程表和进度条窗口
                 const windows = BrowserWindow.getAllWindows();

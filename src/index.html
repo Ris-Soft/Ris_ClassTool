@@ -90,7 +90,7 @@
         let intervalId = null;
         let lastWeatherUpdate = 0; // 记录上次更新天气的时间
         let lastWeather = ''; // 记录上次更新天气的时间
-        const WEATHER_UPDATE_INTERVAL = 1800000; // 天气数据更新间隔（1小时）
+        const WEATHER_UPDATE_INTERVAL = 600000; // 天气数据更新间隔（10分钟）
 
         function count(o) {
             var t = typeof o;
@@ -162,8 +162,8 @@
 
             // 更新天气信息
             if (Date.now() - lastWeatherUpdate > WEATHER_UPDATE_INTERVAL || data.countShow) {
-                updateWeathers(data);
                 lastWeatherUpdate = Date.now(); // 更新最后更新时间
+                updateWeathers(data);
             } else {
                 coursesDiv.appendChild(lastWeather);
             }

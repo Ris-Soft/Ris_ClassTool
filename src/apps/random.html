@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>随机点名</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            /* background: white; */
+            padding: 20px;
+            border-radius: 10px;
+            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+            min-width: 300px;
+            min-height: 210px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        #result {
+            font-size: 2em;
+            color: #1E9FFF;
+            margin: 40px;
+            animation: fadeIn 1s forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .controls {
+            margin: 20px 0;
+        }
+
+        .controls input[type="number"] {
+            padding: 5px;
+            width: 50px;
+            margin: 0 10px;
+            text-align: center;
+        }
+
+        .controls button {
+            padding: 5px 10px;
+            font-size: 1em;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .controls button:hover {
+            background-color: #0056b3;
+        }
+
+        .controls label {
+            font-size: 1em;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>随机点名</h2>
+        <div class="controls">
+            <label for="numOfPicks">点名人数：</label>
+            <button onclick="decreasePicks()">-</button>
+            <input type="number" id="numOfPicks" value="1" min="1" max="8" readonly>
+            <button onclick="increasePicks()">+</button>
+        </div>
+        <div id="result">点击按钮开始点名</div>
+        <button id="startButton" onclick="startPick()">开始点名</button>
+    </div>
+
+    <script>
+        let participants = [];
+        window.api.onScheduleData((config) => {
+            participants = config.students ?? [
+                { name: '张三', weight: 1 },
+                { name: '李四', weight: 2 },
+                { name: '王五', weight: 3 },
+                { name: '赵六', weight: 4 },
+                { name: '孙七', weight: 5 },
+                { name: '孙吧', weight: 5 },
+                { name: '孙就', weight: 5 },
+                { name: '孙是', weight: 5 },
+                { name: '孙十一', weight: 5 },
+                { name: '孙十二', weight: 5 }
+            ];
+        });
+
+        let intervalId;
+
+        function startPick() {
+            let resultElement = document.getElementById('result');
+            resultElement.innerText = "点名中...";
+            document.getElementById('startButton').disabled = true;
+
+            // 清除之前的计时器
+            clearInterval(intervalId);
+
+            intervalId = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * participants.length);
+                resultElement.innerText = participants[randomIndex].name;
+            }, 100);
+
+            setTimeout(() => {
+                clearInterval(intervalId);
+                pickRandom();
+            }, 1000);
+        }
+
+        function pickRandom() {
+            const numOfPicks = Math.min(parseInt(document.getElementById('numOfPicks').value), participants.length);
+            const pickedParticipants = [];
+            const availableParticipants = participants.map(p => ({ ...p, weight: p.weight === 0 ? 1 : p.weight })); // 处理权重为 0 的情况
+
+            while (pickedParticipants.length < numOfPicks) {
+                const totalWeight = availableParticipants.reduce((acc, cur) => acc + cur.weight, 0);
+                let random = Math.random() * totalWeight;
+
+                for (let i = 0; i < availableParticipants.length; i++) {
+                    random -= availableParticipants[i].weight;
+                    if (random <= 0) {
+                        pickedParticipants.push(availableParticipants[i].name);
+                        availableParticipants.splice(i, 1); // 移除已选中的参与者
+                        break;
+                    }
+                }
+            }
+
+            document.getElementById('result').innerText = pickedParticipants.join(', ');
+            document.getElementById('startButton').disabled = false;
+        }
+
+        function increasePicks() {
+            let currentPicks = parseInt(document.getElementById('numOfPicks').value);
+            if (currentPicks < 8) {
+                document.getElementById('numOfPicks').value = currentPicks + 1;
+            }
+        }
+
+        function decreasePicks() {
+            let currentPicks = parseInt(document.getElementById('numOfPicks').value);
+            if (currentPicks > 1) {
+                document.getElementById('numOfPicks').value = currentPicks - 1;
+            }
+        }
+    </script>
+</body>
+
+</html>

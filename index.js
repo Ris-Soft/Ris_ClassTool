@@ -108,13 +108,17 @@ function createsidebarWindow() {
         sidebarWindow.webContents.send('initial-state', sidebarWindow_isExpanded);
     });
 
+    sidebarWindow.setVisibleOnAllWorkspaces(true)
+
     ipcMain.on('toggle-expand', (event, arg) => {
         if (sidebarWindow_isExpanded) {
             sidebarWindow.setContentSize(initialWidth, initialHeight);
             sidebarWindow.setPosition(x, y);
+            sidebarWindow.setAlwaysOnTop(true, "screen-saver");
         } else {
             sidebarWindow.setContentSize(expandedWidth, expandedHeight);
             sidebarWindow.setPosition(width - expandedWidth, height - expandedHeight - 200);
+            sidebarWindow.setAlwaysOnTop(true, "screen-saver");
         }
         sidebarWindow_isExpanded = !sidebarWindow_isExpanded;
         sidebarWindow.webContents.send('update-state', sidebarWindow_isExpanded);

@@ -22,6 +22,31 @@
             background-color: #1E9FFF;
             transition: width 0.5s ease-in-out;
         }
+
+        #statusWindow {
+            position: fixed;
+            top: 30px;
+            right: 5px;
+            color: white;
+            font-size: 12px;
+            z-index: 9998;
+        }
+
+        .card {
+            margin-right: 5px;
+            background-color: rgb(46, 46, 46);
+            border-radius: 5px;
+            font-size: 12px;
+            padding: 4px 8px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .card>span {
+            font-size: 16px;
+            color: white;
+        }
+
         body {
             overflow-y: hidden;
         }
@@ -32,6 +57,11 @@
     <div id="progressBar">
         <div class="bar"></div>
     </div>
+    <div id="statusWindow">
+        <div class="card" id="courseNameBox">当前活动<br><span id="courseName"></span></div>
+        <div class="card" id="timeRangeBox">剩余时间<br><span id="timeRange"></span></div>
+        <div class="card" id="nextActivityBox">下一活动<br><span id="nextActivity"></span></div>
+    </div>
 
     <script>
         let currentPeriod = null;
@@ -40,82 +70,128 @@
         let endTime = null;
         let intervalId = null;
 
-        window.api.onScheduleData((data) => {
-            console.log('接收到课程表数据:', data);
-
+        window.api.config_onRecive((data) => {
             const progressBar = document.querySelector('#progressBar .bar');
-
-            // 重置相关变量
-            currentPeriod = null;
-            currentCourse = null;
-            startTime = null;
-            endTime = null;
+            const statusWindow = document.querySelector('#statusWindow');
+            const courseName = document.querySelector('#courseName');
+            const courseNameBox = document.querySelector('#courseNameBox');
+            const timeRange = document.querySelector('#timeRange');
+            const timeRangeBox = document.querySelector('#timeRangeBox');
+            const nextCourse = document.querySelector('#nextActivity');
+            const nextCourseBox = document.querySelector('#nextActivityBox');
+            let alertsShown = {};
+            const timeOffset = data.timeOffset || 0; // 时钟偏移
+            const weekName = new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase();
 
             function updateProgress() {
                 const now = new Date();
-                const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + now.getMilliseconds() / 1000; // 转换为秒，包括毫秒
+                const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + timeOffset; // 加入偏移量
 
                 // 检查当前是否在上课时间
                 let inClass = false;
                 let nextPeriodStart = null;
+                let nextPeriod = null;
 
                 for (let period in data.timeTable) {
                     const [startStr, endStr] = data.timeTable[period].split('-');
-                    const start = parseInt(startStr.split(':')[0]) * 3600 + parseInt(startStr.split(':')[1]) * 60; // 转换为秒
-                    const end = parseInt(endStr.split(':')[0]) * 3600 + parseInt(endStr.split(':')[1]) * 60; // 转换为秒
+                    const start = parseInt(startStr.split(':')[0]) * 3600 + parseInt(startStr.split(':')[1]) * 60;
+                    const end = parseInt(endStr.split(':')[0]) * 3600 + parseInt(endStr.split(':')[1]) * 60;
 
                     if (currentTime >= start && currentTime < end) {
                         inClass = true;
                         currentPeriod = period;
-                        currentCourse = data.courseTable[new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase()][parseInt(period) - 1];
+                        currentCourse = data.courseTable[weekName][parseInt(period) - 1];
                         startTime = start;
                         endTime = end;
-                        console.log(`当前在上课: 课程 ${currentCourse}, 节次 ${currentPeriod}, 开始时间 ${startStr}, 结束时间 ${endStr}`);
+                        nextPeriod = period + 1;
                         break;
                     } else if (currentTime < start) {
                         if (!nextPeriodStart || start < nextPeriodStart) {
-                            if (endTime === null) {
-                                endTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + now.getMilliseconds() / 1000;
-                            }
                             nextPeriodStart = start;
+                            nextPeriod = period;
+                            if (endTime === null) {
+                                endTime = currentTime;
+                            }
                         }
                     }
                 }
 
+                // 更新进度条
                 if (inClass) {
                     const totalDuration = endTime - startTime;
                     const elapsed = currentTime - startTime;
                     const progress = (elapsed / totalDuration) * 100;
-                    console.log(`上课进度: ${progress.toFixed(2)}%`);
                     progressBar.style.width = `${progress.toFixed(2)}%`;
                 } else if (nextPeriodStart) {
                     const totalDuration = nextPeriodStart - endTime;
-                    const elapsed = currentTime - endTime;
-                    const progress = (elapsed / totalDuration) * 100;
-                    console.log(`课间剩余时间: ${100 - progress.toFixed(2)}%`);
+                    const elapsed = nextPeriodStart - currentTime;
+                    const progress = 100 - (elapsed / totalDuration) * 100;
                     progressBar.style.width = `${100 - progress.toFixed(2)}%`;
                 } else {
-                    console.log('不在任何课程或课间时间内');
                     progressBar.style.width = '0%';
                 }
 
+                // 更新状态窗口
+                if (inClass) {
+                    if ((currentTime - startTime < 30 || endTime - currentTime < 30)) {
+                    // if (true) {
+                        courseName.textContent = `${currentCourse}`;
+                        nextCourse.textContent = `${data.courseTable[weekName][parseInt(nextPeriod) % data.courseTable[weekName].length]}`;
+                        courseNameBox.style.display = (currentTime - startTime < 30) ? 'block' : 'none';
+                        timeRangeBox.style.display = 'none';
+                        nextCourseBox.style.display = (endTime - currentTime < 30) ? 'block' : 'none';
+                        statusWindow.style.display = 'flex';
+                    } else {
+                        statusWindow.style.display = 'none';
+                    }
+                } else {
+                    if (nextPeriodStart) {
+                        const timeToNextClass = nextPeriodStart - currentTime;
+                        const minutes = Math.floor(timeToNextClass / 60);
+                        const seconds = timeToNextClass % 60;
+                        // courseName.textContent = '课间';
+                        timeRange.textContent = `${minutes}:${seconds < 10 ? `0${seconds}` : `${seconds}`}`;
+                        nextCourse.textContent = `${data.courseTable[weekName][parseInt(nextPeriod) % data.courseTable[weekName].length]}`;
+                        courseNameBox.style.display = 'none';
+                        timeRangeBox.style.display = 'block';
+                        nextCourseBox.style.display = 'block';
+                        statusWindow.style.display = 'flex';
+                        // if (!alertsShown[nextPeriod] && minutes <= 300) { // 300秒即5分钟
+                        //     alertsShown[nextPeriod] = true; // 设置标志位，防止重复显示
+                        //     alert(11);
+                        //     window.api.function_autoQuit(false);
+                        // }
+                    } else {
+                        // courseName.textContent = '当前: 下课';
+                        // timeRangeBox.style.display = 'none';
+                        // nextCourse.textContent = '';
+                        statusWindow.style.display = 'none';
+                    }
+                }
+
                 progressBar.style.backgroundColor = data.progressColor ?? '#1E9FFF';
+                // courseName.style.color = data.progressColor ?? '#1E9FFF';
+                progressBar.parentElement.style.height = data.progressHeight ?? '2px';
             }
 
             // 初始更新
             updateProgress();
 
-            // 每 10 毫秒更新一次进度
+            // 每 5 秒更新一次进度
             if (intervalId) {
                 clearInterval(intervalId);
             }
             intervalId = setInterval(updateProgress, 1000);
+
+            // 确保在窗口关闭时清除定时器
+            window.addEventListener('beforeunload', () => {
+                clearInterval(intervalId);
+            });
         });
 
-        // 确保在窗口关闭时清除定时器
-        window.addEventListener('beforeunload', () => {
-            clearInterval(intervalId);
-        });
+        window.onload = function () {
+            window.api.config_sendRequest();
+        };
     </script>
 </body>
 

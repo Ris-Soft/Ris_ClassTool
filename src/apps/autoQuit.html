@@ -4,7 +4,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <title>随机点名</title>
+    <title>关闭闲置程序</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -98,14 +98,14 @@
 
 <body>
     <div class="container">
-        <h2>随机点名</h2>
+        <h2></h2>
         <div class="controls">
-            <label for="numOfPicks">点名人数：</label>
+            <label for="numOfPicks">距离上课剩余5分钟，是否关闭闲置程序（倒计时30秒）</label>
             <button onclick="decreasePicks()">-</button>
             <input type="number" id="numOfPicks" value="1" min="1" max="8" readonly>
             <button onclick="increasePicks()">+</button>
         </div>
-        <div id="result">点击按钮开始点名</div>
+        <div id="result"></div>
         <button id="startButton" onclick="startPick()">开始点名</button>
     </div>
 

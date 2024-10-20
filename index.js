@@ -1,6 +1,10 @@
 const { app, BrowserWindow, screen, ipcMain, Tray, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { spawn, exec } = require('child_process');
+
+// 禁用硬件加速
+app.disableHardwareAcceleration();
 
 // 默认配置数据
 const defaultConfig = {
@@ -53,6 +57,10 @@ try {
     }
 }
 
+// 释放变量
+delete defaultConfig;
+
+
 // 创建托盘
 function createTray() {
     const iconPath = path.join(__dirname, 'logo.png');
@@ -60,11 +68,19 @@ function createTray() {
 
     const contextMenu = Menu.buildFromTemplate([
         {
-            label: '打开设置',
+            label: '随机点名',
+            click: () => createWebViewWindow('./src/apps/random.html',true)
+        },
+        {
+            label: '在线工具',
+            click: () => createWebViewWindow('https\:\/\/edu.3r60.top/?id=tools',false)
+        },
+        {
+            label: '程序设置',
             click: () => createSetWindow()
         },
         {
-            label: '退出程序',
+            label: '退出应用',
             click: () => {
                 app.quit();
             }
@@ -79,13 +95,14 @@ let sidebarWindow;
 let sidebarWindow_isExpanded = false;
 
 function createsidebarWindow() {
+    if (!(config.sideBarShow ?? true)) return;
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
     const initialWidth = 25;
     const initialHeight = 60;
     const expandedWidth = 300;
-    const expandedHeight = 60;
+    const expandedHeight = 80;
     const x = width - initialWidth;
-    const y = height - initialHeight - 200;
+    const y = height - initialHeight - (config.sideBarBottom || 200);
 
     sidebarWindow = new BrowserWindow({
         width: initialWidth,
@@ -104,10 +121,6 @@ function createsidebarWindow() {
 
     sidebarWindow.loadFile('./src/sidebar.html');
 
-    sidebarWindow.webContents.on('did-finish-load', () => {
-        sidebarWindow.webContents.send('initial-state', sidebarWindow_isExpanded);
-    });
-
     sidebarWindow.setVisibleOnAllWorkspaces(true)
 
     ipcMain.on('toggle-expand', (event, arg) => {
@@ -117,11 +130,23 @@ function createsidebarWindow() {
             sidebarWindow.setAlwaysOnTop(true, "screen-saver");
         } else {
             sidebarWindow.setContentSize(expandedWidth, expandedHeight);
-            sidebarWindow.setPosition(width - expandedWidth, height - expandedHeight - 200);
+            sidebarWindow.setPosition(width - expandedWidth, height - (expandedHeight / 2) - (config.sideBarBottom || 200));
             sidebarWindow.setAlwaysOnTop(true, "screen-saver");
         }
         sidebarWindow_isExpanded = !sidebarWindow_isExpanded;
-        sidebarWindow.webContents.send('update-state', sidebarWindow_isExpanded);
+    });
+
+
+    ipcMain.on('function_vKeydown', (event, args) => {
+        // 执行ahk->exe脚本
+        const appPath = process.resourcesPath;
+        const exePath = path.join(appPath, 'scripts', 'RisClassTool_KeyDown.exe');
+        spawn(exePath, args);
+    });
+
+    ipcMain.on('function_showExplorer', (event, args) => {
+        // 打开资源管理器
+        spawn('explorer.exe');
     });
 }
 
@@ -130,31 +155,49 @@ let settingsWindow = null;
 
 // 创建WebView窗口
 function createWebViewWindow(url, local) {
-    Menu.setApplicationMenu(null)
+    Menu.setApplicationMenu(null);
+
     const targetWindow = new BrowserWindow({
-      width: local ? 400 : 1366,
-      height: local ? 400 :768,
-      alwaysOnTop : local,
-      webPreferences: {
-        preload: path.join(__dirname, 'preload.js'),
-        nodeIntegration: true,
-        contextIsolation: true
-      }
+        width: local ? 420 : 1366,
+        height: local ? 400 : 768,
+        alwaysOnTop: local,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+            nodeIntegration: true,
+            contextIsolation: true
+        }
     });
-  
+
     if (local) {
-      targetWindow.loadFile(path.join(__dirname, url)).then(() => {
-        targetWindow.webContents.send('schedule-data', config);
-      });
+        targetWindow.loadFile(path.join(__dirname, url));
     } else {
-      targetWindow.loadURL(url);
+        targetWindow.loadURL(url);
     }
-  
+
+    // 添加关闭监听器以确保在窗口关闭时移除事件处理程序
+    targetWindow.on('closed', () => {
+        // 移除事件处理程序
+        ipcMain.removeListener('config_reciveGetRequest', sendConfigHandler);
+    });
+
+    // 检查并移除已存在的事件处理程序，然后添加新的
+    ipcMain.removeListener('config_reciveGetRequest', sendConfigHandler);
+    ipcMain.on('config_reciveGetRequest', sendConfigHandler);
+
     targetWindow.show();
-  }
-  
-ipcMain.on('set-webview-url', (event, url, local) => {
+}
+
+// 定义事件处理函数
+function sendConfigHandler(event) {
+    event.sender.send('config_deliver', changeCourseProcessing(config));
+}
+
+ipcMain.on('webview_create', (event, url, local) => {
     createWebViewWindow(url, local);
+});
+
+ipcMain.on('function_autoQuit', (event) => {
+    createWebViewWindow('./src/apps/autoQuit.html', true);
 });
 
 
@@ -181,12 +224,15 @@ function createSetWindow() {
         alwaysOnTop: false,
         skipTaskbar: false,
         webPreferences: {
+            nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
         }
     });
 
-    settingsWindow.loadFile(path.join(__dirname, './src/set.html')).then(() => {
-        settingsWindow.webContents.send('schedule-data', config);
+    settingsWindow.loadFile(path.join(__dirname, './src/set.html'));
+
+    ipcMain.on('config_reciveGetRequest', (event) => {
+        settingsWindow.webContents.send('config_deliver', config);
     });
 
     // 监听关闭事件，以便在窗口关闭时将 settingsWindow 设置为 null
@@ -198,7 +244,7 @@ function createSetWindow() {
 // 创建课程表窗口
 function createScheduleWindow() {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-    const winHeight = Math.round(height * 0.041);
+    const winHeight = 100;
     const winY = Math.round(height * 0.01);
 
     const scheduleWindow = new BrowserWindow({
@@ -213,25 +259,38 @@ function createScheduleWindow() {
         skipTaskbar: true,
         transparent: true,
         webPreferences: {
+            nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
         }
     });
 
     scheduleWindow.setIgnoreMouseEvents(true); // 全局穿透
     scheduleWindow.loadFile(path.join(__dirname, './src/index.html'));
+
     scheduleWindow.show();
 
     scheduleWindow.setVisibleOnAllWorkspaces(true);
 
-    // 发送课程信息到渲染进程
-    scheduleWindow.webContents.send('schedule-data', config);
+    scheduleWindow.on('minimize', (event) => {
+        event.preventDefault(); // 阻止默认的最小化行为
+        if (scheduleWindow.isMinimized()) {
+            scheduleWindow.restore(); // 恢复窗口
+        }
+        scheduleWindow.setAlwaysOnTop(true);
+    });
+
+    ipcMain.on('config_reciveGetRequest', (event) => {
+        scheduleWindow.webContents.send('config_deliver', changeCourseProcessing(config));
+    });
+
     // scheduleWindow.webContents.openDevTools({mode:'detach'})
 }
 
 // 创建全局进度条窗口
 function createProcessWindow() {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-    const winHeight = Math.round(height * 0.0025);
+    // const winHeight = Math.round(height * 0.0025);
+    const winHeight = 100;
 
     const processWindow = new BrowserWindow({
         x: 0,
@@ -246,6 +305,7 @@ function createProcessWindow() {
         transparent: true,
         skipTaskbar: true,
         webPreferences: {
+            nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
         }
     });
@@ -257,7 +317,44 @@ function createProcessWindow() {
     processWindow.setVisibleOnAllWorkspaces(true);
 
     // 发送课程信息到渲染进程
-    processWindow.webContents.send('schedule-data', config);
+    ipcMain.on('config_reciveGetRequest', (event) => {
+        processWindow.webContents.send('config_deliver', changeCourseProcessing(config));
+    });
+
+    // processWindow.webContents.openDevTools({ mode: 'detach' })
+}
+
+function changeCourseProcessing(config) {
+    // 获取今天的日期
+    let today = new Date();
+    let tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1); // 明天的日期
+
+    function formatDate(date) {
+        return [date.getMonth() + 1, date.getDate()].join('.');
+    }
+
+    function getWeekday(date) {
+        // 获取星期几
+        return date.toLocaleDateString('en-US', { weekday: 'long' }).charAt(0).toUpperCase() +
+            date.toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase();
+    }
+
+    // 处理换课逻辑
+    if (config.plans) {
+        for (let key in config.plans) {
+            let switchConfig = config.plans[key];
+            if (switchConfig.date === formatDate(today)) {
+                // 如果是今天换课
+                config.courseTable[getWeekday(today)] = switchConfig.courses;
+            } else if (switchConfig.date === formatDate(tomorrow)) {
+                // 如果是明天换课
+                config.courseTable[getWeekday(tomorrow)] = switchConfig.courses;
+            }
+        }
+    }
+
+    return config;
 }
 
 // 请求单实例锁
@@ -268,19 +365,15 @@ if (!gotTheLock) {
 } else {
     app.on('ready', () => {
         createTray();
-        setTimeout(() => {
-            createsidebarWindow();
-            createScheduleWindow();
-            createProcessWindow();
-        }, 2000);
+        createsidebarWindow();
+        createScheduleWindow();
+        createProcessWindow();
 
         app.on('activate', () => {
             if (BrowserWindow.getAllWindows().length === 0) {
-                setTimeout(() => {
-                    createsidebarWindow();
-                    createScheduleWindow();
-                    createProcessWindow();
-                }, 2000);
+                createsidebarWindow();
+                createScheduleWindow();
+                createProcessWindow();
             }
         });
 
@@ -294,22 +387,30 @@ if (!gotTheLock) {
         }
 
         // 监听保存配置的事件
-        ipcMain.on('save-config', (event, newConfig) => {
+        ipcMain.on('config_save', (event, newConfig) => {
             // 将新配置写入文件
-            fs.writeFile(configDataPath, JSON.stringify(newConfig), err => {
+
+            config = {
+                ...config,
+                ...newConfig
+            };
+
+            fs.writeFile(configDataPath, JSON.stringify(config), err => {
                 if (err) throw err;
                 console.log('配置已保存！');
-
-                config = newConfig;
 
                 // 刷新课程表和进度条窗口
                 const windows = BrowserWindow.getAllWindows();
                 windows.forEach(win => {
                     if (win.webContents.getURL().endsWith('index.html') || win.webContents.getURL().endsWith('process.html')) {
-                        win.webContents.send('schedule-data', newConfig);
+                        win.webContents.send('config_deliver', changeCourseProcessing(config));
                     }
                 });
             });
         });
     });
 }
+
+
+// PowerPoint辅助-AI生成
+// 暂未完成

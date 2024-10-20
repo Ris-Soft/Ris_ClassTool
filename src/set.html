@@ -148,16 +148,6 @@
         label {
             font-size: 12px;
             display: block;
-            margin-bottom: 5px;
-        }
-
-
-        input[type="checkbox"] {
-            display: inline-block;
-            vertical-align: middle;
-            width: 20px;
-            padding: 20px;
-            height: 20px;
         }
 
         .page-title {
@@ -179,7 +169,7 @@
             color: white;
             padding: 10px;
             text-align: center;
-            font-weight: bold;
+            font-weight: 100;
         }
 
         table td {
@@ -204,7 +194,8 @@
         }
 
         /* 操作按钮样式 */
-        table .deleteRowButton,.redBtn {
+        table .deleteRowButton,
+        .redBtn {
             background-color: #dc3545;
             color: white;
             border: none;
@@ -213,12 +204,34 @@
             border-radius: 4px;
         }
 
-        table .deleteRowButton:hover,.redBtn:hover {
+        table .deleteRowButton:hover,
+        .redBtn:hover {
             background-color: #c82333;
         }
 
+        table tr:first-child th:first-child {
+            border-top-left-radius: 5px;
+            /* 设置table左上圆角 */
+        }
+
+        table tr:first-child th:last-child {
+            border-top-right-radius: 5px;
+            /* 设置table右上圆角 */
+        }
+
+        table tr:last-child td:first-child {
+            border-bottom-left-radius: 5px;
+            /* 设置table左下圆角 */
+        }
+
+        table tr:last-child td:last-child {
+            border-bottom-right-radius: 5px;
+            /* 设置table右下圆角 */
+        }
+
         /* 新增行按钮样式 */
-        #addRowButton , .greenBtn {
+        #addRowButton,
+        .greenBtn {
             background-color: #28a745;
             color: white;
             border: none;
@@ -227,7 +240,8 @@
             border-radius: 4px;
         }
 
-        #addRowButton:hover , .greenBtn:hover{
+        #addRowButton:hover,
+        .greenBtn:hover {
             background-color: #218838;
         }
 
@@ -246,19 +260,58 @@
             opacity: 0.7;
             background-color: #0069d9;
         }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            border-radius: 5px;
+            color: black;
+            padding: 10px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        .card>label {
+            flex: 1;
+            color: rgb(82, 82, 82);
+        }
+
+        .card>label>h2 {
+            margin: 0;
+            font-weight: 500;
+            font-size: 16px;
+            color: black;
+        }
+
+        .card>input {
+            width: 180px;
+            height: 35px;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+        input[type="checkbox"] {
+            display: inline-block;
+            vertical-align: middle;
+            height: 20px;
+            padding: 20px;
+            width: 50px;
+        }
     </style>
     <link rel="stylesheet" href="./icons/bootstrap-icons.css">
 </head>
 
 <body>
     <div id="header">
-        <div class="title">瑞思课堂工具 0.1.1</div>
+        <div class="title">瑞思课堂工具 0.1.3</div>
     </div>
     <div id="sidebar">
         <div class="sidebar-item active" data-target="#help"><i class="bi bi-info-circle"></i>&nbsp;使用帮助</div>
         <div class="sidebar-item" data-target="#basic"><i class="bi bi-gear"></i>&nbsp;通用设定</div>
         <div class="sidebar-item" data-target="#schedule"><i class="bi bi-calendar2-day"></i>&nbsp;课程设定</div>
         <div class="sidebar-item" data-target="#students"><i class="bi bi-people"></i>&nbsp;学生管理</div>
+        <div class="sidebar-item" data-target="#switch"><i class="bi bi-toggles"></i>&nbsp;调休换课</div>
+        <div class="sidebar-item" data-target="#autoQuit"><i class="bi bi-code-square"></i>&nbsp;自动退出</div>
     </div>
     <div id="main-content">
         <div class="content-page active" id="help">
@@ -267,28 +320,83 @@
                 <li>请不要使用管理员权限运行本程序</li>
                 <li>本程序启动时会自动尝试设置开机自启动，无需自行操作</li>
                 <li>通用设置中位置名称请填写详细地址，避免重名地点导致获取出错</li>
-                <li>进度条刷新间隔：100毫秒；课程表刷新间隔：10秒；天气更新间隔：10分钟</li>
+                <li>配置文件存储位置：D:/Ris_ClassToolConfig.json，删除文件时请注意</li>
+                <li>进度条刷新间隔：1秒；课程表刷新间隔：10秒；天气更新间隔：10分钟</li>
                 <li>更多问题请加群：939571490</li>
             </ul>
         </div>
         <div class="content-page" id="basic">
             <div class="page-title"><i class="bi bi-gear"></i>&nbsp;通用设定</div>
             <form id="basicSettingsForm">
-                <label for="posName">位置名称:</label>
-                <input type="text" id="posName" placeholder="位置名称"><br><br>
-                <label for="countTime">到数目标:</label>
-                <input type="text" id="countTime" placeholder="计时时间"><br><br>
-                <label for="progressColor">进度条色:</label>
-                <input type="text" id="progressColor" placeholder="输入CSS样式，如rgba、rgb、十六进制等"><br><br>
-                <input type="checkbox" id="countShow"><label for="countShow"
-                    style="display: unset;display: inline-block;vertical-align: middle;margin-bottom: 0;">替换天气为倒数日</label><br><br>
-                <button type="button" id="saveBasicConfigButton">保存</button>
+                <div class="card">
+                    <label for="posName">
+                        <h2>地理位置</h2>用于获取天气信息，关闭倒数日时生效
+                    </label>
+                    <input type="text" id="posName" placeholder="位置名称"><br><br>
+                </div>
+                <div class="card">
+                    <label for="countTime">
+                        <h2>到数目标</h2>启用倒数日时生效
+                    </label>
+                    <input type="text" id="countTime" placeholder="计时时间"><br><br>
+                </div>
+                <div class="card">
+                    <label for="timeOffset">
+                        <h2>时间偏移</h2>程序内时间偏移，以秒为单位。例如：+10或-10
+                    </label>
+                    <input type="text" id="timeOffset" placeholder="时间偏移，默认0"><br><br>
+                </div>
+                <div class="card">
+                    <label for="progressColor">
+                        <h2>主题颜色</h2>进度条与课程表的突出主题色
+                    </label>
+                    <input type="text" id="progressColor" placeholder="默认值：#1E9FFF"><br><br>
+                </div>
+                <div class="card">
+                    <label for="progressHeight">
+                        <h2>进度条高度</h2>顶部进度条的显示高度，最大值为100px
+                    </label>
+                    <input type="text" id="progressHeight" placeholder="默认值：2px"><br><br>
+                </div>
+                <div class="card">
+                    <label for="scheduleFontSize">
+                        <h2>课程字体设定</h2>课程表相对字体大小等级[1为最大，6为最小]
+                    </label>
+                    <input type="text" id="scheduleFontSize" placeholder="默认值：2"><br><br>
+                </div>
+                <div class="card">
+                    <label for="sideBarBottom">
+                        <h2>侧边栏位置</h2>侧边栏按钮与底部距离，重启后生效
+                    </label>
+                    <input type="text" id="sideBarBottom" placeholder="默认值：200"><br><br>
+                </div>
+                <div class="card">
+                    <label for="sideBarShow">
+                        <h2>启用侧边栏</h2>重启后生效，关闭后则不再创建侧边栏窗口
+                    </label>
+                    <input type="checkbox" id="sideBarShow"><br>
+                </div>
+                <div class="card">
+                    <label for="countShow">
+                        <h2>启用倒数日</h2>启用此功能后，课程表的天气组件将替换为倒计时组件
+                    </label>
+                    </label>
+                    <input type="checkbox" id="countShow"><br><br>
+                </div>
+                <div class="card">
+                    <button type="button" id="saveAutoQuitConfigButton" onclick="saveBasicConfigButton()">保存</button>
+                </div>
             </form>
         </div>
         <div class="content-page" id="schedule">
-            <div class="page-title"><i class="bi bi-calendar2-day"></i>&nbsp;课程设定<label style="display: unset;">&nbsp;提示：页面底部有保存按钮，编辑后请不要忘记保存</label></div>
-            <label for="linePos">分割线位置:</label>
-            <input type="text" id="linePos" placeholder="分割位置"><br><br>
+            <div class="page-title"><i class="bi bi-calendar2-day"></i>&nbsp;课程设定<label
+                    style="display: unset;">&nbsp;提示：页面底部有保存按钮，编辑后请不要忘记保存</label></div>
+            <div class="card">
+                <label for="linePos">
+                    <h2>分割线位置</h2>格式如下：[1,4]（在第一节和第四节后加入分隔符）
+                </label>
+                <input type="text" id="linePos" placeholder="分割位置"><br><br>
+            </div>
             <div id="scheduleEditor">
                 <table id="scheduleTable">
                     <thead>
@@ -307,7 +415,10 @@
                     <tbody>
                     </tbody>
                 </table>
-                <button type="button" id="addRowButton" style="margin-left: 0;">新增行</button><button type="button" id="saveScheduleConfigButton">保存</button>
+                <div class="card">
+                    <button type="button" id="addRowButton" style="margin-left: 0;">新增行</button><button type="button"
+                        id="saveScheduleConfigButton">保存</button>
+                </div>
             </div>
         </div>
         <div class="content-page" id="students">
@@ -323,41 +434,106 @@
                 <tbody>
                 </tbody>
             </table>
-            <button type="button" class="greenBtn" id="addStudentButton">新增学生</button><button type="button" id="saveStudentsConfigButton">保存</button>
+            <button type="button" class="greenBtn" id="addStudentButton">新增学生</button><button type="button"
+                id="saveStudentsConfigButton">保存</button>
+        </div>
+        <div class="content-page" id="switch">
+            <div class="page-title"><i class="bi bi-toggles"></i>&nbsp;调休换课</div>
+            <table id="plansTable">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>课程数组</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div class="card">
+                <input type="text" placeholder="目标日期" id="planDate" style="width: 72px;">
+                <button type="button" class="greenBtn" id="addPlanButton">新增规则</button><button type="button"
+                    id="savePlansConfigButton">保存</button>
+            </div>
+        </div>
+        <div class="content-page" id="autoQuit">
+            <div class="page-title"><i class="bi bi-code-square"></i>&nbsp;课前准备</div>
+            *该版本未启用本功能，已延时上线
+            <form id="autoQuitSettingsForm">
+                <div class="card">
+                    <label for="posName">
+                        <h2>关闭清单</h2>需要关闭的程序列表
+                    </label>
+                    <textarea id="autoQuitList" placeholder="清单列表，换行分割"></textarea>
+                </div>
+                <div class="card">
+                    <label for="autoQuitChecked">
+                        <h2>功能开关</h2>课间时间过半时提示关闭清单内程序
+                    </label>
+                    <input type="checkbox" id="autoQuitChecked">
+                </div>
+                <div class="card">
+                    <button type="button" id="saveBasicConfigButton" onclick="saveAutoQuitConfigButton()">保存</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-        let intervalId;
-        let oldConfig = '';
-
-        // 切换主内容区
-        document.querySelectorAll('.sidebar-item').forEach(item => {
-            item.addEventListener('click', function (e) {
-                const targetId = this.getAttribute('data-target');
-                document.querySelectorAll('.content-page').forEach(page => {
-                    page.classList.remove('active');
-                });
-                document.querySelector(targetId).classList.add('active');
-                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-
+        var Config;
         // 接收配置信息
-        window.api.onScheduleData((config) => {
+        window.api.config_onRecive((config) => {
             console.log('接收到课程表数据:', config);
             document.getElementById('posName').value = config.posName || '';
             document.getElementById('countShow').checked = config.countShow || false;
             document.getElementById('countTime').value = config.countTime || '';
             document.getElementById('linePos').value = JSON.stringify(config.linePos) || '[0]';
-            document.getElementById('progressColor').value = config.progressColor ?? '';
+            document.getElementById('progressColor').value = config.progressColor || '';
+            document.getElementById('sideBarShow').checked = config.sideBarShow || 1;
+            document.getElementById('sideBarBottom').value = config.sideBarBottom || '';
+            document.getElementById('scheduleFontSize').value = config.scheduleFontSize || '';
+            document.getElementById('progressHeight').value = config.progressHeight || '';
+            document.getElementById('autoQuitList').value = config.autoQuitList || '';
+            document.getElementById('autoQuitChecked').checked = config.autoQuit || 1;
+            document.getElementById('timeOffset').checked = config.timeOffset || '';
+
             loadSchedule(config);
             loadStudents(config);
-            oldConfig = config;
+            loadPlans(config);
+
+            Config = config;
         });
 
-        // 动态加载课程表
+
+        // 保存通用设定
+        function saveBasicConfigButton() {
+            const newConfig = {
+                posName: document.getElementById('posName').value,
+                countShow: document.getElementById('countShow').checked,
+                countTime: document.getElementById('countTime').value,
+                progressColor: document.getElementById('progressColor').value,
+                sideBarShow: document.getElementById('sideBarShow').checked,
+                sideBarBottom: document.getElementById('sideBarBottom').value,
+                scheduleFontSize: document.getElementById('scheduleFontSize').value,
+                progressHeight: document.getElementById('progressHeight').value,
+                timeOffset: parseInt(document.getElementById('timeOffset').value),
+            };
+
+            window.api.config_save(newConfig);
+        };
+
+        // 保存自动关闭设定
+        function saveAutoQuitConfigButton() {
+            const newConfig = {
+                autoQuitList: document.getElementById('autoQuitList').value,
+                autoQuit: document.getElementById('autoQuitChecked').checked,
+            };
+
+            window.api.config_save(newConfig);
+        };
+
+        // 课程表
+        // 动态载入
         function loadSchedule(config) {
             const tbody = document.querySelector('#scheduleTable tbody');
             tbody.innerHTML = ''; // 清空旧的数据
@@ -380,24 +556,6 @@
                 tbody.appendChild(row);
             }
         }
-
-        // 动态加载学生列表
-        function loadStudents(config) {
-            const tbody = document.querySelector('#studentsTable tbody');
-            tbody.innerHTML = ''; // 清空旧的数据
-            const students = config.students || [];
-
-            students.forEach(student => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-            <td contenteditable="true">${student.name}</td>
-            <td contenteditable="true" style="display:none">${student.weight}</td>
-            <td><button class="deleteStudentButton redBtn">删除</button></td>
-        `;
-                tbody.appendChild(row);
-            });
-        }
-
         // 添加新行
         document.getElementById('addRowButton').addEventListener('click', () => {
             const tbody = document.querySelector('#scheduleTable tbody');
@@ -415,39 +573,15 @@
     `;
             tbody.appendChild(newRow);
         });
-
-        // 添加新学生
-        document.getElementById('addStudentButton').addEventListener('click', () => {
-            const tbody = document.querySelector('#studentsTable tbody');
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-        <td contenteditable="true"></td>
-        <td contenteditable="true" style="display:none">0</td>
-        <td><button class="deleteStudentButton redBtn">删除</button></td>
-    `;
-            tbody.appendChild(newRow);
-        });
-
         // 删除行
-        document.querySelector('#scheduleTable').addEventListener('click', (event) => {
-            if (event.target.classList.contains('deleteRowButton')) {
-                event.target.closest('tr').remove();
-            }
-        });
-
-        // 删除学生
         document.querySelector('#studentsTable').addEventListener('click', (event) => {
             if (event.target.classList.contains('deleteStudentButton')) {
                 event.target.closest('tr').remove();
             }
         });
-
         // 保存课程设定
         document.getElementById('saveScheduleConfigButton').addEventListener('click', () => {
             const newConfig = {
-                posName: oldConfig.posName || '',
-                countShow: oldConfig.countShow || false,
-                countTime: oldConfig.countTime || '',
                 timeTable: {},
                 courseTable: {
                     Monday: [],
@@ -459,7 +593,6 @@
                     Sunday: []
                 },
                 linePos: JSON.parse(document.getElementById('linePos').value) ?? null,
-                students: oldConfig.students
             };
 
             const rows = document.querySelectorAll('#scheduleTable tbody tr');
@@ -475,20 +608,49 @@
                 newConfig.courseTable.Sunday.push(cells[7].textContent.trim());
             });
 
-            window.api.saveConfig(newConfig);
-            oldConfig = newConfig;
+            window.api.config_save(newConfig);
         });
 
+
+
+        // 学生列表
+        // 动态加载
+        function loadStudents(config) {
+            const tbody = document.querySelector('#studentsTable tbody');
+            tbody.innerHTML = '';
+            const students = config.students || [];
+
+            students.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+            <td contenteditable="true">${student.name}</td>
+            <td contenteditable="true" style="display:none">${student.weight}</td>
+            <td><button class="deleteStudentButton redBtn">删除</button></td>
+        `;
+                tbody.appendChild(row);
+            });
+        }
+        // 添加新行
+        document.getElementById('addStudentButton').addEventListener('click', () => {
+            const tbody = document.querySelector('#studentsTable tbody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+        <td contenteditable="true"></td>
+        <td contenteditable="true" style="display:none">0</td>
+        <td><button class="deleteStudentButton redBtn">删除</button></td>
+    `;
+            tbody.appendChild(newRow);
+        });
+        // 删除行
+        document.querySelector('#studentsTable').addEventListener('click', (event) => {
+            if (event.target.classList.contains('deleteStudentButton')) {
+                event.target.closest('tr').remove();
+            }
+        });
         // 保存学生配置
         document.getElementById('saveStudentsConfigButton').addEventListener('click', () => {
             const newConfig = {
-                posName: oldConfig.posName || '',
-                countShow: oldConfig.countShow || false,
-                countTime: oldConfig.countTime || '',
-                timeTable: oldConfig.timeTable ?? null,
-                courseTable: oldConfig.courseTable ?? null,
-                linePos: oldConfig.linePos ?? null,
-                students: []
+                students: [],
             };
 
             const rows = document.querySelectorAll('#studentsTable tbody tr');
@@ -500,26 +662,101 @@
                 });
             });
 
-            window.api.saveConfig(newConfig);
-            oldConfig = newConfig;
+            window.api.config_save(newConfig);
         });
 
-        // 保存通用设定
-        document.getElementById('saveBasicConfigButton').addEventListener('click', () => {
+        // 调休换课
+        // 动态载入
+        function loadPlans(config) {
+            const tbody = document.querySelector('#plansTable tbody');
+            tbody.innerHTML = ''; // 清空旧的数据
+            const plans = config.plans || [];
+
+            plans.forEach(plan => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+            <td contenteditable="true">${plan.date}</td>
+            <td contenteditable="true">${JSON.stringify(plan.courses)}</td>
+            <td><button class="deletePlanButton redBtn">删除</button></td>
+        `;
+                tbody.appendChild(row);
+            });
+        }
+        // 新增规则
+        document.getElementById('addPlanButton').addEventListener('click', () => {
+            const dateInput = document.getElementById('planDate').value;
+            const date = parseDate(dateInput) || new Date();
+            const weekday = getWeekday(date);
+            const courses = getOriginalCourses(date, weekday);
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+        <td contenteditable="true">${dateInput || formatDate(date)}</td>
+        <td contenteditable="true">${JSON.stringify(courses)}</td>
+        <td><button class="deletePlanButton redBtn">删除</button></td>
+    `;
+            document.querySelector('#plansTable tbody').appendChild(newRow);
+        });
+        // 删除规则
+        document.querySelector('#plansTable').addEventListener('click', (event) => {
+            if (event.target.classList.contains('deletePlanButton')) {
+                event.target.closest('tr').remove();
+            }
+        });
+        // 保存调休换课配置
+        document.getElementById('savePlansConfigButton').addEventListener('click', () => {
             const newConfig = {
-                posName: document.getElementById('posName').value,
-                countShow: document.getElementById('countShow').checked,
-                countTime: document.getElementById('countTime').value,
-                timeTable: oldConfig.timeTable ?? null,
-                courseTable: oldConfig.courseTable ?? null,
-                linePos: oldConfig.linePos ?? null,
-                progressColor: document.getElementById('progressColor').value,
-                students: oldConfig.students
+                plans: []
             };
 
-            window.api.saveConfig(newConfig);
-            oldConfig = newConfig;
+            const rows = document.querySelectorAll('#plansTable tbody tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const plan = {
+                    date: cells[0].textContent.trim(),
+                    courses: JSON.parse(cells[1].textContent.trim())
+                };
+                newConfig.plans.push(plan);
+            });
+
+            window.api.config_save(newConfig);
         });
+        // 辅助函数
+        function formatDate(date) {
+            return `${date.getMonth() + 1}.${date.getDate()}`;
+        }
+        function parseDate(dateStr) {
+            const [month, day] = dateStr.split('.').map(Number);
+            if (isNaN(month) || isNaN(day)) return null;
+            const date = new Date();
+            date.setMonth(month - 1);
+            date.setDate(day);
+            return date;
+        }
+        function getWeekday(date) {
+            return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][date.getDay()];
+        }
+        function getOriginalCourses(date, weekday) {
+            const courseTable = Config.courseTable || {};
+            return courseTable[weekday] || [];
+        }
+
+
+        // 切换主内容区
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', function (e) {
+                const targetId = this.getAttribute('data-target');
+                document.querySelectorAll('.content-page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.querySelector(targetId).classList.add('active');
+                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        window.onload = function () {
+            window.api.config_sendRequest();
+        };
     </script>
 </body>
 

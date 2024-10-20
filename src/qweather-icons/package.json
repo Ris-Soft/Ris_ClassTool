@@ -58,5 +58,8 @@
     "icons/*.svg",
     "font",
     "!.DS_Store"
-  ]
+  ],
+  "dependencies": {
+    "qweather-icons": "file:"
+  }
 }

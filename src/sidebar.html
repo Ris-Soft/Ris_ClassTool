@@ -41,7 +41,7 @@
       font-size: 1rem;
       color: white;
       border-radius: 10px 0 0 10px;
-      transition: all 0.3s ease;
+      /* transition: all 0.3s ease; */
       z-index: 1000;
       right: 0;
     }
@@ -56,7 +56,7 @@
       padding: 20px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       transform: translateX(100%);
-      transition: transform 0.3s ease;
+      /* transition: transform 0.3s ease; */
     }
 
     .expanded {
@@ -72,20 +72,37 @@
 
     .expanded #expandedContent {
       transform: translateX(0);
-      padding: 16px;
+      padding: 5px;
       padding-left: 30px;
     }
 
+    #expandedContent>button {
+      display: inline-block;
+      font-size: 9px;
+      background-color: transparent;
+    }
+
+    #expandedContent>button>i {
+      font-size: 18px;
+      line-height: 46px;
+      background-color: rgba(255, 255, 255, .1);
+      padding: 10px;
+      border-radius: 100px;
+    }
+
     button {
-      background-color: rgba(255, 255, 255, 0.1);
       border: 0;
       border-radius: 10px;
-      padding: 5px 10px;
       color: white;
+      padding: 5px;
     }
 
     button:hover {
       background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    i:hover {
+      opacity: 0.6;
     }
   </style>
 </head>
@@ -97,29 +114,26 @@
     </button>
     <div id="expandedContent" class="p-3">
       <button onclick="loadWebView('./src/apps/random.html',true)">
-        <i class="bi bi-shuffle"></i>&nbsp;点名</button>
-      <button onclick="loadWebView('https\:\/\/edu.3r60.top/app/phrase/',false)">
-        <i class="bi bi-book"></i>&nbsp;语文成语</button>
-      <button onclick="loadWebView('https\:\/\/edu.3r60.top/app/words/',false)">
-        <i class="bi bi-ear"></i>&nbsp;单词听力</button>
+        <i class="bi bi-shuffle"></i><br>随机点名</button>
+      <button onclick="window.api.function_vKeydown([1]);">
+        <i class="bi bi-window-desktop"></i><br>回到桌面</button>
+        <button onclick="window.api.function_vKeydown([2]);">
+          <i class="bi bi-list-task"></i><br>任务管理</button>
+      <button onclick="window.api.function_showExplorer();">
+        <i class="bi bi-archive"></i><br>浏览文件</button>
+      <button onclick="loadWebView('https\:\/\/edu.3r60.top/?id=tools',false)">
+        <i class="bi bi-three-dots"></i><br>更多工具</button>
     </div>
   </div>
 
   <script>
-    window.api.getInitialState((isExpanded) => {
-      document.getElementById('app').classList.toggle('expanded', isExpanded);
-    });
-
-    window.api.onStateChange((isExpanded) => {
-      document.getElementById('app').classList.toggle('expanded', isExpanded);
-    });
-
     document.getElementById('toggleButton').addEventListener('click', () => {
-      window.api.toggleExpand();
+      window.api.sideBar_expand();
+      document.getElementById('app').classList.toggle('expanded');
     });
 
     function loadWebView(url, local) {
-      window.api.loadWebView(url, local);
+      window.api.webview_create(url, local);
     }
   </script>
 </body>

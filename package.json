@@ -1,6 +1,6 @@
 {
   "name": "risclasstool",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "瑞思课堂工具",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,8 @@
     "electron-builder": "^25.1.7"
   },
   "build": {
-    "appId": "com.risclasstool.app",
+    "appId": "rct.trsz.app",
+    "productName": "瑞思课堂工具",
     "directories": {
       "output": "dist"
     },

@@ -90,7 +90,7 @@
                 // 检查当前是否在上课时间
                 let inClass = false;
                 let nextPeriodStart = null;
-                let nextPeriod = null;
+                let nextPeriod = 0;
 
                 for (let period in data.timeTable) {
                     const [startStr, endStr] = data.timeTable[period].split('-');
@@ -103,7 +103,7 @@
                         currentCourse = data.courseTable[weekName][parseInt(period) - 1];
                         startTime = start;
                         endTime = end;
-                        nextPeriod = period + 1;
+                        nextPeriod = parseInt(period) + 1;
                         break;
                     } else if (currentTime < start) {
                         if (!nextPeriodStart || start < nextPeriodStart) {
@@ -136,7 +136,8 @@
                     if ((currentTime - startTime < 30 || endTime - currentTime < 30)) {
                     // if (true) {
                         courseName.textContent = `${currentCourse}`;
-                        nextCourse.textContent = `${data.courseTable[weekName][parseInt(nextPeriod) % data.courseTable[weekName].length]}`;
+                        nextCourse.textContent = `${data.courseTable[weekName][parseInt(nextPeriod) - 1] || '放学'}`;
+                        // alert(`${nextPeriod} ${data.courseTable[weekName][parseInt(nextPeriod) - 1]}`)
                         courseNameBox.style.display = (currentTime - startTime < 30) ? 'block' : 'none';
                         timeRangeBox.style.display = 'none';
                         nextCourseBox.style.display = (endTime - currentTime < 30) ? 'block' : 'none';
@@ -151,8 +152,9 @@
                         const seconds = timeToNextClass % 60;
                         // courseName.textContent = '课间';
                         timeRange.textContent = `${minutes}:${seconds < 10 ? `0${seconds}` : `${seconds}`}`;
-                        nextCourse.textContent = `${data.courseTable[weekName][parseInt(nextPeriod) % data.courseTable[weekName].length]}`;
+                        nextCourse.textContent = `${data.courseTable[weekName][parseInt(nextPeriod) - 1]}`;
                         courseNameBox.style.display = 'none';
+                        // alert(`${nextPeriod} ${parseInt(nextPeriod) % data.courseTable[weekName].length} ${data.courseTable[weekName][parseInt(nextPeriod)]}`)
                         timeRangeBox.style.display = 'block';
                         nextCourseBox.style.display = 'block';
                         statusWindow.style.display = 'flex';

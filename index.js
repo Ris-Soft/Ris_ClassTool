@@ -1,7 +1,21 @@
-const { app, BrowserWindow, screen, ipcMain, Tray, Menu } = require('electron');
+const { app, BrowserWindow, screen, ipcMain, Tray, Menu, autoUpdater } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { spawn, exec } = require('child_process');
+const { spawn } = require('child_process');
+// const isDev = app.isPackaged;
+// console.log(isDev)
+// 自动更新
+const serverUrl = 'https://backend.3r60.top/autoUpdate/RisClassTool';
+autoUpdater.setFeedURL(`${serverUrl}`);
+// if (!isDev) {
+    // 静默更新并重启
+    autoUpdater.checkForUpdates();
+// }
+autoUpdater.on('update-downloaded', (info) => {
+    // 更新下载完成，自动安装
+    autoUpdater.quitAndInstall();
+});
+
 
 // 禁用硬件加速
 app.disableHardwareAcceleration();
@@ -57,8 +71,10 @@ try {
     }
 }
 
+config['version'] = app.getVersion();
+
 // 释放变量
-delete defaultConfig;
+// delete defaultConfig;
 
 
 // 创建托盘
@@ -69,11 +85,11 @@ function createTray() {
     const contextMenu = Menu.buildFromTemplate([
         {
             label: '随机点名',
-            click: () => createWebViewWindow('./src/apps/random.html',true)
+            click: () => createWebViewWindow('./src/apps/random.html', true)
         },
         {
             label: '在线工具',
-            click: () => createWebViewWindow('https\:\/\/edu.3r60.top/?id=tools',false)
+            click: () => createWebViewWindow('https\:\/\/edu.3r60.top/?id=tools', false)
         },
         {
             label: '程序设置',
@@ -153,18 +169,17 @@ function createsidebarWindow() {
 
 let settingsWindow = null;
 
-// 创建WebView窗口
+// 创建WebView窗口 - AI
 function createWebViewWindow(url, local) {
     Menu.setApplicationMenu(null);
+    // Menu.setApplicationMenu(null);
 
     const targetWindow = new BrowserWindow({
         width: local ? 420 : 1366,
         height: local ? 400 : 768,
         alwaysOnTop: local,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
-            nodeIntegration: true,
-            contextIsolation: true
+            preload: path.join(__dirname, 'preload.js')
         }
     });
 
@@ -174,24 +189,24 @@ function createWebViewWindow(url, local) {
         targetWindow.loadURL(url);
     }
 
+    // 定义特定于此 WebView 实例的事件处理函数
+    const sendConfigHandler = (event) => {
+        const processedConfig = changeCourseProcessing(config);
+        event.sender.send('config_deliver', processedConfig);
+    };
+
     // 添加关闭监听器以确保在窗口关闭时移除事件处理程序
     targetWindow.on('closed', () => {
         // 移除事件处理程序
         ipcMain.removeListener('config_reciveGetRequest', sendConfigHandler);
     });
 
-    // 检查并移除已存在的事件处理程序，然后添加新的
-    ipcMain.removeListener('config_reciveGetRequest', sendConfigHandler);
+    // 添加事件监听器
     ipcMain.on('config_reciveGetRequest', sendConfigHandler);
 
     targetWindow.show();
 }
-
-// 定义事件处理函数
-function sendConfigHandler(event) {
-    event.sender.send('config_deliver', changeCourseProcessing(config));
-}
-
+// 处理来自主进程的创建 WebView 请求
 ipcMain.on('webview_create', (event, url, local) => {
     createWebViewWindow(url, local);
 });
@@ -224,7 +239,6 @@ function createSetWindow() {
         alwaysOnTop: false,
         skipTaskbar: false,
         webPreferences: {
-            nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
         }
     });
@@ -259,7 +273,6 @@ function createScheduleWindow() {
         skipTaskbar: true,
         transparent: true,
         webPreferences: {
-            nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
         }
     });
@@ -305,7 +318,6 @@ function createProcessWindow() {
         transparent: true,
         skipTaskbar: true,
         webPreferences: {
-            nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
         }
     });

@@ -253,6 +253,12 @@
                 if (countShow) {
                     const today = new Date();
                     const currentYear = today.getFullYear();
+                    const currentMonth = today.getMonth();
+                    const currentDay = today.getDate();
+
+                    // 修复倒数日BUG
+                    today.setHours(0, 0, 0, 0);
+
                     const targetDate = new Date(currentYear, parseInt(data.countTime.split('.')[0] ?? 6) - 1, parseInt(data.countTime.split('.')[1]) ?? 7, 0, 0, 0);
 
                     if (today > targetDate) {
@@ -264,7 +270,6 @@
 
                     // 更新天气元素的内容为倒计时
                     weatherElement.innerHTML = `<i class="bi bi-hourglass"></i>&nbsp;${diffDays} 天`;
-
                     lastWeatherUpdate = 0;
                 } else {
                     fetch(`https://api.3r60.top/v2/project/weather/?pos=${data.posName ?? '北京'}`)

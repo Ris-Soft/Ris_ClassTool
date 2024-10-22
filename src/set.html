@@ -303,7 +303,7 @@
 
 <body>
     <div id="header">
-        <div class="title">瑞思课堂工具 0.1.3</div>
+        <div class="title">瑞思课堂工具 <span id="version"></span></div>
     </div>
     <div id="sidebar">
         <div class="sidebar-item active" data-target="#help"><i class="bi bi-info-circle"></i>&nbsp;使用帮助</div>
@@ -484,6 +484,7 @@
         // 接收配置信息
         window.api.config_onRecive((config) => {
             console.log('接收到课程表数据:', config);
+            document.getElementById('version').innerHTML = config.version;
             document.getElementById('posName').value = config.posName || '';
             document.getElementById('countShow').checked = config.countShow || false;
             document.getElementById('countTime').value = config.countTime || '';
@@ -495,7 +496,7 @@
             document.getElementById('progressHeight').value = config.progressHeight || '';
             document.getElementById('autoQuitList').value = config.autoQuitList || '';
             document.getElementById('autoQuitChecked').checked = config.autoQuit || 1;
-            document.getElementById('timeOffset').checked = config.timeOffset || '';
+            document.getElementById('timeOffset').value = config.timeOffset || '';
 
             loadSchedule(config);
             loadStudents(config);
@@ -574,8 +575,8 @@
             tbody.appendChild(newRow);
         });
         // 删除行
-        document.querySelector('#studentsTable').addEventListener('click', (event) => {
-            if (event.target.classList.contains('deleteStudentButton')) {
+        document.querySelector('#scheduleTable').addEventListener('click', (event) => {
+            if (event.target.classList.contains('deleteRowButton')) {
                 event.target.closest('tr').remove();
             }
         });

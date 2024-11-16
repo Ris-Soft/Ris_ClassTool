@@ -1,190 +1,164 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <title>关闭闲置程序</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倒计时任务</title>
+    <link href="https://assets.3r60.top/icons/bootstrap-icons.css" rel="stylesheet">
     <style>
+        html,
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            padding: 0;
             margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            /* 使用现代字体 */
+            background-color: rgba(255, 255, 255, 0.6);
+            /* 添加渐变背景 */
         }
 
-        .container {
-            text-align: center;
-            /* background: white; */
+        #header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+            z-index: 1000;
+            -webkit-app-region: drag;
+        }
+
+        #header .title {
+            padding-left: 15px;
+            font-size: 20px;
+            /* 增加字体大小 */
+            font-weight: bold;
+        }
+
+        #content {
             padding: 20px;
-            border-radius: 10px;
-            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
-            min-width: 300px;
-            min-height: 210px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
         }
 
-        h2 {
-            color: #333;
+        #countdown {
+            font-size: 5em;
+            /* 增加字体大小 */
+            margin-bottom: 20px;
+            color: black;
+            /* 设置字体颜色 */
         }
 
-        #result {
-            font-size: 2em;
-            color: #1E9FFF;
-            margin: 40px;
-            animation: fadeIn 1s forwards;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
+        #textArea {
+            font-size: 2.5em;
+            /* 增加字体大小 */
+            color: black;
+            /* 设置字体颜色 */
         }
 
         button {
-            padding: 10px 20px;
-            font-size: 1em;
-            color: white;
-            background-color: #007BFF;
-            border: none;
+            margin-right: 10px;
             border-radius: 5px;
+            /* 设置按钮圆角 */
+            transition: transform 0.3s;
+            /* 添加悬停效果 */
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            /* 悬停时放大按钮 */
+        }
+
+        .greenBtn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            border-radius: 4px;
+        }
+
+        .greenBtn:hover {
+            background-color: #218838;
+        }
+
+        /* 保存按钮样式 */
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
             margin: 5px;
         }
 
         button:hover {
-            background-color: #0056b3;
-        }
-
-        .controls {
-            margin: 20px 0;
-        }
-
-        .controls input[type="number"] {
-            padding: 5px;
-            width: 50px;
-            margin: 0 10px;
-            text-align: center;
-        }
-
-        .controls button {
-            padding: 5px 10px;
-            font-size: 1em;
-            color: white;
-            background-color: #007BFF;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .controls button:hover {
-            background-color: #0056b3;
-        }
-
-        .controls label {
-            font-size: 1em;
-            color: #333;
+            opacity: 0.7;
+            background-color: #0069d9;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h2></h2>
-        <div class="controls">
-            <label for="numOfPicks">距离上课剩余5分钟，是否关闭闲置程序（倒计时30秒）</label>
-            <button onclick="decreasePicks()">-</button>
-            <input type="number" id="numOfPicks" value="1" min="1" max="8" readonly>
-            <button onclick="increasePicks()">+</button>
-        </div>
-        <div id="result"></div>
-        <button id="startButton" onclick="startPick()">开始点名</button>
+    <div id="header">
+        <div class="title" onclick="window.location.href = 'https://edu.3r60.top'"><i
+                class="bi bi-box-fill"></i>&nbsp;&nbsp;自动任务</div>
     </div>
-
+    <div id="content">
+        <h3 id="textArea">非法访问！</h3>
+        <h1 id="countdown">30</h1>
+        <span style="display: flex;margin-top: 60px;">
+            <button id="cancelButton"><i class="bi bi-x-lg"></i> 忽略</button>
+            <button id="executeButton" class="greenBtn"><i class="bi bi-check2-circle"></i> 立即执行</button>
+        </span>
+    </div>
     <script>
-        let participants = [];
-        window.api.config_onRecive((config) => {
-            participants = config.students ?? [
-                { name: '张三', weight: 1 },
-                { name: '李四', weight: 2 },
-                { name: '王五', weight: 3 },
-                { name: '赵六', weight: 4 },
-                { name: '孙七', weight: 5 },
-                { name: '孙吧', weight: 5 },
-                { name: '孙就', weight: 5 },
-                { name: '孙是', weight: 5 },
-                { name: '孙十一', weight: 5 },
-                { name: '孙十二', weight: 5 }
-            ];
-        });
-
-        let intervalId;
-
-        function startPick() {
-            let resultElement = document.getElementById('result');
-            resultElement.innerText = "点名中...";
-            document.getElementById('startButton').disabled = true;
-
-            // 清除之前的计时器
-            clearInterval(intervalId);
-
-            intervalId = setInterval(() => {
-                const randomIndex = Math.floor(Math.random() * participants.length);
-                resultElement.innerText = participants[randomIndex].name;
-            }, 100);
-
-            setTimeout(() => {
-                clearInterval(intervalId);
-                pickRandom();
+        let countdownElement = document.getElementById('countdown');
+        let actionId = '0';
+        let interval = null;
+        function init(config) {
+            let countdown = 30;
+            actionId = config.ActionID;
+            document.getElementById('textArea').textContent = config.Text;
+            interval = setInterval(() => {
+                countdownElement.textContent = countdown;
+                if (countdown === 0) {
+                    clearInterval(interval);
+                    window.api.function_autoAction(actionId);
+                    window.close();
+                    console.log('执行任务');
+                } else {
+                    countdown--;
+                }
             }, 1000);
         }
 
-        function pickRandom() {
-            const numOfPicks = Math.min(parseInt(document.getElementById('numOfPicks').value), participants.length);
-            const pickedParticipants = [];
-            const availableParticipants = participants.map(p => ({ ...p, weight: p.weight === 0 ? 1 : p.weight })); // 处理权重为 0 的情况
+        document.getElementById('cancelButton').addEventListener('click', () => {
+            clearInterval(interval);
+            countdownElement.textContent = '已取消';
+            window.close();
+        });
 
-            while (pickedParticipants.length < numOfPicks) {
-                const totalWeight = availableParticipants.reduce((acc, cur) => acc + cur.weight, 0);
-                let random = Math.random() * totalWeight;
+        document.getElementById('executeButton').addEventListener('click', () => {
+            clearInterval(interval);
+            countdownElement.textContent = '0';
+            window.api.function_autoAction(actionId);
+            window.close();
+        });
 
-                for (let i = 0; i < availableParticipants.length; i++) {
-                    random -= availableParticipants[i].weight;
-                    if (random <= 0) {
-                        pickedParticipants.push(availableParticipants[i].name);
-                        availableParticipants.splice(i, 1); // 移除已选中的参与者
-                        break;
-                    }
-                }
-            }
-
-            document.getElementById('result').innerText = pickedParticipants.join(', ');
-            document.getElementById('startButton').disabled = false;
-        }
-
-        function increasePicks() {
-            let currentPicks = parseInt(document.getElementById('numOfPicks').value);
-            if (currentPicks < 8) {
-                document.getElementById('numOfPicks').value = currentPicks + 1;
-            }
-        }
-
-        function decreasePicks() {
-            let currentPicks = parseInt(document.getElementById('numOfPicks').value);
-            if (currentPicks > 1) {
-                document.getElementById('numOfPicks').value = currentPicks - 1;
-            }
-        }
-        window.onload = function(){
-            window.api.config_sendRequest();
+        window.onload = async () => {
+            init(await window.api.config_autoAction());
         };
     </script>
 </body>

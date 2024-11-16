@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>课程表窗口</title>
     <style>
+        :root {
+            --font-size: 1em;
+            /* 默认字体大小 */
+        }
+
         html,
         body {
             background-color: transparent;
@@ -36,7 +41,7 @@
         }
 
         .current {
-            font-size: 1.25em;
+            font-size: calc(1.25 * var(--font-size));
             color: #1E9FFF;
             margin-top: -0.25em;
             margin-bottom: -0.2em;
@@ -50,9 +55,14 @@
             color: rgba(255, 255, 255, 0.801);
         }
 
+        .small {
+            font-size: calc(0.60 * var(--font-size));
+        }
+
         #schedules {
+            font-size: calc(1.5* var(--font-size));
             display: block;
-            margin-top: auto;
+            margin-top: 5px;
             margin-bottom: auto;
             margin-left: auto;
             margin-right: auto;
@@ -73,18 +83,18 @@
         }
 
         .vertical-divider::after {
-            content: '|';
+            /* content: '|'; */
             position: absolute;
             top: 0;
             bottom: 0;
-            right: -8px;
-            width: 1px;
+            right: calc(-0.225* var(--font-size));
+            /* width: 1px; */
             color: rgba(190, 190, 190, 0.5);
-            font-size: 1.1em;
+            font-size: calc(0.55* var(--font-size));
         }
 
         #extra {
-            font-size: 0.9em;
+            font-size: calc(0.90* var(--font-size));
             background-color: rgba(0, 0, 0, 0.3);
             width: fit-content;
             margin: 0;
@@ -92,8 +102,7 @@
             margin-right: auto;
             clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
             font-weight: 500;
-            padding: 0px 1.4em;
-            font-size: 0.9em;
+            padding: 5px 1.4em;
             color: rgba(255, 255, 255, .8);
         }
     </style>
@@ -269,7 +278,7 @@
                     const diffDays = Math.round(Math.abs((targetDate - today) / oneDay));
 
                     // 更新天气元素的内容为倒计时
-                    weatherElement.innerHTML = `<i class="bi bi-hourglass"></i>&nbsp;${diffDays} 天`;
+                    weatherElement.innerHTML = `<i class="bi bi-hourglass"></i>&nbsp;${data.countText ? '<span class="small">距&nbsp;</span>' + data.countText + '<span class="small">&nbsp;还有</span> ' : ''}${diffDays} 天`;
                     lastWeatherUpdate = 0;
                 } else {
                     fetch(`https://api.3r60.top/v2/project/weather/?pos=${data.posName ?? '北京'}`)
@@ -292,40 +301,25 @@
             updateWeatherElement(data, data.countShow ? data.countShow : false);
         }
 
-        window.api.config_onRecive((data) => {
-            console.log('接收到课程表数据:', data);
+        window.api.config_onRecive(init);
 
-            // 初始更新
+        function init(data) {
             updateSchedules(data);
-
             // 个性化设定
-            changeElementTagName('schedules', 'h' + (data.scheduleFontSize || '2'));
-            changeElementTagName('extra', 'h' + (data.scheduleFontSize || '2'));
-            document.getElementById('extra').style.fontSize = `${(10 - parseInt(data.scheduleFontSize)) / 10}em`;
-
-            const style = document.createElement('style');
-            style.type = 'text/css';
-            style.innerHTML = `
-                    .current {
-                        color: ${data.progressColor || '#1E9FFF'};
-                    }
-            `;
-            document.head.appendChild(style);
-
-            // 每 10 秒更新一次
+            document.documentElement.style.setProperty('--font-size', `${data.scheduleFontSize || '1'}em`);
             if (intervalId) {
                 clearInterval(intervalId);
             }
             intervalId = setInterval(() => updateSchedules(data), 10000);
-        });
+        }
 
         // 确保在窗口关闭时清除定时器
         window.addEventListener('beforeunload', () => {
             clearInterval(intervalId);
         });
 
-        window.onload = function () {
-            window.api.config_sendRequest();
+        window.onload = async () => {
+            init(await window.api.config_Get());
         };
     </script>
 </body>

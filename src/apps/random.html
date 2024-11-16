@@ -97,6 +97,33 @@
 </head>
 
 <body>
+    <link rel="stylesheet" href="https://assets.3r60.top/icons/bootstrap-icons.css">
+    <style>
+        #header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+            z-index: 1000;
+            -webkit-app-region: drag;
+        }
+
+        #header .title {
+            padding-left: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+    <div id="header">
+        <div class="title" onclick="JavaScript:window.location.href = 'https://edu.3r60.top'"><i
+                class="bi bi-box-fill"></i>&nbsp;&nbsp;教学工具>随机点名</div>
+    </div>
     <div class="container">
         <h2>随机点名</h2>
         <div class="controls">
@@ -111,20 +138,14 @@
 
     <script>
         let participants = [];
-        window.api.config_onRecive((config) => {
+
+        function init(config) {
             participants = config.students ?? [
-                { name: '张三', weight: 1 },
-                { name: '李四', weight: 2 },
-                { name: '王五', weight: 3 },
-                { name: '赵六', weight: 4 },
-                { name: '孙七', weight: 5 },
-                { name: '孙吧', weight: 5 },
-                { name: '孙就', weight: 5 },
-                { name: '孙是', weight: 5 },
-                { name: '孙十一', weight: 5 },
-                { name: '孙十二', weight: 5 }
+                { name: '无数据', weight: 1 }
             ];
-        });
+        }
+
+        window.api.config_onRecive(init);
 
         let intervalId;
 
@@ -183,8 +204,8 @@
                 document.getElementById('numOfPicks').value = currentPicks - 1;
             }
         }
-        window.onload = function(){
-            window.api.config_sendRequest();
+        window.onload = async () => {
+            init(await window.api.config_Get());
         };
     </script>
 </body>

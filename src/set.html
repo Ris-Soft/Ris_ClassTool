@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hans">
+<html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
@@ -303,29 +303,19 @@
 
 <body>
     <div id="header">
-        <div class="title">瑞思课堂工具 <span id="version"></span></div>
+        <div class="title"><i class="bi bi-gear"></i>&nbsp;程序设置</div>
     </div>
     <div id="sidebar">
-        <div class="sidebar-item active" data-target="#help"><i class="bi bi-info-circle"></i>&nbsp;使用帮助</div>
-        <div class="sidebar-item" data-target="#basic"><i class="bi bi-gear"></i>&nbsp;通用设定</div>
+        <div class="sidebar-item active" data-target="#basic"><i class="bi bi-gear"></i>&nbsp;通用设定</div>
         <div class="sidebar-item" data-target="#schedule"><i class="bi bi-calendar2-day"></i>&nbsp;课程设定</div>
         <div class="sidebar-item" data-target="#students"><i class="bi bi-people"></i>&nbsp;学生管理</div>
         <div class="sidebar-item" data-target="#switch"><i class="bi bi-toggles"></i>&nbsp;调休换课</div>
         <div class="sidebar-item" data-target="#autoQuit"><i class="bi bi-code-square"></i>&nbsp;自动退出</div>
+        <div class="sidebar-item" data-target="#help"><i class="bi bi-info-circle"></i>&nbsp;关于程序</div>
+
     </div>
     <div id="main-content">
-        <div class="content-page active" id="help">
-            <div class="page-title"><i class="bi bi-info-circle"></i>&nbsp;使用帮助</div>
-            <ul>
-                <li>请不要使用管理员权限运行本程序</li>
-                <li>本程序启动时会自动尝试设置开机自启动，无需自行操作</li>
-                <li>通用设置中位置名称请填写详细地址，避免重名地点导致获取出错</li>
-                <li>配置文件存储位置：D:/Ris_ClassToolConfig.json，删除文件时请注意</li>
-                <li>进度条刷新间隔：1秒；课程表刷新间隔：10秒；天气更新间隔：10分钟</li>
-                <li>更多问题请加群：939571490</li>
-            </ul>
-        </div>
-        <div class="content-page" id="basic">
+        <div class="content-page active" id="basic">
             <div class="page-title"><i class="bi bi-gear"></i>&nbsp;通用设定</div>
             <form id="basicSettingsForm">
                 <div class="card">
@@ -336,9 +326,15 @@
                 </div>
                 <div class="card">
                     <label for="countTime">
-                        <h2>到数目标</h2>启用倒数日时生效
+                        <h2>到数目标</h2>倒数日的目标日期，启用倒数日时生效
                     </label>
-                    <input type="text" id="countTime" placeholder="计时时间"><br><br>
+                    <input type="text" id="countTime" placeholder="格式：月.日"><br><br>
+                </div>
+                <div class="card">
+                    <label for="countText">
+                        <h2>到数文本</h2>倒数日前显示的文本，启用倒数日时生效
+                    </label>
+                    <input type="text" id="countText" placeholder="默认为空"><br><br>
                 </div>
                 <div class="card">
                     <label for="timeOffset">
@@ -360,9 +356,9 @@
                 </div>
                 <div class="card">
                     <label for="scheduleFontSize">
-                        <h2>课程字体设定</h2>课程表相对字体大小等级[1为最大，6为最小]
+                        <h2>课程字体设定</h2>课程表相对字体大小等级[推荐值：1]
                     </label>
-                    <input type="text" id="scheduleFontSize" placeholder="默认值：2"><br><br>
+                    <input type="text" id="scheduleFontSize" placeholder="推荐值：1"><br><br>
                 </div>
                 <div class="card">
                     <label for="sideBarBottom">
@@ -456,21 +452,33 @@
                     id="savePlansConfigButton">保存</button>
             </div>
         </div>
+        <div class="content-page active" id="help">
+            <h1>RisClassTool <span id="version"></span></h1>
+            <h3>瑞思课堂工具 - 教室桌面得力助手</h3>
+            <ul>
+                <li>使用提示：</li>
+                <li>请不要使用管理员权限运行本程序</li>
+                <li>本程序启动时会自动尝试设置开机自启动，无需自行操作</li>
+                <li>通用设置中位置名称请填写详细地址，避免重名地点导致获取出错</li>
+                <li>配置文件存储位置：D:/Ris_ClassToolConfig.json，删除文件时请注意</li>
+                <li>进度条刷新间隔：1秒；课程表刷新间隔：10秒；天气更新间隔：10分钟</li>
+                <li>更多问题请加群：939571490</li>
+            </ul>
+        </div>
         <div class="content-page" id="autoQuit">
-            <div class="page-title"><i class="bi bi-code-square"></i>&nbsp;课前准备</div>
-            *该版本未启用本功能，已延时上线
+            <div class="page-title"><i class="bi bi-code-square"></i>&nbsp;自动执行</div>
             <form id="autoQuitSettingsForm">
                 <div class="card">
-                    <label for="posName">
-                        <h2>关闭清单</h2>需要关闭的程序列表
-                    </label>
-                    <textarea id="autoQuitList" placeholder="清单列表，换行分割"></textarea>
-                </div>
-                <div class="card">
                     <label for="autoQuitChecked">
-                        <h2>功能开关</h2>课间时间过半时提示关闭清单内程序
+                        <h2>课前5分钟准备</h2>课前五分钟时倒计时提示关闭清单内程序
                     </label>
                     <input type="checkbox" id="autoQuitChecked">
+                </div>
+                <div class="card">
+                    <label for="autoPowerOffChecked">
+                        <h2>放学自动关机</h2>当天最后一节课结束后倒计时关闭计算机
+                    </label>
+                    <input type="checkbox" id="autoPowerOffChecked">
                 </div>
                 <div class="card">
                     <button type="button" id="saveBasicConfigButton" onclick="saveAutoQuitConfigButton()">保存</button>
@@ -482,29 +490,32 @@
     <script>
         var Config;
         // 接收配置信息
-        window.api.config_onRecive((config) => {
+
+        function init(config) {
             console.log('接收到课程表数据:', config);
             document.getElementById('version').innerHTML = config.version;
             document.getElementById('posName').value = config.posName || '';
             document.getElementById('countShow').checked = config.countShow || false;
             document.getElementById('countTime').value = config.countTime || '';
+            document.getElementById('countText').value = config.countText || '';
             document.getElementById('linePos').value = JSON.stringify(config.linePos) || '[0]';
             document.getElementById('progressColor').value = config.progressColor || '';
-            document.getElementById('sideBarShow').checked = config.sideBarShow || 1;
+            document.getElementById('sideBarShow').checked = config.sideBarShow || true;
             document.getElementById('sideBarBottom').value = config.sideBarBottom || '';
             document.getElementById('scheduleFontSize').value = config.scheduleFontSize || '';
             document.getElementById('progressHeight').value = config.progressHeight || '';
-            document.getElementById('autoQuitList').value = config.autoQuitList || '';
-            document.getElementById('autoQuitChecked').checked = config.autoQuit || 1;
             document.getElementById('timeOffset').value = config.timeOffset || '';
+            document.getElementById('autoQuitChecked').checked = config.autoQuit && true;
+            document.getElementById('autoPowerOffChecked').checked = config.autoPowerOff && true;
 
             loadSchedule(config);
             loadStudents(config);
             loadPlans(config);
 
             Config = config;
-        });
+        }
 
+        window.api.config_onRecive(init);
 
         // 保存通用设定
         function saveBasicConfigButton() {
@@ -512,6 +523,7 @@
                 posName: document.getElementById('posName').value,
                 countShow: document.getElementById('countShow').checked,
                 countTime: document.getElementById('countTime').value,
+                countText: document.getElementById('countText').value,
                 progressColor: document.getElementById('progressColor').value,
                 sideBarShow: document.getElementById('sideBarShow').checked,
                 sideBarBottom: document.getElementById('sideBarBottom').value,
@@ -526,8 +538,8 @@
         // 保存自动关闭设定
         function saveAutoQuitConfigButton() {
             const newConfig = {
-                autoQuitList: document.getElementById('autoQuitList').value,
                 autoQuit: document.getElementById('autoQuitChecked').checked,
+                autoPowerOff: document.getElementById('autoPowerOffChecked').checked
             };
 
             window.api.config_save(newConfig);
@@ -755,8 +767,8 @@
             });
         });
 
-        window.onload = function () {
-            window.api.config_sendRequest();
+        window.onload = async () => {
+            init(await window.api.config_Get());
         };
     </script>
 </body>

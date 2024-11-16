@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
   <meta charset="UTF-8">
@@ -113,16 +113,16 @@
       <i class="bi bi-chevron-left"></i>
     </button>
     <div id="expandedContent" class="p-3">
-      <button onclick="loadWebView('./src/apps/random.html',true)">
+      <button onclick="JavaScript:loadWebView('./src/apps/random.html',true,true)">
         <i class="bi bi-shuffle"></i><br>随机点名</button>
       <button onclick="window.api.function_vKeydown([1]);">
-        <i class="bi bi-window-desktop"></i><br>回到桌面</button>
-        <button onclick="window.api.function_vKeydown([2]);">
-          <i class="bi bi-list-task"></i><br>任务管理</button>
-      <button onclick="window.api.function_showExplorer();">
-        <i class="bi bi-archive"></i><br>浏览文件</button>
+        <i class="bi bi-house-fill"></i><br>回到桌面</button>
+      <button onclick="window.api.function_vKeydown([2]);">
+        <i class="bi bi-collection-fill"></i><br>任务管理</button>
+      <button onclick="JavaScript:loadWebView('./src/apps/examMode.html',true,true)">
+        <i class="bi bi-x-diamond-fill"></i><br>专注模式</button>
       <button onclick="loadWebView('https\:\/\/edu.3r60.top/?id=tools',false)">
-        <i class="bi bi-three-dots"></i><br>更多工具</button>
+        <i class="bi bi-box-fill"></i><br>教学工具</button>
     </div>
   </div>
 
@@ -132,8 +132,8 @@
       document.getElementById('app').classList.toggle('expanded');
     });
 
-    function loadWebView(url, local) {
-      window.api.webview_create(url, local);
+    function loadWebView(url, local, fullScreen) {
+      window.api.webview_create(url, local, fullScreen);
     }
   </script>
 </body>

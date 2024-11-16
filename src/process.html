@@ -70,7 +70,7 @@
         let endTime = null;
         let intervalId = null;
 
-        window.api.config_onRecive((data) => {
+        function init(data) {
             const progressBar = document.querySelector('#progressBar .bar');
             const statusWindow = document.querySelector('#statusWindow');
             const courseName = document.querySelector('#courseName');
@@ -79,7 +79,6 @@
             const timeRangeBox = document.querySelector('#timeRangeBox');
             const nextCourse = document.querySelector('#nextActivity');
             const nextCourseBox = document.querySelector('#nextActivityBox');
-            let alertsShown = {};
             const timeOffset = data.timeOffset || 0; // 时钟偏移
             const weekName = new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase();
 
@@ -134,7 +133,7 @@
                 // 更新状态窗口
                 if (inClass) {
                     if ((currentTime - startTime < 30 || endTime - currentTime < 30)) {
-                    // if (true) {
+                        // if (true) {
                         courseName.textContent = `${currentCourse}`;
                         nextCourse.textContent = `${data.courseTable[weekName][parseInt(nextPeriod) - 1] || '放学'}`;
                         // alert(`${nextPeriod} ${data.courseTable[weekName][parseInt(nextPeriod) - 1]}`)
@@ -158,16 +157,16 @@
                         timeRangeBox.style.display = 'block';
                         nextCourseBox.style.display = 'block';
                         statusWindow.style.display = 'flex';
-                        // if (!alertsShown[nextPeriod] && minutes <= 300) { // 300秒即5分钟
-                        //     alertsShown[nextPeriod] = true; // 设置标志位，防止重复显示
-                        //     alert(11);
-                        //     window.api.function_autoQuit(false);
-                        // }
+                        if (minutes == 5 && seconds == 0 && data.courseTable[weekName][parseInt(nextPeriod) - 2] !== data.courseTable[weekName][parseInt(nextPeriod) - 1]) { // 300秒
+                            window.api.function_autoAction(1);
+                        }
                     } else {
+                        window.api.function_autoAction(2);
                         // courseName.textContent = '当前: 下课';
                         // timeRangeBox.style.display = 'none';
                         // nextCourse.textContent = '';
                         statusWindow.style.display = 'none';
+                        clearInterval(intervalId);
                     }
                 }
 
@@ -189,10 +188,12 @@
             window.addEventListener('beforeunload', () => {
                 clearInterval(intervalId);
             });
-        });
+        }
 
-        window.onload = function () {
-            window.api.config_sendRequest();
+        window.api.config_onRecive(init);
+
+        window.onload = async () => {
+            init(await window.api.config_Get());
         };
     </script>
 </body>

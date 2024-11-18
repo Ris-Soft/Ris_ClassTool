@@ -160,6 +160,9 @@
                         if (minutes == 5 && seconds == 0 && data.courseTable[weekName][parseInt(nextPeriod) - 2] !== data.courseTable[weekName][parseInt(nextPeriod) - 1]) { // 300秒
                             window.api.function_autoAction(1);
                         }
+                        if (minutes == 0 && seconds == 1 && data.courseTable[weekName][parseInt(nextPeriod) - 1] == "自") {
+                            window.api.function_autoAction(5);
+                        }
                     } else {
                         window.api.function_autoAction(2);
                         // courseName.textContent = '当前: 下课';

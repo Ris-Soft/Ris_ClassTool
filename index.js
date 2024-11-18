@@ -28,7 +28,7 @@ var autoAction = { Text: '非法操作！', ActionID: 3 };
 
 // ————「程序载入函数」——————————————————————————————————————————————————————————————————————————
 function init() {
-    
+
     // 单实例锁
     if (!app.requestSingleInstanceLock()) app.quit();
 
@@ -45,7 +45,31 @@ function init() {
             return;
         }
     }
+
+    if (config.cloudUrl) {
+        https.get(config.cloudUrl, (resp) => {
+            let data = '';
+            resp.on('data', (chunk) => {
+                data += chunk;
+            });
+
+            resp.on('end', () => {
+                try {
+                    let cloudConfig = JSON.parse(data);
+                    config = { ...config, ...cloudConfig };
+                    fs.writeFileSync(configDataPath, JSON.stringify(config, null, 2), 'utf-8');
+                } catch (error) {
+                    alert("云配置解析失败");
+                }
+            });
+
+        }).on("error", (err) => {
+            console.log("请求云配置失败: " + err.message);
+        });
+    }
+
     config['version'] = app.getVersion(); // 动态写入程序版本
+
     delete defaultConfig; // 释放变量
 
     // 创建托盘
@@ -60,11 +84,11 @@ function init() {
     createWindow_TopLayer();
     createWindow_SideBar();
 
-    setInterval(setTopWindowAlwaysOnTop, 5000);
+    // setInterval(setTopWindowAlwaysOnTop, 5000);
 }
 
 // ————「窗口创建」——————————————————————————————————————————————————————————————————
-function createWindow(url, local, fullScreen) { // 灵活窗口
+function createWindow(url, local, fullScreen = false) { // 灵活窗口
     // 检查是否已经有一个相同URL的窗口打开
     url = url.replaceAll("\\", "/");
     BrowserWindow.getAllWindows().forEach(win => {
@@ -107,6 +131,10 @@ function createWindow(url, local, fullScreen) { // 灵活窗口
     }
     targetWindow.show();
 
+    targetWindow.on('closed', () => {
+        focusAllTopWindos();
+    });
+
     // targetWindow.webContents.openDevTools({mode:'detach'})
 
 }
@@ -144,12 +172,13 @@ function createWindow_Setting() {
     });
 }
 
+let scheduleWindow = null;
 function createWindow_DesktopLayer() { // 桌面层
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
     const winHeight = 100;
     const winY = Math.round(height * 0.01);
 
-    const scheduleWindow = new BrowserWindow({
+    scheduleWindow = new BrowserWindow({
         x: 0,
         y: winY,
         width: width,
@@ -289,17 +318,21 @@ function saveConfig(event, newConfig) { // 配置保存
     });
 }
 
-function setTopWindowAlwaysOnTop() {
-    const topWindow = BrowserWindow.getAllWindows().find(window => {
-        return window.options && window.options.alwaysOnTop === true;
-    });
-
-    if (topWindow) {
-        if (hasFullScreenWindow) {
-            topWindow.setAlwaysOnTop(false);
-        } else {
-            topWindow.setAlwaysOnTop(true);
+function focusAllTopWindos() {
+    const windows = BrowserWindow.getAllWindows();
+    windows.forEach(window => {
+        if (window.options && window.options.alwaysOnTop === true) {
+            window.focus();
         }
+    });
+}
+
+function Ahk(args) {
+    const appPath = isDev ? './' : process.resourcesPath;
+    const exePath = path.join(appPath, 'scripts', 'RisClassTool_KeyDown.exe');
+    spawn(exePath, args);
+    if (args == [1]) {
+        scheduleWindow.restore();
     }
 }
 
@@ -311,25 +344,25 @@ ipcMain.handle('temp_autoAction', (event) => { // 主动获取配置
     return autoAction;
 });
 ipcMain.on('function_vKeydown', (event, args) => { // 执行ahk->exe脚本
-    const appPath = isDev ? './' : process.resourcesPath;
-    const exePath = path.join(appPath, 'scripts', 'RisClassTool_KeyDown.exe');
-    spawn(exePath, args);
+    Ahk(args);
 });
 ipcMain.on('function_autoAction', (event, args) => { // 自动执行
     // 1->还有5min上课  2->最后一节课放学时间到 3->返回桌面 4->关机
-    if (args == 1 && config.autoQuit) {
+    if (args == 1 && (config.autoQuit ?? false)) {
         autoAction = { Text: '剩余5分钟上课，即将自动返回到桌面', ActionID: 3 };
         createWindow('./src/apps/autoQuit.html', true, true);
-    } else if (args == 2 && config.autoPowerOff) {
+    } else if (args == 2 && (config.autoPowerOff ?? false)) {
         autoAction = { Text: '放学时间到，即将关闭计算机', ActionID: 4 };
         createWindow('./src/apps/autoQuit.html', true, true);
     } else if (args == 3) {
-        const appPath = isDev ? './' : process.resourcesPath;
-        const exePath = path.join(appPath, 'scripts', 'RisClassTool_KeyDown.exe');
-        spawn(exePath, [1]);
+        Ahk([1]);
+        focusAllTopWindos();
     } else if (args == 4) {
-        // 执行关机命令
+        // 关机
         spawn('shutdown', ['/s', '/t', '0']);
+    } else if (args == 5 && (config.autoFocusMode ?? false)) {
+        // 专注模式
+        createWindow('./src/apps/examMode.html', true, true);
     }
     console.log(args);
 });

@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{aeacbdb5-3f73-441b-8a3c-2be8d4f7541c}</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <ProjectView>ShowAllFiles</ProjectView>
+    <StartupFile>index.js</StartupFile>
+    <WorkingDirectory>
+    </WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">17.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <StartWebBrowser>False</StartWebBrowser>
+    <SaveNodeJsSettingsInProjectFile>True</SaveNodeJsSettingsInProjectFile>
+    <ScriptArguments>
+    </ScriptArguments>
+    <NodeExePath>D:\Development\Projects-New\TRSZ\RisClassTool\node_modules\electron\dist\electron.exe</NodeExePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <ItemGroup>
+    <Content Include="logo.png" />
+    <Content Include="logo.ico" />
+    <Content Include="config.json" />
+    <Content Include="package-lock.json" />
+    <Content Include="package.json" />
+    <Content Include="README.md" />
+    <Content Include="index.js" />
+    <Content Include="preload.js" />
+    <Content Include="src\index.html" />
+    <Content Include="src\process.html" />
+    <Content Include="src\set.html" />
+    <Content Include="src\sidebar.html" />
+    <Content Include="dist\win-unpacked\LICENSE.electron.txt" />
+    <Content Include="dist\win-unpacked\LICENSES.chromium.html" />
+    <Content Include="dist\win-unpacked\vk_swiftshader_icd.json" />
+    <Content Include="src\apps\autoQuit.html" />
+    <Content Include="src\apps\examMode.html" />
+    <Content Include="src\apps\random.html" />
+    <Content Include="src\icons\bootstrap-icons.css" />
+    <Content Include="src\icons\bootstrap-icons.min.css" />
+    <Content Include="src\icons\bootstrap-icons.json" />
+    <Content Include="src\qweather-icons\package-lock.json" />
+    <Content Include="src\qweather-icons\package.json" />
+    <Content Include="src\qweather-icons\README.md" />
+    <Content Include="src\qweather-icons\font\qweather-icons.css" />
+    <Content Include="src\qweather-icons\font\qweather-icons.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="dist" />
+    <Folder Include="dist\win-unpacked" />
+    <Folder Include="dist\win-unpacked\locales" />
+    <Folder Include="dist\win-unpacked\resources" />
+    <Folder Include="dist\win-unpacked\resources\scripts" />
+    <Folder Include="scripts" />
+    <Folder Include="src" />
+    <Folder Include="src\apps" />
+    <Folder Include="src\icons" />
+    <Folder Include="src\icons\fonts" />
+    <Folder Include="src\qweather-icons" />
+    <Folder Include="src\qweather-icons\font" />
+    <Folder Include="src\qweather-icons\font\fonts" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsToolsV2.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:48022/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>True</UseCustomServer>
+          <CustomServerUrl>http://localhost:1337</CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}" User="">
+        <WebProjectProperties>
+          <StartPageUrl>
+          </StartPageUrl>
+          <StartAction>CurrentPage</StartAction>
+          <AspNetDebugging>True</AspNetDebugging>
+          <SilverlightDebugging>False</SilverlightDebugging>
+          <NativeDebugging>False</NativeDebugging>
+          <SQLDebugging>False</SQLDebugging>
+          <ExternalProgram>
+          </ExternalProgram>
+          <StartExternalURL>
+          </StartExternalURL>
+          <StartCmdLineArguments>
+          </StartCmdLineArguments>
+          <StartWorkingDirectory>
+          </StartWorkingDirectory>
+          <EnableENC>False</EnableENC>
+          <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

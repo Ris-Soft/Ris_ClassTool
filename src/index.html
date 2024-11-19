@@ -41,7 +41,7 @@
         }
 
         .current {
-            font-size: calc(1.25 * var(--font-size));
+            /* font-size: calc(1.25 * var(--font-size)); */
             color: #1E9FFF;
             margin-top: -0.25em;
             margin-bottom: -0.2em;
@@ -319,7 +319,7 @@
         });
 
         window.onload = async () => {
-            init(await window.api.config_Get());
+            init(await window.api.config_Get(true));
         };
     </script>
 </body>

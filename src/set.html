@@ -319,22 +319,10 @@
             <div class="page-title"><i class="bi bi-gear"></i>&nbsp;通用设定</div>
             <form id="basicSettingsForm">
                 <div class="card">
-                    <label for="posName">
-                        <h2>地理位置</h2>用于获取天气信息，关闭倒数日时生效
+                    <label for="cloudUrl">
+                        <h2>云配置地址</h2>设置后每次启动将尝试用链接中的文本替代配置
                     </label>
-                    <input type="text" id="posName" placeholder="位置名称"><br><br>
-                </div>
-                <div class="card">
-                    <label for="countTime">
-                        <h2>到数目标</h2>倒数日的目标日期，启用倒数日时生效
-                    </label>
-                    <input type="text" id="countTime" placeholder="格式：月.日"><br><br>
-                </div>
-                <div class="card">
-                    <label for="countText">
-                        <h2>到数文本</h2>倒数日前显示的文本，启用倒数日时生效
-                    </label>
-                    <input type="text" id="countText" placeholder="默认为空"><br><br>
+                    <input type="text" id="cloudUrl" placeholder="云配置地址"><br><br>
                 </div>
                 <div class="card">
                     <label for="timeOffset">
@@ -349,10 +337,29 @@
                     <input type="text" id="progressColor" placeholder="默认值：#1E9FFF"><br><br>
                 </div>
                 <div class="card">
-                    <label for="progressHeight">
-                        <h2>进度条高度</h2>顶部进度条的显示高度，最大值为100px
+                    <label for="posName">
+                        <h2>地理位置</h2>用于获取天气信息，关闭倒数日时生效
                     </label>
-                    <input type="text" id="progressHeight" placeholder="默认值：2px"><br><br>
+                    <input type="text" id="posName" placeholder="位置名称"><br><br>
+                </div>
+                <div class="card">
+                    <label for="countShow">
+                        <h2>启用倒数日</h2>启用此功能后，课程表的天气组件将替换为倒计时组件
+                    </label>
+                    </label>
+                    <input type="checkbox" id="countShow"><br><br>
+                </div>
+                <div class="card">
+                    <label for="countTime">
+                        <h2>到数目标</h2>倒数日的目标日期，启用倒数日时生效
+                    </label>
+                    <input type="text" id="countTime" placeholder="格式：月.日"><br><br>
+                </div>
+                <div class="card">
+                    <label for="countText">
+                        <h2>到数文本</h2>倒数日前显示的文本，启用倒数日时生效
+                    </label>
+                    <input type="text" id="countText" placeholder="默认为空"><br><br>
                 </div>
                 <div class="card">
                     <label for="scheduleFontSize">
@@ -361,10 +368,10 @@
                     <input type="text" id="scheduleFontSize" placeholder="推荐值：1"><br><br>
                 </div>
                 <div class="card">
-                    <label for="sideBarBottom">
-                        <h2>侧边栏位置</h2>侧边栏按钮与底部距离，重启后生效
+                    <label for="progressHeight">
+                        <h2>进度条高度</h2>顶部进度条的显示高度，最大值为100px
                     </label>
-                    <input type="text" id="sideBarBottom" placeholder="默认值：200"><br><br>
+                    <input type="text" id="progressHeight" placeholder="默认值：2px"><br><br>
                 </div>
                 <div class="card">
                     <label for="sideBarShow">
@@ -373,11 +380,16 @@
                     <input type="checkbox" id="sideBarShow"><br>
                 </div>
                 <div class="card">
-                    <label for="countShow">
-                        <h2>启用倒数日</h2>启用此功能后，课程表的天气组件将替换为倒计时组件
+                    <label for="sideBarBottom">
+                        <h2>侧边栏位置</h2>侧边栏按钮与底部距离，重启后生效
                     </label>
+                    <input type="text" id="sideBarBottom" placeholder="默认值：200"><br><br>
+                </div>
+                <div class="card">
+                    <label for="focusText">
+                        <h2>专注模式默认文本</h2>专注模式默认文本，留空则不显示，处于专注模式时可单击文字暂时修改
                     </label>
-                    <input type="checkbox" id="countShow"><br><br>
+                    <input type="text" id="focusText" placeholder="专注模式默认文本"><br><br>
                 </div>
                 <div class="card">
                     <button type="button" id="saveAutoQuitConfigButton" onclick="saveBasicConfigButton()">保存</button>
@@ -475,6 +487,18 @@
                     <input type="checkbox" id="autoQuitChecked">
                 </div>
                 <div class="card">
+                    <label for="autoFocusMode">
+                        <h2>自习课自动进入专注模式</h2>当课程为“自”时，会自动进入专注模式
+                    </label>
+                    <input type="checkbox" id="autoFocusMode">
+                </div>
+                <div class="card">
+                    <label for="autoFocusMode_PE">
+                        <h2>体育课自动进入专注模式</h2>当课程为“体”时，会自动进入专注模式
+                    </label>
+                    <input type="checkbox" id="autoFocusMode_PE">
+                </div>
+                <div class="card">
                     <label for="autoPowerOffChecked">
                         <h2>放学自动关机</h2>当天最后一节课结束后倒计时关闭计算机
                     </label>
@@ -505,8 +529,16 @@
             document.getElementById('scheduleFontSize').value = config.scheduleFontSize || '';
             document.getElementById('progressHeight').value = config.progressHeight || '';
             document.getElementById('timeOffset').value = config.timeOffset || '';
+            document.getElementById('cloudUrl').value = config.cloudUrl || '';
+            document.getElementById('focusText').value = config.focusText || '';
             document.getElementById('autoQuitChecked').checked = config.autoQuit && true;
             document.getElementById('autoPowerOffChecked').checked = config.autoPowerOff && true;
+            document.getElementById('autoFocusMode').checked = config.autoFocusMode && true;
+            document.getElementById('autoFocusMode_PE').checked = config.autoFocusMode_PE && true;
+
+            if (config.cloudUrl) {
+                alert('云配置已接管所有设置，若不更改云配置设置下次启动时会被云配置覆盖！');
+            }
 
             loadSchedule(config);
             loadStudents(config);
@@ -529,7 +561,9 @@
                 sideBarBottom: document.getElementById('sideBarBottom').value,
                 scheduleFontSize: document.getElementById('scheduleFontSize').value,
                 progressHeight: document.getElementById('progressHeight').value,
+                cloudUrl: document.getElementById('cloudUrl').value,
                 timeOffset: parseInt(document.getElementById('timeOffset').value),
+                focusText: document.getElementById('focusText').value,
             };
 
             window.api.config_save(newConfig);
@@ -539,7 +573,9 @@
         function saveAutoQuitConfigButton() {
             const newConfig = {
                 autoQuit: document.getElementById('autoQuitChecked').checked,
-                autoPowerOff: document.getElementById('autoPowerOffChecked').checked
+                autoPowerOff: document.getElementById('autoPowerOffChecked').checked,
+                autoFocusMode: document.getElementById('autoFocusMode').checked,
+                autoFocusMode_PE: document.getElementById('autoFocusMode_PE').checked
             };
 
             window.api.config_save(newConfig);
@@ -768,7 +804,7 @@
         });
 
         window.onload = async () => {
-            init(await window.api.config_Get());
+            init(await window.api.config_Get(false));
         };
     </script>
 </body>

@@ -5,9 +5,9 @@ contextBridge.exposeInMainWorld('api', {
     config_onRecive: (callback) => {
         ipcRenderer.on('config_deliver', (event, data) => callback(data));
     },
-    config_Get: () => {
+    config_Get: (process) => {
         return new Promise((resolve, reject) => {
-            ipcRenderer.invoke('getConfig').then(resolve).catch(reject);
+            ipcRenderer.invoke('getConfig', process).then(resolve).catch(reject);
         });
     },
     config_autoAction: () => {

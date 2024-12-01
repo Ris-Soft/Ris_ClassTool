@@ -161,8 +161,8 @@ function createWindow(url, local, fullScreen = false) { // 灵活窗口
 
 // 设置窗口
 let settingsWindow = null;
-var settingsWindow_tragetPage = null;
-function createWindow_Setting(tragetPage) {
+var settingsWindow_targetPage = null;
+function createWindow_Setting(targetPage) {
     if (settingsWindow && !settingsWindow.isDestroyed()) {
         settingsWindow.focus();
         return;
@@ -188,7 +188,7 @@ function createWindow_Setting(tragetPage) {
         }
     });
 
-    settingsWindow_tragetPage = tragetPage;
+    settingsWindow_targetPage = targetPage;
 
     settingsWindow.loadFile(path.join(__dirname, './src/set.html'));
 
@@ -488,7 +488,7 @@ ipcMain.handle('temp_autoAction', (event) => { // 主动获取配置
     return autoAction;
 });
 ipcMain.handle('settingPage', (event) => { // 主动获取配置
-    return settingsWindow_tragetPage;
+    return settingsWindow_targetPage;
 });
 ipcMain.on('function_Keydown', (event, functionName, args1, args2) => { // 执行ahk->exe脚本
     internalFunction("keydown", functionName, args1, args2);

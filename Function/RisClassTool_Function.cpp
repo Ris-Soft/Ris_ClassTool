@@ -15,7 +15,7 @@ static void KeyDown(int btn1, int btn2) { // 按下 {btn1} + {btn2} 键
 }
 
 int main(int argc, char* argv[]) {
-    if (argc >= 1) {
+    if (argv) {
         if (strcmp(argv[1], "keydown") == 0) {
             if (argc >= 3) {
                 if (strcmp(argv[2], "desktop") == 0) {
@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
         else {
             cout << "[Function]->ERROR:目标功能类不存在" << endl;
         }
-    }
+    } 
     else {
         cout << "[Function]->ERROR:本功能程序需要带参运行" << endl;
     }

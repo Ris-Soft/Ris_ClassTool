@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>瑞思课堂工具</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f9f9f9;
+            font-family: Arial, sans-serif;
+            color: #333;
+            user-select: none;
+            -webkit-app-region: drag;
+        }
+
+        #header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+            z-index: 1000;
+            -webkit-app-region: drag;
+        }
+
+        #header .title {
+            padding-left: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #header .controls {
+            display: flex;
+            padding-right: 15px;
+        }
+
+        #header .controls button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0 10px;
+            color: #555;
+        }
+
+        #header .controls button:hover {
+            color: #ff4d4d;
+        }
+
+        #sidebar {
+            position: absolute;
+            top: 40px;
+            bottom: 0;
+            left: 0;
+            width: 200px;
+            background-color: #fff;
+            border-right: 1px solid #e0e0e0;
+            -webkit-app-region: no-drag;
+            padding-top: 5px;
+        }
+
+        .sidebar-item {
+            display: block;
+            padding: 10px 15px;
+            margin: 5px;
+            margin-left: 8px;
+            margin-right: 8px;
+            border-radius: 5px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .sidebar-item:hover {
+            background-color: #f1f1f1;
+        }
+
+        .sidebar-item.active {
+            background-image: linear-gradient(to right, #0097fb 0%, #1e71f5 100%);
+            color: white;
+        }
+
+        #main-content {
+            position: absolute;
+            top: 40px;
+            left: 200px;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            -webkit-app-region: no-drag;
+            background-color: #f9f9f9;
+        }
+
+        .content-page {
+            display: none;
+            padding: 20px;
+            transition: opacity 0.3s ease;
+        }
+
+        .content-page.active {
+            display: block;
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            #sidebar {
+                display: none;
+            }
+
+            #main-content {
+                left: 0;
+            }
+        }
+
+        input,
+        textarea {
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            box-sizing: border-box;
+            border-radius: 5px;
+            background-color: transparent;
+            padding: 8px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        input:focus,
+        textarea:focus,
+        input:focus-visible,
+        textarea:focus-visible {
+            border: 1px solid #0097fb;
+            outline: none;
+        }
+
+        label {
+            font-size: 12px;
+            display: block;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* 表格样式 */
+        table {
+            width: auto;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        table th {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: 100;
+        }
+
+        table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        table td[contenteditable="true"] {
+            background-color: #fff;
+            padding: 5px;
+            min-width: 80px;
+        }
+
+        table td[contenteditable="true"]:focus-visible {
+            border: 2px solid #0097fb;
+            outline: none;
+        }
+
+        table td[contenteditable="true"]:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* 操作按钮样式 */
+        table .deleteRowButton,
+        .redBtn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        table .deleteRowButton:hover,
+        .redBtn:hover {
+            background-color: #c82333;
+        }
+
+        table tr:first-child th:first-child {
+            border-top-left-radius: 5px;
+            /* 设置table左上圆角 */
+        }
+
+        table tr:first-child th:last-child {
+            border-top-right-radius: 5px;
+            /* 设置table右上圆角 */
+        }
+
+        table tr:last-child td:first-child {
+            border-bottom-left-radius: 5px;
+            /* 设置table左下圆角 */
+        }
+
+        table tr:last-child td:last-child {
+            border-bottom-right-radius: 5px;
+            /* 设置table右下圆角 */
+        }
+
+        /* 新增行按钮样式 */
+        #addRowButton,
+        .greenBtn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        #addRowButton:hover,
+        .greenBtn:hover {
+            background-color: #218838;
+        }
+
+        /* 保存按钮样式 */
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
+        }
+
+        button:hover {
+            opacity: 0.7;
+            background-color: #0069d9;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            border-radius: 5px;
+            color: black;
+            padding: 10px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        .card>label {
+            flex: 1;
+            color: rgb(82, 82, 82);
+        }
+
+        .card>label>h2 {
+            margin: 0;
+            font-weight: 500;
+            font-size: 16px;
+            color: black;
+        }
+
+        .card>input {
+            width: 180px;
+            height: 35px;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+        input[type="checkbox"] {
+            display: inline-block;
+            vertical-align: middle;
+            height: 20px;
+            padding: 20px;
+            width: 50px;
+        }
+    </style>
+    <link rel="stylesheet" href="./icons/bootstrap-icons.css">
+</head>
+
+<body>
+    <div id="header">
+        <div class="title"><i class="bi bi-gear"></i>&nbsp;程序设置</div>
+    </div>
+    <div id="sidebar">
+        <div class="sidebar-item active" data-target="#basic"><i class="bi bi-gear"></i>&nbsp;通用设定</div>
+        <div class="sidebar-item" data-target="#schedule"><i class="bi bi-calendar2-day"></i>&nbsp;课程设定</div>
+        <div class="sidebar-item" data-target="#students"><i class="bi bi-people"></i>&nbsp;学生管理</div>
+        <div class="sidebar-item" data-target="#switch"><i class="bi bi-toggles"></i>&nbsp;调休换课</div>
+        <div class="sidebar-item" data-target="#autoQuit"><i class="bi bi-code-square"></i>&nbsp;自动退出</div>
+        <div class="sidebar-item" data-target="#help"><i class="bi bi-info-circle"></i>&nbsp;关于程序</div>
+
+    </div>
+    <div id="main-content">
+        <div class="content-page active" id="basic">
+            <div class="page-title"><i class="bi bi-gear"></i>&nbsp;通用设定</div>
+            <form id="basicSettingsForm">
+                <div class="card">
+                    <label for="cloudUrl">
+                        <h2>云配置地址</h2>设置后每次启动将尝试用链接中的文本替代配置
+                    </label>
+                    <input type="text" id="cloudUrl" placeholder="云配置地址"><br><br>
+                </div>
+                <div class="card">
+                    <label for="timeOffset">
+                        <h2>时间偏移</h2>程序内时间偏移，以秒为单位。例如：+10或-10
+                    </label>
+                    <input type="text" id="timeOffset" placeholder="时间偏移，默认0"><br><br>
+                </div>
+                <div class="card">
+                    <label for="progressColor">
+                        <h2>主题颜色</h2>进度条与课程表的突出主题色
+                    </label>
+                    <input type="text" id="progressColor" placeholder="默认值：#1E9FFF"><br><br>
+                </div>
+                <div class="card">
+                    <label for="posName">
+                        <h2>地理位置</h2>用于获取天气信息，关闭倒数日时生效
+                    </label>
+                    <input type="text" id="posName" placeholder="位置名称"><br><br>
+                </div>
+                <div class="card">
+                    <label for="countShow">
+                        <h2>启用倒数日</h2>启用此功能后，课程表的天气组件将替换为倒计时组件
+                    </label>
+                    </label>
+                    <input type="checkbox" id="countShow"><br><br>
+                </div>
+                <div class="card">
+                    <label for="countTime">
+                        <h2>到数目标</h2>倒数日的目标日期，启用倒数日时生效
+                    </label>
+                    <input type="text" id="countTime" placeholder="格式：月.日"><br><br>
+                </div>
+                <div class="card">
+                    <label for="countText">
+                        <h2>到数文本</h2>倒数日前显示的文本，启用倒数日时生效
+                    </label>
+                    <input type="text" id="countText" placeholder="默认为空"><br><br>
+                </div>
+                <div class="card">
+                    <label for="scheduleFontSize">
+                        <h2>课程字体设定</h2>课程表相对字体大小等级[推荐值：1]
+                    </label>
+                    <input type="text" id="scheduleFontSize" placeholder="推荐值：1"><br><br>
+                </div>
+                <div class="card">
+                    <label for="progressHeight">
+                        <h2>进度条高度</h2>顶部进度条的显示高度，最大值为100px
+                    </label>
+                    <input type="text" id="progressHeight" placeholder="默认值：2px"><br><br>
+                </div>
+                <div class="card">
+                    <label for="sideBarShow">
+                        <h2>启用侧边栏</h2>重启后生效，关闭后则不再创建侧边栏窗口
+                    </label>
+                    <input type="checkbox" id="sideBarShow"><br>
+                </div>
+                <div class="card">
+                    <label for="sideBarBottom">
+                        <h2>侧边栏位置</h2>侧边栏按钮与底部距离，重启后生效
+                    </label>
+                    <input type="text" id="sideBarBottom" placeholder="默认值：200"><br><br>
+                </div>
+                <div class="card">
+                    <label for="focusText">
+                        <h2>专注模式默认文本</h2>专注模式默认文本，留空则不显示，处于专注模式时可单击文字暂时修改
+                    </label>
+                    <input type="text" id="focusText" placeholder="专注模式默认文本"><br><br>
+                </div>
+                <div class="card">
+                    <button type="button" id="saveAutoQuitConfigButton" onclick="saveBasicConfigButton()">保存</button>
+                </div>
+            </form>
+        </div>
+        <div class="content-page" id="schedule">
+            <div class="page-title"><i class="bi bi-calendar2-day"></i>&nbsp;课程设定<label
+                    style="display: unset;">&nbsp;提示：页面底部有保存按钮，编辑后请不要忘记保存</label></div>
+            <div class="card">
+                <label for="linePos">
+                    <h2>分割线位置</h2>格式如下：[1,4]（在第一节和第四节后加入分隔符）
+                </label>
+                <input type="text" id="linePos" placeholder="分割位置"><br><br>
+            </div>
+            <div id="scheduleEditor">
+                <table id="scheduleTable">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>周一</th>
+                            <th>周二</th>
+                            <th>周三</th>
+                            <th>周四</th>
+                            <th>周五</th>
+                            <th>周六</th>
+                            <th>周日</th>
+                            <th>行操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <div class="card">
+                    <button type="button" id="addRowButton" style="margin-left: 0;">新增行</button><button type="button"
+                        id="saveScheduleConfigButton">保存</button>
+                </div>
+            </div>
+        </div>
+        <div class="content-page" id="students">
+            <div class="page-title"><i class="bi bi-people"></i>&nbsp;学生管理</div>
+            <table id="studentsTable">
+                <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th style="display:none">权重</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <button type="button" class="greenBtn" id="addStudentButton">新增学生</button><button type="button"
+                id="saveStudentsConfigButton">保存</button>
+        </div>
+        <div class="content-page" id="switch">
+            <div class="page-title"><i class="bi bi-toggles"></i>&nbsp;调休换课</div>
+            <table id="plansTable">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>课程数组</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div class="card">
+                <input type="text" placeholder="目标日期" id="planDate" style="width: 72px;">
+                <button type="button" class="greenBtn" id="addPlanButton">新增规则</button><button type="button"
+                    id="savePlansConfigButton">保存</button>
+            </div>
+        </div>
+        <div class="content-page active" id="help">
+            <h1>RisClassTool <span id="version"></span></h1>
+            <h3>瑞思课堂工具 - 教室桌面得力助手</h3>
+            <ul>
+                <li>使用提示：</li>
+                <li>请不要使用管理员权限运行本程序</li>
+                <li>本程序启动时会自动尝试设置开机自启动，无需自行操作</li>
+                <li>通用设置中位置名称请填写详细地址，避免重名地点导致获取出错</li>
+                <li>配置文件存储位置：D:/Ris_ClassToolConfig.json，删除文件时请注意</li>
+                <li>进度条刷新间隔：1秒；课程表刷新间隔：10秒；天气更新间隔：10分钟</li>
+                <li>更多问题请加群：939571490</li>
+            </ul>
+        </div>
+        <div class="content-page" id="autoQuit">
+            <div class="page-title"><i class="bi bi-code-square"></i>&nbsp;自动执行</div>
+            <form id="autoQuitSettingsForm">
+                <div class="card">
+                    <label for="autoQuitChecked">
+                        <h2>课前5分钟准备</h2>课前五分钟时倒计时提示关闭清单内程序
+                    </label>
+                    <input type="checkbox" id="autoQuitChecked">
+                </div>
+                <div class="card">
+                    <label for="autoFocusMode">
+                        <h2>自习课自动进入专注模式</h2>当课程为“自”时，会自动进入专注模式
+                    </label>
+                    <input type="checkbox" id="autoFocusMode">
+                </div>
+                <div class="card">
+                    <label for="autoFocusMode_PE">
+                        <h2>体育课自动进入专注模式</h2>当课程为“体”时，会自动进入专注模式
+                    </label>
+                    <input type="checkbox" id="autoFocusMode_PE">
+                </div>
+                <div class="card">
+                    <label for="autoPowerOffChecked">
+                        <h2>放学自动关机</h2>当天最后一节课结束后倒计时关闭计算机
+                    </label>
+                    <input type="checkbox" id="autoPowerOffChecked">
+                </div>
+                <div class="card">
+                    <button type="button" id="saveBasicConfigButton" onclick="saveAutoQuitConfigButton()">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        var Config;
+        // 接收配置信息
+
+        function init(config) {
+            console.log('接收到课程表数据:', config);
+            document.getElementById('version').innerHTML = config.version;
+            document.getElementById('posName').value = config.posName || '';
+            document.getElementById('countShow').checked = config.countShow || false;
+            document.getElementById('countTime').value = config.countTime || '';
+            document.getElementById('countText').value = config.countText || '';
+            document.getElementById('linePos').value = JSON.stringify(config.linePos) || '[0]';
+            document.getElementById('progressColor').value = config.progressColor || '';
+            document.getElementById('sideBarShow').checked = config.sideBarShow || true;
+            document.getElementById('sideBarBottom').value = config.sideBarBottom || '';
+            document.getElementById('scheduleFontSize').value = config.scheduleFontSize || '';
+            document.getElementById('progressHeight').value = config.progressHeight || '';
+            document.getElementById('timeOffset').value = config.timeOffset || '';
+            document.getElementById('cloudUrl').value = config.cloudUrl || '';
+            document.getElementById('focusText').value = config.focusText || '';
+            document.getElementById('autoQuitChecked').checked = config.autoQuit && true;
+            document.getElementById('autoPowerOffChecked').checked = config.autoPowerOff && true;
+            document.getElementById('autoFocusMode').checked = config.autoFocusMode && true;
+            document.getElementById('autoFocusMode_PE').checked = config.autoFocusMode_PE && true;
+
+            if (config.cloudUrl) {
+                alert('云配置已接管所有设置，若不更改云配置设置下次启动时会被云配置覆盖！');
+            }
+
+            loadSchedule(config);
+            loadStudents(config);
+            loadPlans(config);
+
+            Config = config;
+        }
+
+        window.api.config_onRecive(init);
+
+        // 保存通用设定
+        function saveBasicConfigButton() {
+            const newConfig = {
+                posName: document.getElementById('posName').value,
+                countShow: document.getElementById('countShow').checked,
+                countTime: document.getElementById('countTime').value,
+                countText: document.getElementById('countText').value,
+                progressColor: document.getElementById('progressColor').value,
+                sideBarShow: document.getElementById('sideBarShow').checked,
+                sideBarBottom: document.getElementById('sideBarBottom').value,
+                scheduleFontSize: document.getElementById('scheduleFontSize').value,
+                progressHeight: document.getElementById('progressHeight').value,
+                cloudUrl: document.getElementById('cloudUrl').value,
+                timeOffset: parseInt(document.getElementById('timeOffset').value),
+                focusText: document.getElementById('focusText').value,
+            };
+
+            window.api.config_save(newConfig);
+        };
+
+        // 保存自动关闭设定
+        function saveAutoQuitConfigButton() {
+            const newConfig = {
+                autoQuit: document.getElementById('autoQuitChecked').checked,
+                autoPowerOff: document.getElementById('autoPowerOffChecked').checked,
+                autoFocusMode: document.getElementById('autoFocusMode').checked,
+                autoFocusMode_PE: document.getElementById('autoFocusMode_PE').checked
+            };
+
+            window.api.config_save(newConfig);
+        };
+
+        // 课程表
+        // 动态载入
+        function loadSchedule(config) {
+            const tbody = document.querySelector('#scheduleTable tbody');
+            tbody.innerHTML = ''; // 清空旧的数据
+            const timeTable = config.timeTable || {};
+            const courseTable = config.courseTable || {};
+
+            for (let key in timeTable) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+            <td contenteditable="true">${timeTable[key]}</td>
+            <td contenteditable="true">${courseTable.Monday ? courseTable.Monday[key - 1] : ''}</td>
+            <td contenteditable="true">${courseTable.Tuesday ? courseTable.Tuesday[key - 1] : ''}</td>
+            <td contenteditable="true">${courseTable.Wednesday ? courseTable.Wednesday[key - 1] : ''}</td>
+            <td contenteditable="true">${courseTable.Thursday ? courseTable.Thursday[key - 1] : ''}</td>
+            <td contenteditable="true">${courseTable.Friday ? courseTable.Friday[key - 1] : ''}</td>
+            <td contenteditable="true">${courseTable.Saturday ? courseTable.Saturday[key - 1] : ''}</td>
+            <td contenteditable="true">${courseTable.Sunday ? courseTable.Sunday[key - 1] : ''}</td>
+            <td><button class="deleteRowButton" data-key="${key}">删除</button></td>
+        `;
+                tbody.appendChild(row);
+            }
+        }
+        // 添加新行
+        document.getElementById('addRowButton').addEventListener('click', () => {
+            const tbody = document.querySelector('#scheduleTable tbody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td><button class="deleteRowButton">删除</button></td>
+    `;
+            tbody.appendChild(newRow);
+        });
+        // 删除行
+        document.querySelector('#scheduleTable').addEventListener('click', (event) => {
+            if (event.target.classList.contains('deleteRowButton')) {
+                event.target.closest('tr').remove();
+            }
+        });
+        // 保存课程设定
+        document.getElementById('saveScheduleConfigButton').addEventListener('click', () => {
+            const newConfig = {
+                timeTable: {},
+                courseTable: {
+                    Monday: [],
+                    Tuesday: [],
+                    Wednesday: [],
+                    Thursday: [],
+                    Friday: [],
+                    Saturday: [],
+                    Sunday: []
+                },
+                linePos: JSON.parse(document.getElementById('linePos').value) ?? null,
+            };
+
+            const rows = document.querySelectorAll('#scheduleTable tbody tr');
+            rows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                newConfig.timeTable[index + 1] = cells[0].textContent.trim(); // 获取时间列的内容
+                newConfig.courseTable.Monday.push(cells[1].textContent.trim());
+                newConfig.courseTable.Tuesday.push(cells[2].textContent.trim());
+                newConfig.courseTable.Wednesday.push(cells[3].textContent.trim());
+                newConfig.courseTable.Thursday.push(cells[4].textContent.trim());
+                newConfig.courseTable.Friday.push(cells[5].textContent.trim());
+                newConfig.courseTable.Saturday.push(cells[6].textContent.trim());
+                newConfig.courseTable.Sunday.push(cells[7].textContent.trim());
+            });
+
+            window.api.config_save(newConfig);
+        });
+
+
+
+        // 学生列表
+        // 动态加载
+        function loadStudents(config) {
+            const tbody = document.querySelector('#studentsTable tbody');
+            tbody.innerHTML = '';
+            const students = config.students || [];
+
+            students.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+            <td contenteditable="true">${student.name}</td>
+            <td contenteditable="true" style="display:none">${student.weight}</td>
+            <td><button class="deleteStudentButton redBtn">删除</button></td>
+        `;
+                tbody.appendChild(row);
+            });
+        }
+        // 添加新行
+        document.getElementById('addStudentButton').addEventListener('click', () => {
+            const tbody = document.querySelector('#studentsTable tbody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+        <td contenteditable="true"></td>
+        <td contenteditable="true" style="display:none">0</td>
+        <td><button class="deleteStudentButton redBtn">删除</button></td>
+    `;
+            tbody.appendChild(newRow);
+        });
+        // 删除行
+        document.querySelector('#studentsTable').addEventListener('click', (event) => {
+            if (event.target.classList.contains('deleteStudentButton')) {
+                event.target.closest('tr').remove();
+            }
+        });
+        // 保存学生配置
+        document.getElementById('saveStudentsConfigButton').addEventListener('click', () => {
+            const newConfig = {
+                students: [],
+            };
+
+            const rows = document.querySelectorAll('#studentsTable tbody tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                newConfig.students.push({
+                    name: cells[0].textContent.trim(),
+                    weight: parseInt(cells[1].textContent.trim())
+                });
+            });
+
+            window.api.config_save(newConfig);
+        });
+
+        // 调休换课
+        // 动态载入
+        function loadPlans(config) {
+            const tbody = document.querySelector('#plansTable tbody');
+            tbody.innerHTML = ''; // 清空旧的数据
+            const plans = config.plans || [];
+
+            plans.forEach(plan => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+            <td contenteditable="true">${plan.date}</td>
+            <td contenteditable="true">${JSON.stringify(plan.courses)}</td>
+            <td><button class="deletePlanButton redBtn">删除</button></td>
+        `;
+                tbody.appendChild(row);
+            });
+        }
+        // 新增规则
+        document.getElementById('addPlanButton').addEventListener('click', () => {
+            const dateInput = document.getElementById('planDate').value;
+            const date = parseDate(dateInput) || new Date();
+            const weekday = getWeekday(date);
+            const courses = getOriginalCourses(date, weekday);
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+        <td contenteditable="true">${dateInput || formatDate(date)}</td>
+        <td contenteditable="true">${JSON.stringify(courses)}</td>
+        <td><button class="deletePlanButton redBtn">删除</button></td>
+    `;
+            document.querySelector('#plansTable tbody').appendChild(newRow);
+        });
+        // 删除规则
+        document.querySelector('#plansTable').addEventListener('click', (event) => {
+            if (event.target.classList.contains('deletePlanButton')) {
+                event.target.closest('tr').remove();
+            }
+        });
+        // 保存调休换课配置
+        document.getElementById('savePlansConfigButton').addEventListener('click', () => {
+            const newConfig = {
+                plans: []
+            };
+
+            const rows = document.querySelectorAll('#plansTable tbody tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const plan = {
+                    date: cells[0].textContent.trim(),
+                    courses: JSON.parse(cells[1].textContent.trim())
+                };
+                newConfig.plans.push(plan);
+            });
+
+            window.api.config_save(newConfig);
+        });
+        // 辅助函数
+        function formatDate(date) {
+            return `${date.getMonth() + 1}.${date.getDate()}`;
+        }
+        function parseDate(dateStr) {
+            const [month, day] = dateStr.split('.').map(Number);
+            if (isNaN(month) || isNaN(day)) return null;
+            const date = new Date();
+            date.setMonth(month - 1);
+            date.setDate(day);
+            return date;
+        }
+        function getWeekday(date) {
+            return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][date.getDay()];
+        }
+        function getOriginalCourses(date, weekday) {
+            const courseTable = Config.courseTable || {};
+            return courseTable[weekday] || [];
+        }
+
+
+        // 切换主内容区
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', function (e) {
+                const targetId = this.getAttribute('data-target');
+                document.querySelectorAll('.content-page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.querySelector(targetId).classList.add('active');
+                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        window.onload = async () => {
+            init(await window.api.config_Get(false));
+            const targetPage = await window.api.config_settingPage();
+            if (targetPage) {
+                const targetId = targetPage;
+                document.querySelectorAll('.content-page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.querySelector(targetId).classList.add('active');
+                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            }
+        };
+    </script>
+</body>
+
+</html>

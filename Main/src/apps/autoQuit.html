@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倒计时任务</title>
+    <link href="https://assets.3r60.top/icons/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            /* 使用现代字体 */
+            background-color: rgba(255, 255, 255, 0.6);
+            /* 添加渐变背景 */
+        }
+
+        #header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+            z-index: 1000;
+            -webkit-app-region: drag;
+        }
+
+        #header .title {
+            padding-left: 15px;
+            font-size: 20px;
+            /* 增加字体大小 */
+            font-weight: bold;
+        }
+
+        #content {
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #countdown {
+            font-size: 5em;
+            /* 增加字体大小 */
+            margin-bottom: 20px;
+            color: black;
+            /* 设置字体颜色 */
+        }
+
+        #textArea {
+            font-size: 2.5em;
+            /* 增加字体大小 */
+            color: black;
+            /* 设置字体颜色 */
+        }
+
+        button {
+            margin-right: 10px;
+            border-radius: 5px;
+            /* 设置按钮圆角 */
+            transition: transform 0.3s;
+            /* 添加悬停效果 */
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            /* 悬停时放大按钮 */
+        }
+
+        .greenBtn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .greenBtn:hover {
+            background-color: #218838;
+        }
+
+        /* 保存按钮样式 */
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
+        }
+
+        button:hover {
+            opacity: 0.7;
+            background-color: #0069d9;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="header">
+        <div class="title" onclick="window.location.href = 'https://edu.3r60.top'"><i
+                class="bi bi-box-fill"></i>&nbsp;&nbsp;自动任务</div>
+    </div>
+    <div id="content">
+        <h3 id="textArea">非法访问！</h3>
+        <h1 id="countdown">30</h1>
+        <span style="display: flex;margin-top: 60px;">
+            <button id="cancelButton"><i class="bi bi-x-lg"></i> 忽略</button>
+            <button id="executeButton" class="greenBtn"><i class="bi bi-check2-circle"></i> 立即执行</button>
+        </span>
+    </div>
+    <script>
+        let countdownElement = document.getElementById('countdown');
+        let actionId = '0';
+        let interval = null;
+        function init(config) {
+            let countdown = 30;
+            actionId = config.ActionID;
+            document.getElementById('textArea').textContent = config.Text;
+            interval = setInterval(() => {
+                countdownElement.textContent = countdown;
+                if (countdown === 0) {
+                    clearInterval(interval);
+                    window.api.function_autoAction(actionId);
+                    window.close();
+                    console.log('执行任务');
+                } else {
+                    countdown--;
+                }
+            }, 1000);
+        }
+
+        document.getElementById('cancelButton').addEventListener('click', () => {
+            clearInterval(interval);
+            countdownElement.textContent = '已取消';
+            window.close();
+        });
+
+        document.getElementById('executeButton').addEventListener('click', () => {
+            clearInterval(interval);
+            countdownElement.textContent = '0';
+            window.api.function_autoAction(actionId);
+            window.close();
+        });
+
+        window.onload = async () => {
+            init(await window.api.config_autoAction());
+        };
+    </script>
+</body>
+
+</html>

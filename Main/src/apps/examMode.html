@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>专注模式</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #000;
+      color: #fff;
+    }
+
+    #clock {
+      font-size: 15em;
+      margin: 40px;
+    }
+
+    #date {
+      font-size: 2em;
+      margin: 40px;
+    }
+
+    #message {
+      font-size: 1.5em;
+      margin: 40px;
+      /* border: 1px solid #fff; */
+      padding: 10px;
+      min-width: 200px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    #message:focus {
+      outline: none;
+      border-color: #f4f4f4;
+    }
+
+    #exitButton {
+      padding: 10px 20px;
+      font-size: 1.5em;
+      cursor: pointer;
+      background-color: #000;
+      border-color: #f4f4f4;
+      border-width: 1px;
+      border-style: solid;
+      color: white;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="date"></div>
+  <div id="clock"></div>
+  <div id="message" contenteditable="false"></div>
+  <button id="exitButton">退出专注模式</button>
+
+  <script>
+    function formatTime(time) {
+      return time < 10 ? '0' + time : time;
+    }
+
+
+    function updateClock() {
+      var now = new Date();
+      var year = now.getFullYear();
+      var month = formatTime(now.getMonth() + 1);
+      var day = formatTime(now.getDate());
+      var weekday = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][now.getDay()];
+      var hours = formatTime(now.getHours());
+      var minutes = formatTime(now.getMinutes());
+      var seconds = formatTime(now.getSeconds());
+
+      document.getElementById('date').textContent = year + '-' + month + '-' + day + ' ' + weekday;
+      document.getElementById('clock').textContent = hours + ':' + minutes + ':' + seconds;
+    }
+
+    setInterval(updateClock, 1000);
+
+    document.getElementById('exitButton').onclick = function () {
+      window.close();
+    };
+
+    document.getElementById('message').addEventListener('click', function () {
+      this.contentEditable = true;
+      this.focus();
+    });
+
+    document.getElementById('message').addEventListener('blur', function () {
+      this.contentEditable = false;
+    });
+
+    document.getElementById('message').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        this.contentEditable = false;
+        e.preventDefault();
+      }
+    });
+
+    function init(config) {
+      document.getElementById('message').innerHTML = config.focusText ?? '';
+    }
+
+    window.onload = async () => {
+      init(await window.api.config_Get());
+    };
+  </script>
+</body>
+
+</html>

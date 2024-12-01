@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课程表窗口</title>
+    <style>
+        :root {
+            --font-size: 1em;
+            /* 默认字体大小 */
+        }
+
+        html,
+        body {
+            background-color: transparent;
+            color: white;
+            overflow-y: hidden;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .today {
+            margin-left: 10px;
+            margin-right: 10px;
+            margin-top: 0px;
+            vertical-align: middle;
+        }
+
+        .schedule {
+            margin: 0;
+            padding: 0;
+            margin-left: 5px;
+            margin-right: 5px;
+            margin-top: auto;
+            margin-bottom: auto;
+            vertical-align: middle;
+            display: inline-block;
+            position: relative;
+        }
+
+        .current {
+            /* font-size: calc(1.25 * var(--font-size)); */
+            color: #1E9FFF;
+            margin-top: -0.25em;
+            margin-bottom: -0.2em;
+        }
+
+        .past {
+            color: rgba(177, 177, 177, 0.705);
+        }
+
+        .future {
+            color: rgba(255, 255, 255, 0.801);
+        }
+
+        .small {
+            font-size: calc(0.60 * var(--font-size));
+        }
+
+        #schedules {
+            font-size: calc(1.5* var(--font-size));
+            display: block;
+            margin-top: 5px;
+            margin-bottom: auto;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0;
+            padding-left: 10px;
+            padding-right: 10px;
+            height: auto;
+            width: fit-content;
+            background-color: rgba(0, 0, 0, .4);
+            position: relative;
+            border-radius: 5px;
+            padding-bottom: 7px;
+            padding-top: 5px;
+        }
+
+        .vertical-divider {
+            margin-right: 15px;
+        }
+
+        .vertical-divider::after {
+            /* content: '|'; */
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: calc(-0.225* var(--font-size));
+            /* width: 1px; */
+            color: rgba(190, 190, 190, 0.5);
+            font-size: calc(0.55* var(--font-size));
+        }
+
+        #extra {
+            font-size: calc(0.90* var(--font-size));
+            background-color: rgba(0, 0, 0, 0.3);
+            width: fit-content;
+            margin: 0;
+            margin-left: auto;
+            margin-right: auto;
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+            font-weight: 500;
+            padding: 5px 1.4em;
+            color: rgba(255, 255, 255, .8);
+        }
+    </style>
+    <link rel="stylesheet" href="./qweather-icons/font/qweather-icons.css">
+    <link rel="stylesheet" href="./icons/bootstrap-icons.css">
+</head>
+
+<body>
+    <h2 id="schedules">加载中...</h2>
+    <h2 id="extra" style="display: none;">加载中...</h2>
+    <script>
+        let intervalId = null;
+        let lastWeatherUpdate = 0; // 记录上次更新天气的时间
+        let lastWeather = ''; // 记录上次更新天气的时间
+        const WEATHER_UPDATE_INTERVAL = 600000; // 天气数据更新间隔（10分钟）
+
+        function count(o) {
+            var t = typeof o;
+            if (t == 'string') {
+                return o.length;
+            } else if (t == 'object') {
+                var n = 0;
+                for (var i in o) {
+                    n++;
+                }
+                return n;
+            }
+            return false;
+        }
+
+        function updateSchedules(data) {
+            const coursesDiv = document.getElementById('schedules');
+            coursesDiv.innerHTML = ''; // 清空之前的内容
+
+            const arr = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+            const myDate = new Date();
+            const cycle = arr[myDate.getDay()];
+
+            const cycleElement = document.createElement('span');
+            cycleElement.textContent = cycle;
+            cycleElement.className = 'today';
+            coursesDiv.appendChild(cycleElement);
+
+            const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).charAt(0).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase();
+            const dailyCourses = data.courseTable[today];
+            const timeTable = data.timeTable;
+
+            const timeOffset = data.timeOffset || 0; // 从配置中获取时钟偏移量，默认为0
+
+            const now = new Date();
+            const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + timeOffset; // 加入偏移量
+
+            let lastLinePosPassed = false; // 标记是否已经过了最后一个linePos
+
+            // 显示今天的课程
+            for (let i = 1; i <= count(data.timeTable); i++) {
+                const period = i.toString();
+                const course = dailyCourses[i - 1];
+                const time = timeTable[period];
+                const [startStr, endStr] = time.split('-');
+                const start = parseInt(startStr.split(':')[0]) * 3600 + parseInt(startStr.split(':')[1]) * 60;
+                const end = parseInt(endStr.split(':')[0]) * 3600 + parseInt(endStr.split(':')[1]) * 60;
+
+                const courseElement = document.createElement('span');
+                courseElement.className = 'schedule';
+
+                if (currentTime >= start && currentTime < end) {
+                    courseElement.classList.add('current');
+                    if (i > data.linePos[data.linePos.length - 1]) {
+                        lastLinePosPassed = true;
+                    }
+                } else if (currentTime < start) {
+                    courseElement.classList.add('future');
+                } else {
+                    courseElement.classList.add('past');
+                }
+
+                courseElement.textContent = `${course}`;
+
+                if (data.linePos.includes(i)) {
+                    courseElement.classList.add('vertical-divider');
+                }
+
+                coursesDiv.appendChild(courseElement);
+            }
+
+            // 如果已经过了最后一个linePos，并且有明天的课程，则显示明天的课程
+            if (lastLinePosPassed) {
+                // 获取明天的日期
+                var tomorrowData = new Date();
+                tomorrowData.setDate(now.getDate() + 1);
+                const arr_eng = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+                // 获取明天是周几
+                var dayOfWeek = tomorrowData.getDay();
+                const tomorrow = arr_eng[dayOfWeek];
+                const tomorrowCourses = data.courseTable[tomorrow];
+
+                console.log(tomorrow, tomorrowCourses);
+                const extraDiv = document.getElementById('extra');
+                extraDiv.style.display = tomorrowCourses ? 'block' : 'none';
+
+                if (tomorrowCourses) {
+                    const tomorrowLabel = document.createElement('span');
+                    extraDiv.innerHTML = arr[dayOfWeek] + '&nbsp;&nbsp;&nbsp;';
+                    coursesDiv.appendChild(tomorrowLabel);
+
+                    for (let i = 1; i <= count(data.timeTable); i++) {
+                        const period = i.toString();
+                        const course = tomorrowCourses[i - 1];
+                        extraDiv.innerHTML = extraDiv.innerHTML + ` ${course} ${data.linePos.includes(i) ? "|" : ""}`;
+                    }
+                }
+            }
+
+            if (Date.now() - lastWeatherUpdate > WEATHER_UPDATE_INTERVAL || data.countShow) {
+                lastWeatherUpdate = Date.now();
+                updateWeathers(data);
+            } else {
+                coursesDiv.appendChild(lastWeather);
+            }
+        }
+
+        function changeElementTagName(elementId, newTagName) { // AI 生成
+            // 获取原始元素
+            const originalElement = document.getElementById(elementId);
+
+            // 创建新元素
+            const newElement = document.createElement(newTagName);
+
+            // 复制原始元素的所有属性
+            for (let i = 0; i < originalElement.attributes.length; i++) {
+                const attr = originalElement.attributes[i];
+                newElement.setAttribute(attr.name, attr.value);
+            }
+
+            // 复制原始元素的所有子节点
+            while (originalElement.firstChild) {
+                newElement.appendChild(originalElement.firstChild);
+            }
+
+            // 替换原始元素
+            originalElement.parentNode.replaceChild(newElement, originalElement);
+        }
+
+        function updateWeathers(data) {
+            function updateWeatherElement(data, countShow) {
+                const coursesDiv = document.getElementById('schedules');
+                let weatherElement = coursesDiv.querySelector('.weather') || document.createElement('span');
+
+                if (!weatherElement.classList.contains('today')) {
+                    weatherElement.className = 'today weather';
+                    coursesDiv.appendChild(weatherElement);
+                    lastWeather = weatherElement;
+                }
+
+                if (countShow) {
+                    const today = new Date();
+                    const currentYear = today.getFullYear();
+                    const currentMonth = today.getMonth();
+                    const currentDay = today.getDate();
+
+                    // 修复倒数日BUG
+                    today.setHours(0, 0, 0, 0);
+
+                    const targetDate = new Date(currentYear, parseInt(data.countTime.split('.')[0] ?? 6) - 1, parseInt(data.countTime.split('.')[1]) ?? 7, 0, 0, 0);
+
+                    if (today > targetDate) {
+                        targetDate.setFullYear(targetDate.getFullYear() + 1);
+                    }
+
+                    const oneDay = 24 * 60 * 60 * 1000;
+                    const diffDays = Math.round(Math.abs((targetDate - today) / oneDay));
+
+                    // 更新天气元素的内容为倒计时
+                    weatherElement.innerHTML = `<i class="bi bi-hourglass"></i>&nbsp;${data.countText ? '<span class="small">距&nbsp;</span>' + data.countText + '<span class="small">&nbsp;还有</span> ' : ''}${diffDays} 天`;
+                    lastWeatherUpdate = 0;
+                } else {
+                    fetch(`https://api.3r60.top/v2/project/weather/?pos=${data.posName ?? '北京'}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // 更新天气元素的内容为实际天气
+                            weatherElement.innerHTML = `<i class="qi-${data.icon}"></i>&nbsp;${data.temp}℃`;
+                        })
+                        .catch(error => {
+                            console.error('There has been a problem with your fetch operation:', error);
+                        });
+                }
+            }
+
+            updateWeatherElement(data, data.countShow ? data.countShow : false);
+        }
+
+        window.api.config_onRecive(init);
+
+        function init(data) {
+            updateSchedules(data);
+            // 个性化设定
+            document.documentElement.style.setProperty('--font-size', `${data.scheduleFontSize || '1'}em`);
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+            intervalId = setInterval(() => updateSchedules(data), 10000);
+        }
+
+        // 确保在窗口关闭时清除定时器
+        window.addEventListener('beforeunload', () => {
+            clearInterval(intervalId);
+        });
+
+        window.onload = async () => {
+            init(await window.api.config_Get(true));
+        };
+    </script>
+</body>
+
+</html>

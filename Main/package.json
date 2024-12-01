@@ -1,0 +1,51 @@
+{
+  "name": "risclasstool",
+  "version": "0.1.9",
+  "description": "瑞思课堂工具",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64"
+  },
+  "author": "PYLXU",
+  "license": "LGPL-3.0-or-later",
+  "devDependencies": {
+    "electron": "^32.1.2",
+    "electron-builder": "^25.1.7",
+    "eslint": "^9.15.0"
+  },
+  "build": {
+    "appId": "rct.trsz.app",
+    "productName": "瑞思课堂工具",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**",
+      "**/**",
+      "**/*",
+      "!**/*.ts",
+      "!**/*.map",
+      "!**/*.spec.js"
+    ],
+    "extraResources": [
+      {
+        "from": "./scripts",
+        "to": "scripts",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "logo.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "logo.ico",
+      "uninstallerIcon": "logo.ico"
+    }
+  }
+}

@@ -488,9 +488,15 @@
                 </div>
                 <div class="card">
                     <label for="autoFocusMode">
-                        <h2>自动进入专注模式</h2>当课程为“自”时，会自动进入专注模式
+                        <h2>自习课自动进入专注模式</h2>当课程为“自”时，会自动进入专注模式
                     </label>
                     <input type="checkbox" id="autoFocusMode">
+                </div>
+                <div class="card">
+                    <label for="autoFocusMode_PE">
+                        <h2>体育课自动进入专注模式</h2>当课程为“体”时，会自动进入专注模式
+                    </label>
+                    <input type="checkbox" id="autoFocusMode_PE">
                 </div>
                 <div class="card">
                     <label for="autoPowerOffChecked">
@@ -528,6 +534,7 @@
             document.getElementById('autoQuitChecked').checked = config.autoQuit && true;
             document.getElementById('autoPowerOffChecked').checked = config.autoPowerOff && true;
             document.getElementById('autoFocusMode').checked = config.autoFocusMode && true;
+            document.getElementById('autoFocusMode_PE').checked = config.autoFocusMode_PE && true;
 
             if (config.cloudUrl) {
                 alert('云配置已接管所有设置，若不更改云配置设置下次启动时会被云配置覆盖！');
@@ -567,7 +574,8 @@
             const newConfig = {
                 autoQuit: document.getElementById('autoQuitChecked').checked,
                 autoPowerOff: document.getElementById('autoPowerOffChecked').checked,
-                autoFocusMode: document.getElementById('autoFocusMode').checked
+                autoFocusMode: document.getElementById('autoFocusMode').checked,
+                autoFocusMode_PE: document.getElementById('autoFocusMode_PE').checked
             };
 
             window.api.config_save(newConfig);
@@ -796,7 +804,7 @@
         });
 
         window.onload = async () => {
-            init(await window.api.config_Get());
+            init(await window.api.config_Get(false));
         };
     </script>
 </body>

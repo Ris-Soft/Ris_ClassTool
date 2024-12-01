@@ -1,0 +1,3 @@
+D:\Development\Projects-New\TRSZ\RisClassTool\obj\Debug\RisClassTool.njsproj.AssemblyReference.cache
+D:\Development\Projects-New\TRSZ\RisClassTool\obj\Debug\RisClassTool.njsproj.CoreCompileInputs.cache
+D:\Development\Projects-New\TRSZ\RisClassTool\bin\Microsoft.NodejsTools.WebRole.dll

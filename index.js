@@ -1,7 +1,7 @@
 // ————「初始化变量」————————————————————————————————————————————————————————————————————————————
 
 // 模块引用
-const { app, BrowserWindow, screen, ipcMain, Tray, Menu, autoUpdater, contextBridge } = require('electron'); // Electron模块
+const { app, BrowserWindow, screen, ipcMain, Tray, Menu } = require('electron'); // Electron模块
 const path = require('path'); // 路径拼接模块
 const fs = require('fs'); // 文件读取模块
 const { spawn } = require('child_process'); // 进程执行模块
@@ -83,8 +83,6 @@ function init() {
     createWindow_DesktopLayer();
     createWindow_TopLayer();
     createWindow_SideBar();
-
-    // setInterval(setTopWindowAlwaysOnTop, 5000);
 }
 
 // ————「窗口创建」——————————————————————————————————————————————————————————————————
@@ -115,7 +113,7 @@ function createWindow(url, local, fullScreen = false) { // 灵活窗口
         resizable: true,
         transparent: fullScreen,
         movable: !fullScreen,
-        alwaysOnTop: fullScreen,
+        alwaysOnTop: fullScreen || local,
         skipTaskbar: false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
@@ -123,6 +121,7 @@ function createWindow(url, local, fullScreen = false) { // 灵活窗口
     });
 
     targetWindow.setFullScreen(fullScreen);
+    targetWindow.setAlwaysOnTop(fullScreen || local, 'screen-saver');
 
     if (local) {
         targetWindow.loadFile(path.join(__dirname, url));
@@ -160,6 +159,7 @@ function createWindow_Setting() {
         resizable: true,
         movable: true,
         alwaysOnTop: false,
+        type: 'desktop',
         skipTaskbar: false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
@@ -186,7 +186,6 @@ function createWindow_DesktopLayer() { // 桌面层
         frame: false,
         resizable: false,
         movable: false,
-        alwaysOnTop: false,
         skipTaskbar: true,
         transparent: true,
         webPreferences: {
@@ -204,11 +203,12 @@ function createWindow_DesktopLayer() { // 桌面层
     // scheduleWindow.webContents.openDevTools({mode:'detach'})
 }
 
+let processWindow = null;
 function createWindow_TopLayer() { // 置顶层
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
     const winHeight = 100;
 
-    const processWindow = new BrowserWindow({
+    processWindow = new BrowserWindow({
         x: 0,
         y: 0,
         width: width,
@@ -229,7 +229,83 @@ function createWindow_TopLayer() { // 置顶层
     processWindow.loadFile('./src/process.html');
     processWindow.show();
 
+    processWindow.setAlwaysOnTop(true,'status')
+
     processWindow.setVisibleOnAllWorkspaces(true);
+
+    let currentPeriod = null;
+    let currentCourse = null;
+    let startTime = null;
+    let endTime = null;
+    let intervalId = null;
+
+        function updateProgress() {
+            const now = new Date();
+            const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + config.timeOffset; // 加入偏移量
+
+            // 检查当前是否在上课时间
+            let inClass = false;
+            let nextPeriodStart = null;
+            let nextPeriod = 0;
+
+            for (let period in config.timeTable) {
+                const [startStr, endStr] = config.timeTable[period].split('-');
+                const start = parseInt(startStr.split(':')[0]) * 3600 + parseInt(startStr.split(':')[1]) * 60;
+                const end = parseInt(endStr.split(':')[0]) * 3600 + parseInt(endStr.split(':')[1]) * 60;
+
+                if (currentTime >= start && currentTime < end) {
+                    inClass = true;
+                    currentPeriod = period;
+                    currentCourse = config.courseTable[new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase()][parseInt(period) - 1];
+                    startTime = start;
+                    endTime = end;
+                    nextPeriod = parseInt(period) + 1;
+                    break;
+                } else if (currentTime < start) {
+                    if (!nextPeriodStart || start < nextPeriodStart) {
+                        nextPeriodStart = start;
+                        nextPeriod = period;
+                        if (endTime === null) {
+                            endTime = currentTime;
+                        }
+                    }
+                }
+            }
+
+            // 更新状态窗口
+            if (inClass) {
+                // 暂无课上计划
+            } else {
+                if (nextPeriodStart) {
+                    const timeToNextClass = nextPeriodStart - currentTime;
+                    const minutes = Math.floor(timeToNextClass / 60);
+                    const seconds = timeToNextClass % 60;
+                    const lastClass = config.courseTable[new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase()][parseInt(nextPeriod) - 2];
+                    const nextClass = config.courseTable[new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase()][parseInt(nextPeriod) - 1];
+                    if (minutes == 5 && seconds == 0 && lastClass !== nextClass ) { // 300秒
+                        autoActionFunction(1);
+                    }
+                    if (minutes == 0 && seconds == 1 && nextClass == "自") {
+                        autoActionFunction(5);
+                    }
+                    if (minutes == 0 && seconds == 1 && nextClass == "体") {
+                        autoActionFunction(5);
+                    }
+                } else {
+                    autoActionFunction(2);
+                    clearInterval(intervalId);
+                }
+            }
+        }
+
+        // 初始更新
+        updateProgress();
+
+        // 每 1 秒更新一次进度
+        if (intervalId) {
+            clearInterval(intervalId);
+        }
+        intervalId = setInterval(updateProgress, 1000);
 
     // processWindow.webContents.openDevTools({ mode: 'detach' })
 }
@@ -260,6 +336,8 @@ function createWindow_SideBar() {
         }
     });
 
+    sidebarWindow.setAlwaysOnTop(true, 'tool');
+
     sidebarWindow.loadFile('./src/sidebar.html');
 
     sidebarWindow.setVisibleOnAllWorkspaces(true)
@@ -268,11 +346,11 @@ function createWindow_SideBar() {
         if (sidebarWindow_isExpanded) {
             sidebarWindow.setContentSize(initialWidth, initialHeight);
             sidebarWindow.setPosition(x, y);
-            sidebarWindow.setAlwaysOnTop(true, "screen-saver");
+            sidebarWindow.setAlwaysOnTop(true, "tool");
         } else {
             sidebarWindow.setContentSize(expandedWidth, expandedHeight);
             sidebarWindow.setPosition(width - expandedWidth, height - (expandedHeight / 2) - (config.sideBarBottom || 200));
-            sidebarWindow.setAlwaysOnTop(true, "screen-saver");
+            sidebarWindow.setAlwaysOnTop(true, "tool");
         }
         sidebarWindow_isExpanded = !sidebarWindow_isExpanded;
     });
@@ -280,6 +358,8 @@ function createWindow_SideBar() {
 
 // ————「功能函数」——————————————————————————————————————————————————————————————————
 function changeCourseProcessing(targetConfig) { // 换课调整
+    //return targetConfig;
+    let tempConfig = targetConfig;
     let today = new Date();
     let tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -290,17 +370,18 @@ function changeCourseProcessing(targetConfig) { // 换课调整
         return date.toLocaleDateString('en-US', { weekday: 'long' }).charAt(0).toUpperCase() +
             date.toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase();
     }
-    if (targetConfig.plans) {
-        for (let key in targetConfig.plans) {
-            let switchConfig = targetConfig.plans[key];
+    if (tempConfig.plans) {
+        for (let key in tempConfig.plans) {
+            let switchConfig = tempConfig.plans[key];
             if (switchConfig.date === formatDate(today)) {
-                targetConfig.courseTable[getWeekday(today)] = switchConfig.courses;
+                tempConfig.courseTable[getWeekday(today)] = switchConfig.courses;
             } else if (switchConfig.date === formatDate(tomorrow)) {
-                targetConfig.courseTable[getWeekday(tomorrow)] = switchConfig.courses;
+                tempConfig.courseTable[getWeekday(tomorrow)] = switchConfig.courses;
             }
         }
     }
-    return targetConfig;
+
+    return tempConfig;
 }
 function saveConfig(event, newConfig) { // 配置保存
     config = {
@@ -318,6 +399,7 @@ function saveConfig(event, newConfig) { // 配置保存
     });
 }
 
+
 function focusAllTopWindos() {
     const windows = BrowserWindow.getAllWindows();
     windows.forEach(window => {
@@ -333,12 +415,54 @@ function Ahk(args) {
     spawn(exePath, args);
     if (args == [1]) {
         scheduleWindow.restore();
+=======
+function Ahk(args) {
+    console.log(args);
+    scheduleWindow.setAlwaysOnTop(true, "screen-saver");
+    const appPath = isDev ? './' : process.resourcesPath;
+    const exePath = path.join(appPath, 'scripts', 'RisClassTool_KeyDown.exe');
+    spawn(exePath, args);
+    setTimeout(() => {
+        scheduleWindow.setAlwaysOnTop(false);
+    }, 1000);
+}
+
+function autoActionGUI(args) {
+    autoAction = args;
+    createWindow('./src/apps/autoQuit.html', true, true);
+    const windows = BrowserWindow.getAllWindows();
+    windows.forEach(win => {
+        if (win.webContents.getURL().endsWith('examMode.html')) {
+            win.close();
+        }
+    });
+}
+
+function autoActionFunction(args) {
+    // 1->还有5min上课  2->最后一节课放学时间到 3->返回桌面 4->关机
+    if (args == 1 && (config.autoQuit ?? false)) {
+        autoActionGUI({ Text: '剩余5分钟上课，即将自动返回到桌面', ActionID: 3 });
+    } else if (args == 2 && (config.autoPowerOff ?? false)) {
+        autoActionGUI({ Text: '放学时间到，即将关闭计算机', ActionID: 4 });
+    } else if (args == 3) {
+        Ahk([1]);
+    } else if (args == 4) {
+        // 关机
+        spawn('shutdown', ['/s', '/t', '0']);
+    } else if (args == 5 && (config.autoFocusMode ?? false)) {
+        // 专注模式
+        createWindow('./src/apps/examMode.html', true, true);
     }
+    console.log(args);
 }
 
 // ————「事件定义」——————————————————————————————————————————————————————————————————
-ipcMain.handle('getConfig', (event) => { // 主动获取配置
-    return config;
+ipcMain.handle('getConfig', (event, process) => { // 主动获取配置
+    let tempConfig = JSON.parse(JSON.stringify(config)); // 创建config的深拷贝
+    if (process === true) {
+        tempConfig = changeCourseProcessing(tempConfig);
+    }
+    return tempConfig;
 });
 ipcMain.handle('temp_autoAction', (event) => { // 主动获取配置
     return autoAction;
@@ -347,6 +471,7 @@ ipcMain.on('function_vKeydown', (event, args) => { // 执行ahk->exe脚本
     Ahk(args);
 });
 ipcMain.on('function_autoAction', (event, args) => { // 自动执行
+
     // 1->还有5min上课  2->最后一节课放学时间到 3->返回桌面 4->关机
     if (args == 1 && (config.autoQuit ?? false)) {
         autoAction = { Text: '剩余5分钟上课，即将自动返回到桌面', ActionID: 3 };

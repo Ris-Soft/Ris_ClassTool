@@ -1,4 +1,4 @@
-# Ris_ClassTool 瑞思课堂工具
+# Ris_ClassTool 瑞思课堂工具 · 主程序
 
 ## 软件介绍
 

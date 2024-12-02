@@ -25,6 +25,9 @@ contextBridge.exposeInMainWorld('api', {
     config_save: (config) => {
         ipcRenderer.send('config_save', config);
     },
+    createLink: (linkName) => {
+        ipcRenderer.send('createLink', linkName);
+    },
 
     // 侧边栏
     sideBar_expand: () => ipcRenderer.send('toggle-expand'),

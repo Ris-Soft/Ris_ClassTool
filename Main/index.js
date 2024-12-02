@@ -1,7 +1,7 @@
 // ————「初始化变量」————————————————————————————————————————————————————————————————————————————
 
 // 模块引用
-const { app, BrowserWindow, screen, ipcMain, Tray, Menu } = require('electron'); // Electron模块
+const { app, BrowserWindow, screen, ipcMain, Tray, Menu, autoUpdater, Notification } = require('electron'); // Electron模块
 const path = require('path'); // 路径拼接模块
 const fs = require('fs'); // 文件读取模块
 const { spawn } = require('child_process'); // 进程执行模块
@@ -52,6 +52,22 @@ function init() {
     // 单实例锁
     if (!app.requestSingleInstanceLock()) app.quit();
 
+    // 检查更新
+    if (!isDev) {
+        autoUpdater.setFeedURL('https://app.3r60.top/webProject/Ris_ClassTool/version/');
+        autoUpdater.checkForUpdates();
+        autoUpdater.on('update-available', () => {
+            console.log('发现新版本，准备更新');
+        });
+        autoUpdater.on('update-downloaded', () => {
+            console.log('更新就绪，下次启动时应用');
+            new Notification({
+                title: '更新已就绪',
+                body: '已升级到最新版本，下次启动时生效'
+            }).show()
+        });
+    }
+
     // 配置读取
     try {
         var configData = fs.readFileSync(configDataPath, 'utf-8');
@@ -89,6 +105,7 @@ function init() {
     }
 
     config['version'] = app.getVersion(); // 动态写入程序版本
+    config['path'] = app.getAppPath() + app.getName(); // 动态写入程序目录
     config_Processed = changeCourseProcessing(config);
 
 
@@ -105,11 +122,14 @@ function init() {
     createWindow_DesktopLayer();
     createWindow_TopLayer();
     createWindow_SideBar();
+
+    // 处理参数
+    handleCommand(process.argv.slice(2));
 }
 
 function handleCommand(commandLine) {
-    if (commandLine[0] == "setting") {
-        createWindow_Setting();
+    if (commandLine && commandLine[0] == "setting" && commandLine[1]) {
+        createWindow_Setting(commandLine[1]);
     }
 }
 
@@ -571,6 +591,9 @@ ipcMain.on('function_autoAction', (event, args) => { // 自动执行
     autoActionFunction(args);
 });
 ipcMain.on('function_showExplorer', (event, args) => { // 打开资源管理器
+    spawn('explorer.exe');
+});
+ipcMain.on('createLink', (event, linkName) => { // 创建快捷方式
     spawn('explorer.exe');
 });
 ipcMain.on('webview_create', (event, url, local, fullScreen) => { // 创建灵活窗口

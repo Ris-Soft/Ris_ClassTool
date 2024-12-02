@@ -1,41 +1,8 @@
 ﻿#include <iostream>
 #include <windows.h>
-#include <urlmon.h>
-#include <wininet.h>
-#include <fstream>
-#include <vector>
-#include <string>
-
-#pragma comment(lib, "wininet.lib")
-#pragma comment(lib, "urlmon.lib")
 
 using namespace std;
 
-
-// 从URL下载文件
-bool DownloadFile(const std::wstring& url, const std::wstring& filename) {
-    HRESULT hr = URLDownloadToFile(NULL, url.c_str(), filename.c_str(), 0, NULL);
-    return SUCCEEDED(hr);
-}
-
-// 启动进程
-bool StartProcess(const std::wstring& exePath) {
-    STARTUPINFO si;
-    PROCESS_INFORMATION pi;
-    ZeroMemory(&si, sizeof(si));
-    si.cb = sizeof(si);
-    ZeroMemory(&pi, sizeof(pi));
-
-    if (!CreateProcess(NULL, (LPWSTR)exePath.c_str(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
-        return false;
-    }
-
-    WaitForSingleObject(pi.hProcess, INFINITE);
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
-
-    return true;
-}
 
 static void PressKey(int key, bool press) {
     keybd_event(key, 0, press ? 0 : KEYEVENTF_KEYUP, 0);

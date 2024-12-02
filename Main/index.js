@@ -5,8 +5,11 @@ const { app, BrowserWindow, screen, ipcMain, Tray, Menu } = require('electron');
 const path = require('path'); // 路径拼接模块
 const fs = require('fs'); // 文件读取模块
 const { spawn } = require('child_process'); // 进程执行模块
+const http = require('http'); // HTTP模块
+const https = require('https'); // HTTPS模块
 
 // 常量定义
+const host = "https://app.3r60.top/webProject/Ris_ClassTool/"; // 带有/结尾
 const isDev = !app.isPackaged;
 const configDataPath = 'D:\\Ris_ClassToolConfig.json'; // 配置文件路径
 const defaultConfig = {
@@ -126,8 +129,8 @@ function createWindow(url, local, fullScreen = false) { // 灵活窗口
     }
     Menu.setApplicationMenu(null);
     const targetWindow = new BrowserWindow({
-        width: local ? 420 : 1366,
-        height: local ? 400 : 768,
+        width: (local || url.endsWith('random.html')) ? 420 : 1366,
+        height: (local || url.endsWith('random.html')) ? 400 : 768,
         frame: !fullScreen,
         titleBarOverlay: !fullScreen ? {
             color: "#fff",
@@ -190,7 +193,17 @@ function createWindow_Setting(targetPage) {
 
     settingsWindow_targetPage = targetPage;
 
-    settingsWindow.loadFile(path.join(__dirname, './src/set.html'));
+    if (config.insiderPreview) {
+        checkWebsite('https://app.3r60.top/webProject/Ris_ClassTool/check.html', 'Successful', (result) => {
+            if (result) {
+                settingsWindow.loadURL(host + 'set.html');
+            }
+        });
+    } else {
+        settingsWindow.loadFile(path.join(__dirname, './src/set.html'));
+    }
+
+    //settingsWindow.loadFile(path.join(__dirname, './src/set.html'));
 
     settingsWindow.on('closed', () => {
         settingsWindow = null;
@@ -200,12 +213,12 @@ function createWindow_Setting(targetPage) {
 let scheduleWindow = null;
 function createWindow_DesktopLayer() { // 桌面层
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-    const winHeight = 100;
-    const winY = Math.round(height * 0.01);
+    const winHeight = height;
+    //const winY = Math.round(height * 0.01);
 
     scheduleWindow = new BrowserWindow({
         x: 0,
-        y: winY,
+        y: 0,
         width: width,
         height: winHeight,
         frame: false,
@@ -218,8 +231,16 @@ function createWindow_DesktopLayer() { // 桌面层
         }
     });
 
-    //scheduleWindow.setIgnoreMouseEvents(true); // 全局穿透
-    scheduleWindow.loadFile(path.join(__dirname, './src/index.html'));
+    scheduleWindow.setIgnoreMouseEvents(true); // 全局穿透
+    if (config.insiderPreview) {
+        checkWebsite('https://app.3r60.top/webProject/Ris_ClassTool/check.html', 'Successful', (result) => {
+            if (result) {
+                scheduleWindow.loadURL(host + 'index.html');
+            }
+        });
+    } else {
+        scheduleWindow.loadFile(path.join(__dirname, './src/index.html'));
+    }
 
     scheduleWindow.show();
 
@@ -251,7 +272,17 @@ function createWindow_TopLayer() { // 置顶层
     });
 
     processWindow.setIgnoreMouseEvents(true); // 全局穿透
-    processWindow.loadFile('./src/process.html');
+    if (config.insiderPreview) {
+        checkWebsite('https://app.3r60.top/webProject/Ris_ClassTool/check.html', 'Successful', (result) => {
+            if (result) {
+                processWindow.loadURL(host + 'process.html');
+            }
+        });
+    } else {
+        processWindow.loadFile(path.join(__dirname, './src/process.html'));
+    }
+
+    //processWindow.loadFile('./src/process.html');
     processWindow.show();
 
     processWindow.setAlwaysOnTop(true, 'status')
@@ -266,7 +297,7 @@ function createWindow_TopLayer() { // 置顶层
 
     function updateProgress() {
         const now = new Date();
-        const currentTime = formatTime(now,false);
+        const currentTime = formatTime(now, false);
         if (autoAction_StopTime && autoAction_StopTime > currentTime) return;
 
 
@@ -365,7 +396,17 @@ function createWindow_SideBar() {
 
     sidebarWindow.setAlwaysOnTop(true, 'tool');
 
-    sidebarWindow.loadFile('./src/sidebar.html');
+    if (config.insiderPreview) {
+        checkWebsite('https://app.3r60.top/webProject/Ris_ClassTool/check.html', 'Successful', (result) => {
+            if (result) {
+                sidebarWindow.loadURL(host + 'sidebar.html');
+            }
+        });
+    } else {
+        sidebarWindow.loadFile(path.join(__dirname, './src/sidebar.html'));
+    }
+
+    //sidebarWindow.loadFile('./src/sidebar.html');
 
     sidebarWindow.setVisibleOnAllWorkspaces(true)
 
@@ -382,11 +423,44 @@ function createWindow_SideBar() {
         sidebarWindow_isExpanded = !sidebarWindow_isExpanded;
     });
 
-    sidebarWindow.webContents.openDevTools({ mode: 'detach' })
+    //sidebarWindow.webContents.openDevTools({ mode: 'detach' })
 
 }
 
 // ————「功能函数」——————————————————————————————————————————————————————————————————
+function checkWebsite(url, expectedContent, callback) { // 连通性检查
+    const protocol = url.startsWith('https') ? https : http;
+    const options = {
+        hostname: new URL(url).hostname,
+        path: new URL(url).pathname,
+        method: 'GET',
+    };
+
+    protocol.get(options, (res) => {
+        let data = '';
+
+        // 监听数据事件，收集响应数据
+        res.on('data', (chunk) => {
+            data += chunk;
+        });
+
+        // 监听结束事件，处理响应数据
+        res.on('end', () => {
+            const statusCode = res.statusCode;
+            const contentType = res.headers['content-type'];
+            const containsExpectedContent = data.includes(expectedContent);
+
+            // 检查状态码和内容
+            if (statusCode === 200 && containsExpectedContent) {
+                callback(true);
+            } else {
+                callback(false);
+            }
+        });
+    }).on('error', (err) => {
+        callback(false);
+    });
+}
 function changeCourseProcessing(targetConfig) { // 换课调整
     //return targetConfig;
     let tempConfig = targetConfig;
@@ -460,7 +534,7 @@ function autoActionFunction(args) {
     } else if (args == 2 && (config.autoPowerOff ?? false)) {
         autoActionGUI({ Text: '放学时间到，即将关闭计算机', ActionID: 4 });
     } else if (args == 3) {
-        internalFunction("keydown","desktop");
+        internalFunction("keydown", "desktop");
     } else if (args == 4) {
         // 关机
         spawn('shutdown', ['/s', '/t', '0']);

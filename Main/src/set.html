@@ -319,6 +319,12 @@
             <div class="page-title"><i class="bi bi-gear"></i>&nbsp;通用设定</div>
             <form id="basicSettingsForm">
                 <div class="card">
+                    <label for="insiderPreview">
+                        <h2>预览体验成员</h2>开启后可视化页面将交给瑞思软件的服务器接管（服务器连接失败时使用本地连接）[重启软件后生效]
+                    </label>
+                    <input type="checkbox" id="insiderPreview"><br>
+                </div>
+                <div class="card">
                     <label for="cloudUrl">
                         <h2>云配置地址</h2>设置后每次启动将尝试用链接中的文本替代配置
                     </label>
@@ -529,6 +535,7 @@
             document.getElementById('scheduleFontSize').value = config.scheduleFontSize || '';
             document.getElementById('progressHeight').value = config.progressHeight || '';
             document.getElementById('timeOffset').value = config.timeOffset || '';
+            document.getElementById('insiderPreview').checked = config.insiderPreview || false;
             document.getElementById('cloudUrl').value = config.cloudUrl || '';
             document.getElementById('focusText').value = config.focusText || '';
             document.getElementById('autoQuitChecked').checked = config.autoQuit && true;
@@ -562,6 +569,7 @@
                 scheduleFontSize: document.getElementById('scheduleFontSize').value,
                 progressHeight: document.getElementById('progressHeight').value,
                 cloudUrl: document.getElementById('cloudUrl').value,
+                insiderPreview: document.getElementById('insiderPreview').checked,
                 timeOffset: parseInt(document.getElementById('timeOffset').value),
                 focusText: document.getElementById('focusText').value,
             };

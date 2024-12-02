@@ -6,7 +6,7 @@
     <RootNamespace>Main</RootNamespace>
     <ScriptArguments>.</ScriptArguments>
     <SaveNodeJsSettingsInProjectFile>True</SaveNodeJsSettingsInProjectFile>
-    <NodeExePath>C:\Users\HOME\Desktop\RisClassTool\Main\node_modules\electron\dist\electron.exe</NodeExePath>
+    <NodeExePath>.\node_modules\electron\dist\electron.exe</NodeExePath>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>

@@ -105,7 +105,7 @@ function init() {
     }
 
     config['version'] = app.getVersion(); // 动态写入程序版本
-    config['path'] = path.basename(exePath, path.extname(exePath)); // 动态写入程序目录
+    config['path'] = path.basename(process.execPath, path.extname(exePath)); // 动态写入程序目录
     config_Processed = changeCourseProcessing(config);
 
 

@@ -836,8 +836,8 @@
 
         document.getElementById('createLink').addEventListener('click', () => {
             const data = document.querySelector('.sidebar-item.active').getAttribute('data-target');
-            navigator.clipboard.writeText(Config.path + ' setting ' + data.substr(1));
-            alert('已复制目标至剪切板，请手动粘贴');
+            navigator.clipboard.writeText('setting ' + data.substr(1));
+            alert('参数已复制目标至剪切板，请手动粘创建');
             // window.api.createLink(data);
         });
     </script>

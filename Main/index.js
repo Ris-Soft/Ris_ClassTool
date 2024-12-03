@@ -33,7 +33,19 @@ const contextMenu = Menu.buildFromTemplate([
         ]
     },
     { type: "separator" },
-    { label: '随机点名', click: () => createWindow('./src/apps/random.html', true) },
+    {
+        label: '随机点名', click: () => {
+            if (config.insiderPreview) {
+                checkWebsite('https://app.3r60.top/webProject/Ris_ClassTool/check.html', 'Successful', (result) => {
+                    if (result) {
+                        createWindow(host + 'apps/random.html',false,false,true);
+                    }
+                });
+            } else {
+                createWindow(path.join(__dirname, './src/apps/random.html'),true,false,true);
+            }
+        }
+    },
     { label: '在线工具', click: () => createWindow('https\:\/\/edu.3r60.top/?id=tools', false) },
     { label: '程序设置', click: () => createWindow_Setting() },
     { label: '退出应用', click: () => { app.quit(); } }
@@ -127,13 +139,15 @@ function init() {
 }
 
 function handleCommand(commandLine) {
-    if (commandLine && commandLine[0] == "setting" && commandLine[1]) {
-        createWindow_Setting(commandLine[1]);
+    if (commandLine && commandLine.length > 1) {
+        if (commandLine[0] === "setting") {
+            createWindow_Setting(commandLine[1]);
+        }
     }
 }
 
 // ————「窗口创建」——————————————————————————————————————————————————————————————————
-function createWindow(url, local, fullScreen = false) { // 灵活窗口
+function createWindow(url, local, fullScreen = false, StMode = false) { // 灵活窗口
     // 检查是否已经有一个相同URL的窗口打开
     url = url.replaceAll("\\", "/");
     BrowserWindow.getAllWindows().forEach(win => {
@@ -148,8 +162,8 @@ function createWindow(url, local, fullScreen = false) { // 灵活窗口
     }
     Menu.setApplicationMenu(null);
     const targetWindow = new BrowserWindow({
-        width: (local || url.endsWith('random.html')) ? 420 : 1366,
-        height: (local || url.endsWith('random.html')) ? 400 : 768,
+        width: StMode ? 420 : 1366,
+        height: StMode ? 400 : 768,
         frame: !fullScreen,
         titleBarOverlay: !fullScreen ? {
             color: "#fff",
@@ -168,7 +182,7 @@ function createWindow(url, local, fullScreen = false) { // 灵活窗口
     });
 
     targetWindow.setFullScreen(fullScreen);
-    targetWindow.setAlwaysOnTop(fullScreen || local, 'screen-saver');
+    targetWindow.setAlwaysOnTop(fullScreen || StMode, 'screen-saver');
 
     if (local) {
         targetWindow.loadFile(path.join(__dirname, url));
@@ -537,7 +551,15 @@ function internalFunction(functionCategory, functionName, args1, args2) {
 
 function autoActionGUI(args) {
     autoAction = args;
-    createWindow('./src/apps/autoQuit.html', true, true);
+    if (config.insiderPreview) {
+        checkWebsite('https://app.3r60.top/webProject/Ris_ClassTool/check.html', 'Successful', (result) => {
+            if (result) {
+                createWindow(host + 'apps/autoQuit.html', false , true);
+            }
+        });
+    } else {
+        createWindow(path.join(__dirname, './src/apps/autoQuit.html'), true, true);
+    }
     const windows = BrowserWindow.getAllWindows();
     windows.forEach(win => {
         if (win.webContents.getURL().endsWith('examMode.html')) {
@@ -559,7 +581,15 @@ function autoActionFunction(args) {
         spawn('shutdown', ['/s', '/t', '0']);
     } else if (args == 5 && (config.autoFocusMode ?? false)) {
         // 专注模式
-        createWindow('./src/apps/examMode.html', true, true);
+        if (config.insiderPreview) {
+            checkWebsite('https://app.3r60.top/webProject/Ris_ClassTool/check.html', 'Successful', (result) => {
+                if (result) {
+                    createWindow(host + 'apps/examMode.html', false, true);
+                }
+            });
+        } else {
+            createWindow(path.join(__dirname, './src/apps/examMode.html'), true, true);
+        }
     }
     console.log(args);
 }
@@ -595,8 +625,8 @@ ipcMain.on('function_showExplorer', (event, args) => { // 打开资源管理器
 ipcMain.on('createLink', (event, linkName) => { // 创建快捷方式
     spawn('explorer.exe');
 });
-ipcMain.on('webview_create', (event, url, local, fullScreen) => { // 创建灵活窗口
-    createWindow(url, local, fullScreen);
+ipcMain.on('webview_create', (event, url, local, fullScreen, StMode) => { // 创建灵活窗口
+    createWindow(url, local, fullScreen, StMode);
 });
 ipcMain.on('config_save', saveConfig);
 app.on('ready', init); // 载入应用

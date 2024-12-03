@@ -38,8 +38,8 @@ contextBridge.exposeInMainWorld('api', {
     function_autoAction: (args) => ipcRenderer.send('function_autoAction', args),
 
     // WebView
-    webview_create: (url, local, fullScreen) => {
-        ipcRenderer.send('webview_create', url, local, fullScreen);
+    webview_create: (url, local, fullScreen, StMode) => {
+        ipcRenderer.send('webview_create', url, local, fullScreen, StMode);
     },
 
     openFile: (filePath, mode) => ipcRenderer.send('open-file', filePath, mode)

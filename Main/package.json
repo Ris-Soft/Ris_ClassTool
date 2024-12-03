@@ -1,6 +1,6 @@
 {
   "name": "risclasstool",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "瑞思课堂工具",
   "main": "index.js",
   "scripts": {
@@ -15,18 +15,18 @@
     "electron-updater": "^6.3.9",
     "eslint": "^9.15.0"
   },
-  "publish": [
-    {
-      "provider": "generic",
-      "url": "https://app.3r60.top/webProject/Ris_ClassTool/version/"
-    }
-  ],
   "build": {
     "appId": "rct.trsz.app",
     "productName": "瑞思课堂工具",
     "directories": {
       "output": "dist"
     },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://app.3r60.top/webProject/Ris_ClassTool/version/"
+      }
+    ],
     "files": [
       "**",
       "**/**",

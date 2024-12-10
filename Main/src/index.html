@@ -3,8 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>课程表窗口</title>
+    <title>桌面层</title>
+    <link rel="stylesheet" href="./icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="./qweather-icons/font/qweather-icons.css">
     <style>
         :root {
             --font-size: 1em;
@@ -13,17 +18,18 @@
 
         html,
         body {
+            margin: 0;
+            padding: 0;
+            padding-top: 0.2%;
             background-color: transparent;
             color: white;
             overflow-y: hidden;
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
         }
 
         .today {
             margin-left: 10px;
-            margin-right: 10px;
+            margin-right: 20px;
             margin-top: 0px;
             vertical-align: middle;
         }
@@ -41,7 +47,6 @@
         }
 
         .current {
-            /* font-size: calc(1.25 * var(--font-size)); */
             color: #1E9FFF;
             margin-top: -0.25em;
             margin-bottom: -0.2em;
@@ -60,7 +65,7 @@
         }
 
         #schedules {
-            font-size: calc(1.5* var(--font-size));
+            font-size: calc(1.5 * var(--font-size));
             display: block;
             margin-top: 5px;
             margin-bottom: auto;
@@ -68,55 +73,95 @@
             margin-right: auto;
             padding: 0;
             padding-left: 10px;
-            padding-right: 10px;
+            padding-right: 15px;
             height: auto;
             width: fit-content;
-            background-color: rgba(0, 0, 0, .4);
+            background-color: rgba(35, 35, 35, .9);
             position: relative;
             border-radius: 5px;
             padding-bottom: 7px;
             padding-top: 5px;
+            box-shadow: 0px 0px 15px 0px #080808;
         }
 
         .vertical-divider {
             margin-right: 15px;
         }
 
-        .vertical-divider::after {
-            /* content: '|'; */
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            right: calc(-0.225* var(--font-size));
-            /* width: 1px; */
-            color: rgba(190, 190, 190, 0.5);
-            font-size: calc(0.55* var(--font-size));
-        }
+            .vertical-divider::after {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                right: calc(-0.225 * var(--font-size));
+                color: rgba(190, 190, 190, 0.5);
+                font-size: calc(0.55 * var(--font-size));
+            }
 
-        #extra {
-            font-size: calc(0.90* var(--font-size));
+        #infoBar {
+            font-size: calc(0.90*var(--font-size));
             background-color: rgba(0, 0, 0, 0.3);
             width: fit-content;
             margin: 0;
             margin-left: auto;
             margin-right: auto;
-            clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
             font-weight: 500;
-            padding: 5px 1.4em;
-            color: rgba(255, 255, 255, .8);
+            padding: 5px1.4em;
+            background-color: rgba(45, 45, 45, .9);
+            border-bottom-left-radius: 5px;
+            /*左下角*/
+            border-bottom-right-radius: 5px;
+            /*右下角*/
+            padding: 1px;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+
+            #infoBar div {
+                margin: 10px 15px;
+                display: flex;
+                align-items: flex-end;
+                padding: 0px 8px;
+            }
+
+                #infoBar div:not(:last-child) {
+                    margin-bottom: 10px;
+                    border-bottom: 1px solid rgba(255, 255, 255, .1);
+                    padding-bottom: 10px;
+                }
+
+                #infoBar div:first-child {
+                    padding-top: 0;
+                    margin-top: 10px;
+                }
+
+                #infoBar div:last-child {
+                    border-bottom: none;
+                    padding-bottom: 0;
+                }
+
+            #infoBar span {
+                display: block;
+            }
+
+        .weather,
+        .activity,
+        .countdown {
+            margin-top: 10px;
         }
     </style>
-    <link rel="stylesheet" href="./qweather-icons/font/qweather-icons.css">
-    <link rel="stylesheet" href="./icons/bootstrap-icons.css">
 </head>
 
 <body>
+    <!--<div style="position:fixed;right:0;bottom:0;padding:20px;font-family:Arial,sans-serif;color:#666;z-index:1000">
+        <b>RisClassTool</b><br>InsiderPreview
+    </div>-->
     <h2 id="schedules">加载中...</h2>
-    <h2 id="extra" style="display: none;">加载中...</h2>
+    <div class="info-bar" id="infoBar"></div>
     <script>
         let intervalId = null;
         let lastWeatherUpdate = 0; // 记录上次更新天气的时间
-        let lastWeather = ''; // 记录上次更新天气的时间
+        let lastWeather = ''; // 记录上次更新的天气信息
         const WEATHER_UPDATE_INTERVAL = 600000; // 天气数据更新间隔（10分钟）
 
         function count(o) {
@@ -133,30 +178,31 @@
             return false;
         }
 
+        var lastLinePosPassed = false;
+
         function updateSchedules(data) {
             const coursesDiv = document.getElementById('schedules');
-            coursesDiv.innerHTML = ''; // 清空之前的内容
-
-            const arr = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-            const myDate = new Date();
-            const cycle = arr[myDate.getDay()];
-
+            coursesDiv.innerHTML = '';
+            const today2 = new Date();
+            const month = today2.getMonth() + 1;
+            const day = today2.getDate();
+            const weekday = today2.toLocaleDateString('zh-CN', {
+                weekday: 'long'
+            });
             const cycleElement = document.createElement('span');
-            cycleElement.textContent = cycle;
+            cycleElement.textContent = `${weekday}`;
             cycleElement.className = 'today';
             coursesDiv.appendChild(cycleElement);
-
-            const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).charAt(0).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase();
+            const today = today2.toLocaleDateString('en-US', {
+                weekday: 'long'
+            }).charAt(0).toUpperCase() + today2.toLocaleDateString('en-US', {
+                weekday: 'long'
+            }).slice(1).toLowerCase();
             const dailyCourses = data.courseTable[today];
             const timeTable = data.timeTable;
-
-            const timeOffset = data.timeOffset || 0; // 从配置中获取时钟偏移量，默认为0
-
+            const timeOffset = data.timeOffset || 0;
             const now = new Date();
             const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + timeOffset; // 加入偏移量
-
-            let lastLinePosPassed = false; // 标记是否已经过了最后一个linePos
-
             // 显示今天的课程
             for (let i = 1; i <= count(data.timeTable); i++) {
                 const period = i.toString();
@@ -165,10 +211,8 @@
                 const [startStr, endStr] = time.split('-');
                 const start = parseInt(startStr.split(':')[0]) * 3600 + parseInt(startStr.split(':')[1]) * 60;
                 const end = parseInt(endStr.split(':')[0]) * 3600 + parseInt(endStr.split(':')[1]) * 60;
-
                 const courseElement = document.createElement('span');
                 courseElement.className = 'schedule';
-
                 if (currentTime >= start && currentTime < end) {
                     courseElement.classList.add('current');
                     if (i > data.linePos[data.linePos.length - 1]) {
@@ -179,108 +223,51 @@
                 } else {
                     courseElement.classList.add('past');
                 }
-
                 courseElement.textContent = `${course}`;
 
                 if (data.linePos.includes(i)) {
                     courseElement.classList.add('vertical-divider');
                 }
-
                 coursesDiv.appendChild(courseElement);
             }
 
             // 如果已经过了最后一个linePos，并且有明天的课程，则显示明天的课程
+            const extraDiv = document.getElementById('extra');
             if (lastLinePosPassed) {
-                // 获取明天的日期
-                var tomorrowData = new Date();
+                const tomorrowData = new Date();
                 tomorrowData.setDate(now.getDate() + 1);
                 const arr_eng = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-                // 获取明天是周几
-                var dayOfWeek = tomorrowData.getDay();
+                const arr2 = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+                const dayOfWeek = tomorrowData.getDay();
                 const tomorrow = arr_eng[dayOfWeek];
                 const tomorrowCourses = data.courseTable[tomorrow];
 
                 console.log(tomorrow, tomorrowCourses);
-                const extraDiv = document.getElementById('extra');
-                extraDiv.style.display = tomorrowCourses ? 'block' : 'none';
+                extraDiv.style.display = tomorrowCourses ? 'flex' : 'none';
 
                 if (tomorrowCourses) {
-                    const tomorrowLabel = document.createElement('span');
-                    extraDiv.innerHTML = arr[dayOfWeek] + '&nbsp;&nbsp;&nbsp;';
-                    coursesDiv.appendChild(tomorrowLabel);
-
+                    extraDiv.innerHTML = `<i class="bi bi-calendar-minus"></i>
+                                &nbsp;&nbsp;${arr2[dayOfWeek]}<span style="flex:1"></span>`;
                     for (let i = 1; i <= count(data.timeTable); i++) {
                         const period = i.toString();
                         const course = tomorrowCourses[i - 1];
-                        extraDiv.innerHTML = extraDiv.innerHTML + ` ${course} ${data.linePos.includes(i) ? "|" : ""}`;
+                        extraDiv.innerHTML += `${course}${data.linePos.includes(i) ? " | " : " "}`;
                     }
                 }
-            }
-
-            if (Date.now() - lastWeatherUpdate > WEATHER_UPDATE_INTERVAL || data.countShow) {
-                lastWeatherUpdate = Date.now();
-                updateWeathers(data);
             } else {
-                coursesDiv.appendChild(lastWeather);
+                extraDiv.style.display = 'none';
             }
-        }
-
-        function changeElementTagName(elementId, newTagName) { // AI 生成
-            // 获取原始元素
-            const originalElement = document.getElementById(elementId);
-
-            // 创建新元素
-            const newElement = document.createElement(newTagName);
-
-            // 复制原始元素的所有属性
-            for (let i = 0; i < originalElement.attributes.length; i++) {
-                const attr = originalElement.attributes[i];
-                newElement.setAttribute(attr.name, attr.value);
-            }
-
-            // 复制原始元素的所有子节点
-            while (originalElement.firstChild) {
-                newElement.appendChild(originalElement.firstChild);
-            }
-
-            // 替换原始元素
-            originalElement.parentNode.replaceChild(newElement, originalElement);
         }
 
         function updateWeathers(data) {
             function updateWeatherElement(data, countShow) {
-                const coursesDiv = document.getElementById('schedules');
-                let weatherElement = coursesDiv.querySelector('.weather') || document.createElement('span');
-
-                if (!weatherElement.classList.contains('today')) {
-                    weatherElement.className = 'today weather';
-                    coursesDiv.appendChild(weatherElement);
-                    lastWeather = weatherElement;
-                }
-
-                if (countShow) {
-                    const today = new Date();
-                    const currentYear = today.getFullYear();
-                    const currentMonth = today.getMonth();
-                    const currentDay = today.getDate();
-
-                    // 修复倒数日BUG
-                    today.setHours(0, 0, 0, 0);
-
-                    const targetDate = new Date(currentYear, parseInt(data.countTime.split('.')[0] ?? 6) - 1, parseInt(data.countTime.split('.')[1]) ?? 7, 0, 0, 0);
-
-                    if (today > targetDate) {
-                        targetDate.setFullYear(targetDate.getFullYear() + 1);
-                    }
-
-                    const oneDay = 24 * 60 * 60 * 1000;
-                    const diffDays = Math.round(Math.abs((targetDate - today) / oneDay));
-
-                    // 更新天气元素的内容为倒计时
-                    weatherElement.innerHTML = `<i class="bi bi-hourglass"></i>&nbsp;${data.countText ? '<span class="small">距&nbsp;</span>' + data.countText + '<span class="small">&nbsp;还有</span> ' : ''}${diffDays} 天`;
-                    lastWeatherUpdate = 0;
-                } else {
+                const infoBar = document.getElementById('infoBar');
+                let weatherElement = infoBar.querySelector('.weather') || document.createElement('div');
+                weatherElement.innerHTML = '<i class="bi bi-stars"></i>&nbsp;&nbsp;天气信息<span style="flex:1"></span>正在获取...';
+                weatherElement.className = 'weather';
+                infoBar.appendChild(weatherElement);
+                if (data.posName && Date.now() - lastWeatherUpdate > WEATHER_UPDATE_INTERVAL) {
+                    lastWeatherUpdate = Date.now();
                     fetch(`https://api.3r60.top/v2/project/weather/?pos=${data.posName ?? '北京'}`)
                         .then(response => {
                             if (!response.ok) {
@@ -290,27 +277,112 @@
                         })
                         .then(data => {
                             // 更新天气元素的内容为实际天气
-                            weatherElement.innerHTML = `<i class="qi-${data.icon}"></i>&nbsp;${data.temp}℃`;
+                            weatherElement.innerHTML = `<i class="qi-${data.icon}"></i>
+                                &nbsp;&nbsp;天气信息<span style="flex:1"></span>
+                                ${data.text}
+                                ${data.temp}℃ &nbsp;
+                                ${data.windDir}${data.windScale}级`;
+                            lastWeather = weatherElement.innerHTML;
+
                         })
                         .catch(error => {
                             console.error('There has been a problem with your fetch operation:', error);
                         });
+                } else {
+                    weatherElement.innerHTML = lastWeather;
+
                 }
             }
 
             updateWeatherElement(data, data.countShow ? data.countShow : false);
         }
 
-        window.api.config_onRecive(init);
+        function checkAndDisplayInfoBar(data) {
+            const today = new Date();
+            const month = today.getMonth() + 1;
+            const day = today.getDate();
+            const weekday = today.toLocaleDateString('zh-CN', {
+                weekday: 'long'
+            });
+            const todaysDate = `${month}.${day}`;
+            const infoBar = document.getElementById('infoBar');
+            const students = data.students;
+            const studentsWithActiveDate = students.filter(student => student.activeDate === todaysDate);
+
+            infoBar.innerHTML = '';
+
+            // 添加时间信息
+            const timeElement = document.createElement('div');
+            timeElement.innerHTML = `<i class="bi bi-calendar-check"></i>&nbsp;&nbsp;今天<span style="flex:1"></span>${month}月${day}日 ${weekday}`;
+            infoBar.appendChild(timeElement);
+
+            // 添加明日课程容器
+            const extraElement = document.createElement('div');
+            extraElement.id = 'extra';
+            infoBar.appendChild(extraElement);
+
+            updateSchedules(data); // 加载课程表
+
+            if (studentsWithActiveDate.length > 0) {
+
+                // 初始化一个变量来存储所有学生的姓名字符串
+                let nameList = '';
+
+                // 对于每个有活动的学生，添加他们的姓名到nameList字符串中
+                studentsWithActiveDate.forEach(student => {
+                    if (nameList !== "") {
+                        nameList += ","; // 添加分隔符
+                    }
+                    nameList += student.name; // 添加学生姓名
+                });
+
+                // 创建事件名称和所有学生姓名文本并添加到信息栏中
+                const eventNameText = document.createElement('div');
+                eventNameText.innerHTML = `<i class="bi bi-check2-circle"></i>&nbsp;&nbsp;${data.studentActiveName}<span style="flex:1"></span>${nameList}`;
+                infoBar.appendChild(eventNameText);
+            }
+
+            // 添加倒计时信息
+            if (data.countTime) {
+                const today = new Date();
+                const currentYear = today.getFullYear();
+                const currentMonth = today.getMonth();
+                const currentDay = today.getDate();
+
+                // 修复倒数日BUG
+                today.setHours(0, 0, 0, 0);
+
+                const targetDate = new Date(currentYear, parseInt(data.countTime.split('.')[0] ?? 6) - 1, parseInt(data.countTime.split('.')[1] ?? 7), 0, 0, 0);
+
+                if (today > targetDate) {
+                    targetDate.setFullYear(targetDate.getFullYear() + 1);
+                }
+
+                const oneDay = 24 * 60 * 60 * 1000;
+                const diffDays = Math.round(Math.abs((targetDate - today) / oneDay));
+                const countdownTitle = data.countText ? "距离 " + data.countText : '倒计时';
+                const countdownElement = document.createElement('div');
+                countdownElement.innerHTML = `<i class="bi bi-hourglass-split"></i>&nbsp;&nbsp;${countdownTitle}<span style="flex:1"></span>${diffDays} 天`;
+                countdownElement.className = 'countdown';
+                infoBar.appendChild(countdownElement);
+            }
+
+            // 添加天气信息
+            updateWeathers(data);
+        }
 
         function init(data) {
-            updateSchedules(data);
+            // 检查日期并显示信息栏
+            checkAndDisplayInfoBar(data);
+
             // 个性化设定
             document.documentElement.style.setProperty('--font-size', `${data.scheduleFontSize || '1'}em`);
             if (intervalId) {
                 clearInterval(intervalId);
             }
-            intervalId = setInterval(() => updateSchedules(data), 10000);
+            intervalId = setInterval(() => {
+                checkAndDisplayInfoBar(data);
+            }, 10000);
         }
 
         // 确保在窗口关闭时清除定时器
@@ -318,9 +390,44 @@
             clearInterval(intervalId);
         });
 
+        window.api.config_onRecive(init);
+
+        function removeUrlParameter(param) {
+            const url = new URL(window.location);
+            const params = new URLSearchParams(url.search);
+            params.delete(param);
+            url.search = params.toString();
+            window.history.replaceState(null, '', url);
+        }
+
         window.onload = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (!urlParams.has('firstVisit')) {
+                const newUrl = `${window.location.pathname}?firstVisit=true`;
+                window.location.href = newUrl;
+            } else {
+                removeUrlParameter('firstVisit');
+            }
             init(await window.api.config_Get(true));
         };
+
+        // 同步宽度
+        // 获取源和目标元素
+        const sourceElement = document.getElementById('schedules');
+        const targetElement = document.getElementById('infoBar');
+
+        // 创建一个新的 ResizeObserver 实例
+        const resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                if (entry.target === sourceElement) {
+                    // 更新目标元素的宽度为源元素的实际宽度
+                    targetElement.style.width = `${entry.contentRect.width}px`;
+                }
+            }
+        });
+
+        // 开始观察源元素的尺寸变化
+        resizeObserver.observe(sourceElement);
     </script>
 </body>
 

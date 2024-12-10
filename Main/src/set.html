@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+<!--<div style="position: fixed; right: 0; bottom: 0; padding: 20px; font-family: Arial, sans-serif; color: #666;z-index:1000">
+    <b>RisClassTool</b><br>Insider Preview
+</div>-->
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>瑞思课堂工具</title>
+    <title>设置</title>
     <style>
         * {
             box-sizing: border-box;
@@ -127,7 +130,8 @@
         }
 
         input,
-        textarea {
+        textarea,
+        select {
             border: 1px solid rgba(0, 0, 0, 0.2);
             box-sizing: border-box;
             border-radius: 5px;
@@ -137,10 +141,15 @@
             max-width: 600px;
         }
 
+        select {
+            width: 180px;
+        }
+
             input:focus,
             textarea:focus,
             input:focus-visible,
-            textarea:focus-visible {
+            textarea:focus-visible,
+            select:focus {
                 border: 1px solid #0097fb;
                 outline: none;
             }
@@ -297,6 +306,56 @@
             padding: 20px;
             width: 50px;
         }
+
+        .content-page#about {
+            padding: 20px;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+
+        .about-container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+            .about-container h1 {
+                color: #333;
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+
+            .about-container h3 {
+                color: #666;
+                font-size: 18px;
+                margin-bottom: 20px;
+            }
+
+        .about-list {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+
+            .about-list li {
+                padding: 5px 0;
+                font-size: 16px;
+                color: #333;
+            }
+
+                .about-list li strong {
+                    color: #000;
+                }
+
+        .about-footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #888;
+            text-align: center;
+        }
     </style>
     <link rel="stylesheet" href="./icons/bootstrap-icons.css">
 </head>
@@ -311,12 +370,89 @@
         <div class="sidebar-item" data-target="#students"><i class="bi bi-people"></i>&nbsp;学生管理</div>
         <div class="sidebar-item" data-target="#switch"><i class="bi bi-toggles"></i>&nbsp;调休换课</div>
         <div class="sidebar-item" data-target="#autoQuit"><i class="bi bi-code-square"></i>&nbsp;自动退出</div>
-        <div class="sidebar-item" data-target="#help"><i class="bi bi-info-circle"></i>&nbsp;关于程序</div>
-        <a id="createLink" style="position: fixed;left: 0;bottom: 0;padding: 15px;font-family: Arial, sans-serif;color: #007bff;z-index:1000;font-size: 12px;text-decoration: underline;cursor: pointer;">
+        <div class="sidebar-item" data-target="#appearance"><i class="bi bi-palette"></i>&nbsp;外观设置</div>
+        <div class="sidebar-item" data-target="#countdown"><i class="bi bi-clock"></i>&nbsp;倒计时与天气</div>
+        <div class="sidebar-item" data-target="#sidebarSettings"><i class="bi bi-layout-sidebar"></i>&nbsp;侧边栏设置</div>
+        <div class="sidebar-item" data-target="#about"><i class="bi bi-info-circle"></i>&nbsp;关于程序</div>
+        <a id="createLink"
+           style="position: fixed;left: 0;bottom: 0;padding: 15px;font-family: Arial, sans-serif;color: #007bff;z-index:1000;font-size: 12px;text-decoration: underline;cursor: pointer;">
             <b>创建当前快捷方式</b><br>在桌面生成此页的快捷方式
         </a>
     </div>
+    </div>
     <div id="main-content">
+        <!-- 外观设置页面 -->
+        <div class="content-page" id="appearance">
+            <div class="page-title"><i class="bi bi-palette"></i>&nbsp;外观设置</div>
+            <div class="card">
+                <label for="infoBarStyle">
+                    <h2>桌面信息栏输出样式</h2>请选择一个选项
+                </label>
+                <select id="infoBarStyle">
+                    <option value="1">样式1</option>
+                    <option value="2">样式2</option>
+                    <option value="3">样式3</option>
+                </select>
+            </div>
+            <div class="card">
+                <label for="progressColor">
+                    <h2>主题颜色</h2>进度条与课程表的突出主题色
+                </label>
+                <input type="text" id="progressColor" placeholder="默认值：#1E9FFF"><br><br>
+            </div>
+            <div class="card">
+                <label for="scheduleFontSize">
+                    <h2>课程字体设定</h2>课程表相对字体大小等级[推荐值：1]
+                </label>
+                <input type="text" id="scheduleFontSize" placeholder="推荐值：1"><br><br>
+            </div>
+            <div class="card">
+                <label for="progressHeight">
+                    <h2>进度条高度</h2>顶部进度条的显示高度，最大值为100px
+                </label>
+                <input type="text" id="progressHeight" placeholder="默认值：2px"><br><br>
+            </div>
+        </div>
+
+        <!-- 倒计时与提醒页面 -->
+        <div class="content-page" id="countdown">
+            <div class="page-title"><i class="bi bi-clock"></i>&nbsp;倒计时与提醒</div>
+            <div class="card">
+                <label for="countTime">
+                    <h2>到数目标</h2>倒数日的目标日期，启用倒数日时生效
+                </label>
+                <input type="text" id="countTime" placeholder="格式：月.日"><br><br>
+            </div>
+            <div class="card">
+                <label for="countText">
+                    <h2>到数文本</h2>倒数日前显示的文本，启用倒数日时生效
+                </label>
+                <input type="text" id="countText" placeholder="默认为空"><br><br>
+            </div>
+            <div class="card">
+                <label for="posName">
+                    <h2>地理位置</h2>用于获取天气信息，关闭倒数日时生效
+                </label>
+                <input type="text" id="posName" placeholder="位置名称"><br><br>
+            </div>
+        </div>
+
+        <!-- 侧边栏设置页面 -->
+        <div class="content-page" id="sidebarSettings">
+            <div class="page-title"><i class="bi bi-layout-sidebar"></i>&nbsp;侧边栏设置</div>
+            <div class="card">
+                <label for="sideBarShow">
+                    <h2>启用侧边栏</h2>重启后生效，关闭后则不再创建侧边栏窗口
+                </label>
+                <input type="checkbox" id="sideBarShow"><br>
+            </div>
+            <div class="card">
+                <label for="sideBarBottom">
+                    <h2>侧边栏位置</h2>侧边栏按钮与底部距离，重启后生效
+                </label>
+                <input type="text" id="sideBarBottom" placeholder="默认值：200"><br><br>
+            </div>
+        </div>
         <div class="content-page active" id="basic">
             <div class="page-title"><i class="bi bi-gear"></i>&nbsp;通用设定</div>
             <form id="basicSettingsForm">
@@ -334,64 +470,9 @@
                 </div>
                 <div class="card">
                     <label for="timeOffset">
-                        <h2>时间偏移</h2>程序内时间偏移，以秒为单位。例如：+10或-10
+                        <h2>时间偏移</h2>程序内时间偏移，以秒为单位例如：+10或-10
                     </label>
                     <input type="text" id="timeOffset" placeholder="时间偏移，默认0"><br><br>
-                </div>
-                <div class="card">
-                    <label for="progressColor">
-                        <h2>主题颜色</h2>进度条与课程表的突出主题色
-                    </label>
-                    <input type="text" id="progressColor" placeholder="默认值：#1E9FFF"><br><br>
-                </div>
-                <div class="card">
-                    <label for="posName">
-                        <h2>地理位置</h2>用于获取天气信息，关闭倒数日时生效
-                    </label>
-                    <input type="text" id="posName" placeholder="位置名称"><br><br>
-                </div>
-                <div class="card">
-                    <label for="countShow">
-                        <h2>启用倒数日</h2>启用此功能后，课程表的天气组件将替换为倒计时组件
-                    </label>
-                    </label>
-                    <input type="checkbox" id="countShow"><br><br>
-                </div>
-                <div class="card">
-                    <label for="countTime">
-                        <h2>到数目标</h2>倒数日的目标日期，启用倒数日时生效
-                    </label>
-                    <input type="text" id="countTime" placeholder="格式：月.日"><br><br>
-                </div>
-                <div class="card">
-                    <label for="countText">
-                        <h2>到数文本</h2>倒数日前显示的文本，启用倒数日时生效
-                    </label>
-                    <input type="text" id="countText" placeholder="默认为空"><br><br>
-                </div>
-                <div class="card">
-                    <label for="scheduleFontSize">
-                        <h2>课程字体设定</h2>课程表相对字体大小等级[推荐值：1]
-                    </label>
-                    <input type="text" id="scheduleFontSize" placeholder="推荐值：1"><br><br>
-                </div>
-                <div class="card">
-                    <label for="progressHeight">
-                        <h2>进度条高度</h2>顶部进度条的显示高度，最大值为100px
-                    </label>
-                    <input type="text" id="progressHeight" placeholder="默认值：2px"><br><br>
-                </div>
-                <div class="card">
-                    <label for="sideBarShow">
-                        <h2>启用侧边栏</h2>重启后生效，关闭后则不再创建侧边栏窗口
-                    </label>
-                    <input type="checkbox" id="sideBarShow"><br>
-                </div>
-                <div class="card">
-                    <label for="sideBarBottom">
-                        <h2>侧边栏位置</h2>侧边栏按钮与底部距离，重启后生效
-                    </label>
-                    <input type="text" id="sideBarBottom" placeholder="默认值：200"><br><br>
                 </div>
                 <div class="card">
                     <label for="focusText">
@@ -399,9 +480,47 @@
                     </label>
                     <input type="text" id="focusText" placeholder="专注模式默认文本"><br><br>
                 </div>
-                <div class="card">
+                <!-- <div class="card">
                     <button type="button" id="saveAutoQuitConfigButton" onclick="saveBasicConfigButton()">保存</button>
+                </div> -->
+            </form>
+        </div>
+        <div class="content-page" id="autoQuit">
+            <div class="page-title"><i class="bi bi-code-square"></i>&nbsp;自动执行</div>
+            <form id="autoQuitSettingsForm">
+                <div class="card">
+                    <label for="autoQuit">
+                        <h2>课前5分钟准备</h2>课前五分钟时倒计时提示关闭清单内程序
+                    </label>
+                    <input type="checkbox" id="autoQuit">
                 </div>
+                <div class="card">
+                    <label for="autoFocusMode">
+                        <h2>自习课自动进入专注模式</h2>当课程为“自”时，会自动进入专注模式
+                    </label>
+                    <input type="checkbox" id="autoFocusMode">
+                </div>
+                <div class="card">
+                    <label for="autoFocusMode_PE">
+                        <h2>体育课自动进入专注模式</h2>当课程为“体”时，会自动进入专注模式
+                    </label>
+                    <input type="checkbox" id="autoFocusMode_PE">
+                </div>
+                <div class="card">
+                    <label for="autoPowerOffB">
+                        <h2>空白课程关机</h2>当课程为“-”时，会提示并倒计时自动工具
+                    </label>
+                    <input type="checkbox" id="autoPowerOffB">
+                </div>
+                <div class="card">
+                    <label for="autoPowerOff">
+                        <h2>放学自动关机</h2>当天最后一节课结束后倒计时关闭计算机
+                    </label>
+                    <input type="checkbox" id="autoPowerOff">
+                </div>
+                <!-- <div class="card">
+                    <button type="button" id="saveBasicConfigButton" onclick="saveAutoQuitConfigButton()">保存</button>
+                </div> -->
             </form>
         </div>
         <div class="content-page" id="schedule">
@@ -435,28 +554,39 @@
                 <div class="card">
                     <button type="button" id="addRowButton" style="margin-left: 0;">新增行</button><button type="button"
                                                                                                         id="saveScheduleConfigButton">
-                        保存
+                        保存课表
                     </button>
                 </div>
             </div>
         </div>
         <div class="content-page" id="students">
             <div class="page-title"><i class="bi bi-people"></i>&nbsp;学生管理</div>
-            <table id="studentsTable">
-                <thead>
-                    <tr>
-                        <th>姓名</th>
-                        <th style="display:none">权重</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-            <button type="button" class="greenBtn" id="addStudentButton">新增学生</button><button type="button"
-                                                                                              id="saveStudentsConfigButton">
-                保存
-            </button>
+            <div class="card">
+                <label for="studentActiveName">
+                    <h2>特殊活动名称</h2>指定日期在桌面信息栏中显示学生名称（例如：擦黑板）
+                </label>
+                <input type="text" id="studentActiveName" placeholder="特殊活动名称"><br><br>
+            </div>
+            <div class="card" style="display:block">
+                <span style="display:flex;">
+                    <i class="bi bi-list" style="font-size: 26px;margin: 10px;"></i>
+                    <button type="button" class="greenBtn" id="addStudentButton"><i class="bi bi-plus-circle"></i>&nbsp;新增</button><button type="button"
+                                                                                                                                           id="saveStudentsConfigButton">
+                        <i class="bi bi-archive"></i>&nbsp;保存
+                    </button>
+                </span><br>
+                <table id="studentsTable">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>活动日期</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div class="content-page" id="switch">
             <div class="page-title"><i class="bi bi-toggles"></i>&nbsp;调休换课</div>
@@ -479,126 +609,32 @@
                 </button>
             </div>
         </div>
-        <div class="content-page active" id="help">
-            <h1>RisClassTool <span id="version"></span></h1>
-            <h3>瑞思课堂工具 - 教室桌面得力助手</h3>
-            <ul>
-                <li>使用提示：</li>
-                <li>请不要使用管理员权限运行本程序</li>
-                <li>本程序启动时会自动尝试设置开机自启动，无需自行操作</li>
-                <li>通用设置中位置名称请填写详细地址，避免重名地点导致获取出错</li>
-                <li>配置文件存储位置：D:/Ris_ClassToolConfig.json，删除文件时请注意</li>
-                <li>进度条刷新间隔：1秒；课程表刷新间隔：10秒；天气更新间隔：10分钟</li>
-                <li>更多问题请加群：939571490</li>
-            </ul>
-        </div>
-        <div class="content-page" id="autoQuit">
-            <div class="page-title"><i class="bi bi-code-square"></i>&nbsp;自动执行</div>
-            <form id="autoQuitSettingsForm">
-                <div class="card">
-                    <label for="autoQuitChecked">
-                        <h2>课前5分钟准备</h2>课前五分钟时倒计时提示关闭清单内程序
-                    </label>
-                    <input type="checkbox" id="autoQuitChecked">
+        <div class="content-page" id="about">
+            <div class="about-container">
+                <h1><i class="bi bi-info-circle"></i> RisClassTool <span id="version"></span></h1>
+                <h3><i class="bi bi-gear"></i> 瑞思课堂工具 - 教室桌面得力助手</h3>
+                <ul class="about-list">
+                    <li><strong>使用提示：</strong></li>
+                    <li><i class="bi bi-exclamation-triangle"></i> 请不要使用管理员权限运行本程序</li>
+                    <li><i class="bi bi-circle"></i> 本程序启动时会自动尝试设置开机自启动，无需自行操作</li>
+                    <li><i class="bi bi-geo-alt"></i> 在通用设置中填写位置名称时，请提供详细地址，以避免因重名地点导致获取信息出错</li>
+                    <li><i class="bi bi-folder"></i> 配置文件存储于 D:/Ris_ClassToolConfig.json，请在删除文件时注意备份</li>
+                    <li><i class="bi bi-clock"></i> 数据刷新间隔：进度条每1秒刷新一次；课程表每10秒刷新一次；天气信息每10分钟更新一次</li>
+                    <li><i class="bi bi-telegram"></i> 如遇更多问题，请加入官方群组：939571490</li>
+                </ul>
+                <div class="about-footer">
+                    <p>&copy; 2024 瑞思课堂工具</p>
                 </div>
-                <div class="card">
-                    <label for="autoFocusMode">
-                        <h2>自习课自动进入专注模式</h2>当课程为“自”时，会自动进入专注模式
-                    </label>
-                    <input type="checkbox" id="autoFocusMode">
-                </div>
-                <div class="card">
-                    <label for="autoFocusMode_PE">
-                        <h2>体育课自动进入专注模式</h2>当课程为“体”时，会自动进入专注模式
-                    </label>
-                    <input type="checkbox" id="autoFocusMode_PE">
-                </div>
-                <div class="card">
-                    <label for="autoPowerOffChecked">
-                        <h2>放学自动关机</h2>当天最后一节课结束后倒计时关闭计算机
-                    </label>
-                    <input type="checkbox" id="autoPowerOffChecked">
-                </div>
-                <div class="card">
-                    <button type="button" id="saveBasicConfigButton" onclick="saveAutoQuitConfigButton()">保存</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 
+    <script src="https://edu.3r60.top/app/phrase/pinyin-pro.js"></script>
     <script>
         var Config;
-        // 接收配置信息
+        const { pinyin } = pinyinPro;
 
-        function init(config) {
-            console.log('接收到课程表数据:', config);
-            document.getElementById('version').innerHTML = config.version;
-            document.getElementById('posName').value = config.posName || '';
-            document.getElementById('countShow').checked = config.countShow || false;
-            document.getElementById('countTime').value = config.countTime || '';
-            document.getElementById('countText').value = config.countText || '';
-            document.getElementById('linePos').value = JSON.stringify(config.linePos) || '[0]';
-            document.getElementById('progressColor').value = config.progressColor || '';
-            document.getElementById('sideBarShow').checked = config.sideBarShow || true;
-            document.getElementById('sideBarBottom').value = config.sideBarBottom || '';
-            document.getElementById('scheduleFontSize').value = config.scheduleFontSize || '';
-            document.getElementById('progressHeight').value = config.progressHeight || '';
-            document.getElementById('timeOffset').value = config.timeOffset || '';
-            document.getElementById('insiderPreview').checked = config.insiderPreview || false;
-            document.getElementById('cloudUrl').value = config.cloudUrl || '';
-            document.getElementById('focusText').value = config.focusText || '';
-            document.getElementById('autoQuitChecked').checked = config.autoQuit && true;
-            document.getElementById('autoPowerOffChecked').checked = config.autoPowerOff && true;
-            document.getElementById('autoFocusMode').checked = config.autoFocusMode && true;
-            document.getElementById('autoFocusMode_PE').checked = config.autoFocusMode_PE && true;
-
-            if (config.cloudUrl) {
-                alert('云配置已接管所有设置，若不更改云配置设置下次启动时会被云配置覆盖！');
-            }
-
-            loadSchedule(config);
-            loadStudents(config);
-            loadPlans(config);
-
-            Config = config;
-        }
-
-        window.api.config_onRecive(init);
-
-        // 保存通用设定
-        function saveBasicConfigButton() {
-            const newConfig = {
-                posName: document.getElementById('posName').value,
-                countShow: document.getElementById('countShow').checked,
-                countTime: document.getElementById('countTime').value,
-                countText: document.getElementById('countText').value,
-                progressColor: document.getElementById('progressColor').value,
-                sideBarShow: document.getElementById('sideBarShow').checked,
-                sideBarBottom: document.getElementById('sideBarBottom').value,
-                scheduleFontSize: document.getElementById('scheduleFontSize').value,
-                progressHeight: document.getElementById('progressHeight').value,
-                cloudUrl: document.getElementById('cloudUrl').value,
-                insiderPreview: document.getElementById('insiderPreview').checked,
-                timeOffset: parseInt(document.getElementById('timeOffset').value),
-                focusText: document.getElementById('focusText').value,
-            };
-
-            window.api.config_save(newConfig);
-        };
-
-        // 保存自动关闭设定
-        function saveAutoQuitConfigButton() {
-            const newConfig = {
-                autoQuit: document.getElementById('autoQuitChecked').checked,
-                autoPowerOff: document.getElementById('autoPowerOffChecked').checked,
-                autoFocusMode: document.getElementById('autoFocusMode').checked,
-                autoFocusMode_PE: document.getElementById('autoFocusMode_PE').checked
-            };
-
-            window.api.config_save(newConfig);
-        };
-
-        // 课程表
+        // ================================================================
         // 动态载入
         function loadSchedule(config) {
             const tbody = document.querySelector('#scheduleTable tbody');
@@ -609,16 +645,16 @@
             for (let key in timeTable) {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-            <td contenteditable="true">${timeTable[key]}</td>
-            <td contenteditable="true">${courseTable.Monday ? courseTable.Monday[key - 1] : ''}</td>
-            <td contenteditable="true">${courseTable.Tuesday ? courseTable.Tuesday[key - 1] : ''}</td>
-            <td contenteditable="true">${courseTable.Wednesday ? courseTable.Wednesday[key - 1] : ''}</td>
-            <td contenteditable="true">${courseTable.Thursday ? courseTable.Thursday[key - 1] : ''}</td>
-            <td contenteditable="true">${courseTable.Friday ? courseTable.Friday[key - 1] : ''}</td>
-            <td contenteditable="true">${courseTable.Saturday ? courseTable.Saturday[key - 1] : ''}</td>
-            <td contenteditable="true">${courseTable.Sunday ? courseTable.Sunday[key - 1] : ''}</td>
-            <td><button class="deleteRowButton" data-key="${key}">删除</button></td>
-        `;
+                <td contenteditable="true">${timeTable[key]}</td>
+                <td contenteditable="true">${courseTable.Monday ? courseTable.Monday[key - 1] : ''}</td>
+                <td contenteditable="true">${courseTable.Tuesday ? courseTable.Tuesday[key - 1] : ''}</td>
+                <td contenteditable="true">${courseTable.Wednesday ? courseTable.Wednesday[key - 1] : ''}</td>
+                <td contenteditable="true">${courseTable.Thursday ? courseTable.Thursday[key - 1] : ''}</td>
+                <td contenteditable="true">${courseTable.Friday ? courseTable.Friday[key - 1] : ''}</td>
+                <td contenteditable="true">${courseTable.Saturday ? courseTable.Saturday[key - 1] : ''}</td>
+                <td contenteditable="true">${courseTable.Sunday ? courseTable.Sunday[key - 1] : ''}</td>
+                <td><button class="deleteRowButton" data-key="${key}">删除</button></td>
+            `;
                 tbody.appendChild(row);
             }
         }
@@ -627,16 +663,16 @@
             const tbody = document.querySelector('#scheduleTable tbody');
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td><button class="deleteRowButton">删除</button></td>
-    `;
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td><button class="deleteRowButton">删除</button></td>
+        `;
             tbody.appendChild(newRow);
         });
         // 删除行
@@ -657,8 +693,7 @@
                     Friday: [],
                     Saturday: [],
                     Sunday: []
-                },
-                linePos: JSON.parse(document.getElementById('linePos').value) ?? null,
+                }
             };
 
             const rows = document.querySelectorAll('#scheduleTable tbody tr');
@@ -676,23 +711,43 @@
 
             window.api.config_save(newConfig);
         });
+        // --------------------------
 
 
-
+        // ================================================================
         // 学生列表
-        // 动态加载
+        // 动态加载并按拼音首字母排序
         function loadStudents(config) {
             const tbody = document.querySelector('#studentsTable tbody');
             tbody.innerHTML = '';
             const students = config.students || [];
 
+            // 按拼音首字母排序
+            students.sort((a, b) => {
+                // 获取拼音首字母
+                const firstLetterA = pinyin(a.name, {
+                    style: pinyin.STYLE_FIRST_LETTER
+                })[0][0];
+                const firstLetterB = pinyin(b.name, {
+                    style: pinyin.STYLE_FIRST_LETTER
+                })[0][0];
+
+                if (firstLetterA < firstLetterB) {
+                    return -1;
+                }
+                if (firstLetterA > firstLetterB) {
+                    return 1;
+                }
+                return 0;
+            });
+
             students.forEach(student => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-            <td contenteditable="true">${student.name}</td>
-            <td contenteditable="true" style="display:none">${student.weight}</td>
-            <td><button class="deleteStudentButton redBtn">删除</button></td>
-        `;
+                        <td contenteditable="true">${student.name}</td>
+                        <td contenteditable="true">${student.activeDate || ''}</td>
+                        <td><button class="deleteStudentButton redBtn">删除</button></td>
+                    `;
                 tbody.appendChild(row);
             });
         }
@@ -701,10 +756,10 @@
             const tbody = document.querySelector('#studentsTable tbody');
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
-        <td contenteditable="true"></td>
-        <td contenteditable="true" style="display:none">0</td>
-        <td><button class="deleteStudentButton redBtn">删除</button></td>
-    `;
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td><button class="deleteStudentButton redBtn">删除</button></td>
+        `;
             tbody.appendChild(newRow);
         });
         // 删除行
@@ -724,13 +779,18 @@
                 const cells = row.querySelectorAll('td');
                 newConfig.students.push({
                     name: cells[0].textContent.trim(),
-                    weight: parseInt(cells[1].textContent.trim())
+                    activeDate: cells[1].textContent.trim()
                 });
             });
 
             window.api.config_save(newConfig);
         });
+        // --------------------------
 
+
+
+
+        // =============================================================================
         // 调休换课
         // 动态载入
         function loadPlans(config) {
@@ -741,10 +801,10 @@
             plans.forEach(plan => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-            <td contenteditable="true">${plan.date}</td>
-            <td contenteditable="true">${JSON.stringify(plan.courses)}</td>
-            <td><button class="deletePlanButton redBtn">删除</button></td>
-        `;
+                <td contenteditable="true">${plan.date}</td>
+                <td contenteditable="true">${JSON.stringify(plan.courses)}</td>
+                <td><button class="deletePlanButton redBtn">删除</button></td>
+            `;
                 tbody.appendChild(row);
             });
         }
@@ -756,10 +816,10 @@
             const courses = getOriginalCourses(date, weekday);
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
-        <td contenteditable="true">${dateInput || formatDate(date)}</td>
-        <td contenteditable="true">${JSON.stringify(courses)}</td>
-        <td><button class="deletePlanButton redBtn">删除</button></td>
-    `;
+            <td contenteditable="true">${dateInput || formatDate(date)}</td>
+            <td contenteditable="true">${JSON.stringify(courses)}</td>
+            <td><button class="deletePlanButton redBtn">删除</button></td>
+        `;
             document.querySelector('#plansTable tbody').appendChild(newRow);
         });
         // 删除规则
@@ -786,6 +846,10 @@
 
             window.api.config_save(newConfig);
         });
+
+
+
+        // ====================================================================
         // 辅助函数
         function formatDate(date) {
             return `${date.getMonth() + 1}.${date.getDate()}`;
@@ -806,6 +870,73 @@
             return courseTable[weekday] || [];
         }
 
+
+
+        // ===============================================================
+        // 主函数
+
+
+        function init(config) {
+            console.log('接收到课程表数据:', config);
+            document.getElementById('version').innerHTML = config.version;
+            document.getElementById('posName').value = config.posName || '';
+            document.getElementById('countTime').value = config.countTime || '';
+            document.getElementById('countText').value = config.countText || '';
+            document.getElementById('linePos').value = JSON.stringify(config.linePos) || '[0]';
+            document.getElementById('progressColor').value = config.progressColor || '';
+            document.getElementById('sideBarShow').checked = config.sideBarShow || true;
+            document.getElementById('sideBarBottom').value = config.sideBarBottom || '';
+            document.getElementById('scheduleFontSize').value = config.scheduleFontSize || '';
+            document.getElementById('progressHeight').value = config.progressHeight || '';
+            document.getElementById('timeOffset').value = config.timeOffset || '';
+            document.getElementById('cloudUrl').value = config.cloudUrl || '';
+            document.getElementById('focusText').value = config.focusText || '';
+            document.getElementById('studentActiveName').value = config.studentActiveName || '';
+            document.getElementById('autoQuit').checked = config.autoQuit && true;
+            document.getElementById('autoPowerOff').checked = config.autoPowerOff && true;
+            document.getElementById('autoFocusMode').checked = config.autoFocusMode && true;
+            document.getElementById('autoFocusMode_PE').checked = config.autoFocusMode_PE && true;
+            document.getElementById('insiderPreview').checked = config.insiderPreview || false;
+            document.getElementById('autoPowerOffB').checked = config.autoPowerOffB || false;
+            document.getElementById('infoBarStyle').value = config.infoBarStyle || "1"; // 为下拉框创建配置读取
+
+            if (config.cloudUrl) {
+                alert('云配置已接管所有设置，若不更改云配置设置下次启动时会被云配置覆盖！');
+            }
+
+            loadSchedule(config);
+            loadStudents(config);
+            loadPlans(config);
+
+            Config = config;
+        }
+
+        window.api.config_onRecive(init);
+
+        // 保存配置
+        function saveConfigOnBlur(element) {
+            const newConfig = {};
+
+            // 根据元素类型处理值
+            if (element.type === 'checkbox' || element.type === 'radio') {
+                newConfig[element.id] = element.checked;
+            } else if (element.tagName === 'SELECT') {
+                newConfig[element.id] = element.value !== '';
+            } else if (element.id === 'linePos') {
+                newConfig[element.id] = JSON.parse(element.value) ?? null;
+            } else {
+                newConfig[element.id] = element.value;
+            }
+
+            // 调用API保存配置
+            window.api.config_save(newConfig);
+        }
+
+        document.querySelectorAll('input, select, textarea').forEach(element => {
+            element.addEventListener('blur', function () {
+                saveConfigOnBlur(this);
+            });
+        });
 
         // 切换主内容区
         document.querySelectorAll('.sidebar-item').forEach(item => {
@@ -830,7 +961,7 @@
                 });
                 document.querySelector(targetId).classList.add('active');
                 document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-                document.querySelector(targetId).classList.add('active');
+                this.classList.add('active');
             }
         };
 

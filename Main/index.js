@@ -1,10 +1,10 @@
 // ————「初始化变量」————————————————————————————————————————————————————————————————————————————
 
 // 模块引用
-const { app, BrowserWindow, screen, ipcMain, Tray, Menu, autoUpdater, Notification } = require('electron'); // Electron模块
+const { app, BrowserWindow, screen, ipcMain, Tray, Menu, Notification } = require('electron'); // Electron模块
 const path = require('path'); // 路径拼接模块
 const fs = require('fs'); // 文件读取模块
-const { spawn } = require('child_process'); // 进程执行模块
+const { spawn, exec } = require('child_process'); // 进程执行模块
 const http = require('http'); // HTTP模块
 const https = require('https'); // HTTPS模块
 
@@ -66,18 +66,20 @@ function init() {
 
     // 检查更新
     if (!isDev) {
-        autoUpdater.setFeedURL('https://app.3r60.top/webProject/Ris_ClassTool/version/');
-        autoUpdater.checkForUpdates();
-        autoUpdater.on('update-available', () => {
-            console.log('发现新版本，准备更新');
-        });
-        autoUpdater.on('update-downloaded', () => {
-            console.log('更新就绪，下次启动时应用');
-            new Notification({
-                title: '更新已就绪',
-                body: '已升级到最新版本，下次启动时生效'
-            }).show()
-        });
+        //autoUpdater.setFeedURL('https://app.3r60.top/webProject/Ris_ClassTool/version/');
+        //autoUpdater.checkForUpdates();
+        //autoUpdater.on('update-available', () => {
+        //    console.log('发现新版本，准备更新');
+        //});
+        //autoUpdater.on('update-downloaded', () => {
+        //    console.log('更新就绪，下次启动时应用');
+        //    new Notification({
+        //        title: '更新已就绪',
+        //        body: '已升级到最新版本，下次启动时生效'
+        //    }).show()
+        //});
+
+
     }
 
     // 配置读取
@@ -143,6 +145,66 @@ function handleCommand(commandLine) {
         if (commandLine[0] === "setting") {
             createWindow_Setting(commandLine[1]);
         }
+    }
+}
+
+function update() {
+
+
+    // 创建临时目录
+    const tempDir = fs.mkdtempSync(path.join(process.cwd(), 'tmp-'));
+    const asarPath = path.join(tempDir, 'app.asar');
+
+    // 下载asar文件
+    https.get(url, (response) => {
+        if (response.statusCode === 200) {
+            const fileStream = fs.createWriteStream(asarPath);
+            response.pipe(fileStream);
+
+            fileStream.on('finish', () => {
+                fileStream.close(() => {
+                    console.log('Download completed.');
+                    replaceAndRestart(asarPath);
+                });
+            });
+
+            fileStream.on('error', (err) => {
+                fs.unlink(asarPath); // 删除已损坏的文件
+                console.error(`Error writing the file to disk: ${err.message}`);
+            });
+        } else {
+            console.error(`Failed to download file: ${response.statusCode} ${response.statusMessage}`);
+        }
+    }).on('error', (err) => {
+        console.error(`Error downloading the file: ${err.message}`);
+    });
+
+    function replaceAndRestart(asarPath) {
+        const cppProgramPath = path.join(__dirname, 'resources', 'scripts', 'RisClassTool_Function.exe'); // C++程序路径
+        const electronAppPath = path.join(__dirname, 'electron-app'); // Electron应用路径
+        const backupAsarPath = `${asarPath}.bak`;
+        const targetAsarPath = path.join(electronAppPath, 'resources', 'app.asar');
+
+        // 备份旧的asar文件
+        fs.renameSync(targetAsarPath, backupAsarPath);
+        console.log('Old ASAR file backed up.');
+
+        // 移动新的asar文件到目标位置
+        fs.renameSync(asarPath, targetAsarPath);
+        console.log('New ASAR file replaced successfully.');
+
+        // 构建命令行参数
+        const command = `"${cppProgramPath}" "replace_and_restart" "${targetAsarPath}"`;
+
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Error executing C++ program: ${error.message}`);
+                return;
+            }
+
+            console.log(stdout);
+            console.error(stderr);
+        });
     }
 }
 
@@ -279,7 +341,7 @@ function createWindow_DesktopLayer() { // 桌面层
 
     scheduleWindow.setVisibleOnAllWorkspaces(true);
 
-    // scheduleWindow.webContents.openDevTools({mode:'detach'})
+    //scheduleWindow.webContents.openDevTools({mode:'detach'})
 }
 
 let processWindow = null;
@@ -381,6 +443,9 @@ function createWindow_TopLayer() { // 置顶层
                 }
                 if (minutes == 0 && seconds == 1 && nextClass == "体") {
                     autoActionFunction(5);
+                }
+                if (minutes == 0 && seconds == 1 && nextClass == "-") {
+                    autoActionFunction(6);
                 }
             } else {
                 autoActionFunction(2);
@@ -590,6 +655,8 @@ function autoActionFunction(args) {
         } else {
             createWindow(path.join(__dirname, './src/apps/examMode.html'), true, true);
         }
+    } else if (args == 6 && (config.autoPowerOffB ?? false)) {
+        autoActionGUI({ Text: '提示：即将关闭计算机', ActionID: 4 });
     }
     console.log(args);
 }
@@ -629,7 +696,7 @@ ipcMain.on('webview_create', (event, url, local, fullScreen, StMode) => { // 创
     createWindow(url, local, fullScreen, StMode);
 });
 ipcMain.on('config_save', saveConfig);
-app.on('ready', init); // 载入应用
 app.on('second-instance', (event, commandLine, workingDirectory) => {
     handleCommand(commandLine)
 });
+app.on('ready', init); // 载入应用

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <title>随机点名</title>
+    <link rel="stylesheet" href="https://assets.3r60.top/icons/bootstrap-icons.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,10 +19,8 @@
 
         .container {
             text-align: center;
-            /* background: white; */
             padding: 20px;
             border-radius: 10px;
-            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
             min-width: 300px;
             min-height: 210px;
         }
@@ -59,46 +58,42 @@
             margin: 5px;
         }
 
-        button:hover {
-            background-color: #0056b3;
-        }
+            button:hover {
+                background-color: #0056b3;
+            }
 
         .controls {
             margin: 20px 0;
         }
 
-        .controls input[type="number"] {
-            padding: 5px;
-            width: 50px;
-            margin: 0 10px;
-            text-align: center;
-        }
+            .controls input[type="number"] {
+                padding: 5px;
+                width: 50px;
+                margin: 0 10px;
+                text-align: center;
+            }
 
-        .controls button {
-            padding: 5px 10px;
-            font-size: 1em;
-            color: white;
-            background-color: #007BFF;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+            .controls button {
+                padding: 5px 10px;
+                font-size: 1em;
+                color: white;
+                background-color: #007BFF;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
 
-        .controls button:hover {
-            background-color: #0056b3;
-        }
+                .controls button:hover {
+                    background-color: #0056b3;
+                }
 
-        .controls label {
-            font-size: 1em;
-            color: #333;
-        }
-    </style>
-</head>
+            .controls label {
+                font-size: 1em;
+                color: #333;
+            }
 
-<body>
-    <link rel="stylesheet" href="https://assets.3r60.top/icons/bootstrap-icons.css">
-    <style>
+
         #header {
             position: fixed;
             top: 0;
@@ -114,15 +109,23 @@
             -webkit-app-region: drag;
         }
 
-        #header .title {
-            padding-left: 15px;
-            font-size: 18px;
-            font-weight: bold;
-        }
+            #header .title {
+                padding-left: 15px;
+                font-size: 20px;
+                /* 增加字体大小 */
+                font-weight: bold;
+            }
     </style>
+</head>
+
+<body>
+    <!--<div style="position: fixed; right: 0; bottom: 0; padding: 20px; font-family: Arial, sans-serif; color: #333;z-index:1000">
+        <b>RisClassTool</b><br>Insider Preview
+    </div>-->
     <div id="header">
-        <div class="title" onclick="JavaScript:window.location.href = 'https://edu.3r60.top'"><i
-                class="bi bi-box-fill"></i>&nbsp;&nbsp;教学工具>随机点名</div>
+        <div class="title" onclick="JavaScript:window.location.href = 'https://edu.3r60.top'">
+            <i class="bi bi-box-fill"></i>&nbsp;&nbsp;教学工具>随机点名
+        </div>
     </div>
     <div class="container">
         <h2>随机点名</h2>
@@ -141,7 +144,11 @@
 
         function init(config) {
             participants = config.students ?? [
-                { name: '无数据', weight: 1 }
+                { name: '无数据0' },
+                { name: '无数据1' },
+                { name: '无数据2' },
+                { name: '无数据3' },
+
             ];
         }
 
@@ -171,20 +178,12 @@
         function pickRandom() {
             const numOfPicks = Math.min(parseInt(document.getElementById('numOfPicks').value), participants.length);
             const pickedParticipants = [];
-            const availableParticipants = participants.map(p => ({ ...p, weight: p.weight === 0 ? 1 : p.weight })); // 处理权重为 0 的情况
+            const tempParticipants = [...participants]; // 创建参与者的副本
 
             while (pickedParticipants.length < numOfPicks) {
-                const totalWeight = availableParticipants.reduce((acc, cur) => acc + cur.weight, 0);
-                let random = Math.random() * totalWeight;
-
-                for (let i = 0; i < availableParticipants.length; i++) {
-                    random -= availableParticipants[i].weight;
-                    if (random <= 0) {
-                        pickedParticipants.push(availableParticipants[i].name);
-                        availableParticipants.splice(i, 1); // 移除已选中的参与者
-                        break;
-                    }
-                }
+                const randomIndex = Math.floor(Math.random() * tempParticipants.length);
+                pickedParticipants.push(tempParticipants[randomIndex].name);
+                tempParticipants.splice(randomIndex, 1); // 从副本中移除已选中的参与者
             }
 
             document.getElementById('result').innerText = pickedParticipants.join(', ');

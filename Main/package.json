@@ -1,6 +1,6 @@
 {
-  "name": "risclasstool",
-  "version": "0.2.1",
+  "name": "RisClassTool",
+  "version": "0.2.2",
   "description": "瑞思课堂工具",
   "main": "index.js",
   "scripts": {
@@ -12,6 +12,7 @@
   "devDependencies": {
     "electron": "^32.1.2",
     "electron-builder": "^25.1.7",
+    "electron-squirrel-startup": "^1.0.1",
     "electron-updater": "^6.3.9",
     "eslint": "^9.15.0"
   },

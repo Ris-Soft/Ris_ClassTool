@@ -1,5 +1,7 @@
 # Ris_ClassTool 瑞思课堂工具 综合存储库
 
+介绍页：https://app.3r60.top/Ris_ClassTool
+
 ## 软件介绍
 
 ![A2449CFEDA11054ED39AEE271115E9F1](https://github.com/user-attachments/assets/c7c2b95a-22cb-4763-8f37-6cb6db603918)

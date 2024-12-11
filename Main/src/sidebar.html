@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>侧边栏</title>
-    <link rel="stylesheet" href="./icons/bootstrap-icons.css">
+     <link rel="stylesheet" href="./icons/bootstrap-icons.css"> 
+    <!--<link rel="stylesheet" href="https://assets.3r60.top/icons/bootstrap-icons.css">-->
     <style>
         body,
         html {
@@ -135,10 +136,21 @@
         document.getElementById('toggleButton').addEventListener('click', () => {
             window.api.sideBar_expand();
             document.getElementById('app').classList.toggle('expanded');
+            autoCollapse(); // 展开后自动调用自动收起功能
         });
 
         function loadWebView(url, local, fullScreen, StMode) {
             window.api.webview_create(url, local, fullScreen, StMode);
+        }
+
+        // 新增自动收起功能
+        function autoCollapse() {
+            setTimeout(() => {
+                if (document.getElementById('app').classList.contains('expanded')) {
+                    document.getElementById('app').classList.remove('expanded');
+                    window.api.sideBar_expand();
+                }
+            }, 10000); // 10秒后自动收起
         }
     </script>
 </body>

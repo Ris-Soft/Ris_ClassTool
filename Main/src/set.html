@@ -8,6 +8,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>设置</title>
+    <link rel="stylesheet" href="./icons/bootstrap-icons.css">
+    <!--<link rel="stylesheet" href="https://assets.3r60.top/icons/bootstrap-icons.css">-->
     <style>
         * {
             box-sizing: border-box;
@@ -357,7 +359,6 @@
             text-align: center;
         }
     </style>
-    <link rel="stylesheet" href="./icons/bootstrap-icons.css">
 </head>
 
 <body>
@@ -384,16 +385,16 @@
         <!-- 外观设置页面 -->
         <div class="content-page" id="appearance">
             <div class="page-title"><i class="bi bi-palette"></i>&nbsp;外观设置</div>
-            <div class="card">
-                <label for="infoBarStyle">
-                    <h2>桌面信息栏输出样式</h2>请选择一个选项
-                </label>
-                <select id="infoBarStyle">
-                    <option value="1">样式1</option>
-                    <option value="2">样式2</option>
-                    <option value="3">样式3</option>
-                </select>
-            </div>
+            <!--<div class="card">
+        <label for="infoBarStyle">
+            <h2>桌面信息栏输出样式</h2>请选择一个选项
+        </label>
+        <select id="infoBarStyle">
+            <option value="1">样式1</option>
+            <option value="2">样式2</option>
+            <option value="3">样式3</option>
+        </select>
+    </div>-->
             <div class="card">
                 <label for="progressColor">
                     <h2>主题颜色</h2>进度条与课程表的突出主题色
@@ -402,9 +403,15 @@
             </div>
             <div class="card">
                 <label for="scheduleFontSize">
-                    <h2>课程字体设定</h2>课程表相对字体大小等级[推荐值：1]
+                    <h2>桌面课程字体设定</h2>课程表相对字体大小等级[推荐值：1]
                 </label>
                 <input type="text" id="scheduleFontSize" placeholder="推荐值：1"><br><br>
+            </div>
+            <div class="card">
+                <label for="infoFontSize">
+                    <h2>桌面信息窗字体设定</h2>桌面信息窗相对字体大小等级，不填写默认跟随课程表字体大小
+                </label>
+                <input type="text" id="infoFontSize" placeholder="推荐值：1"><br><br>
             </div>
             <div class="card">
                 <label for="progressHeight">
@@ -508,7 +515,7 @@
                 </div>
                 <div class="card">
                     <label for="autoPowerOffB">
-                        <h2>空白课程关机</h2>当课程为“-”时，会提示并倒计时自动工具
+                        <h2>空白课程关机</h2>当下节课程为“-”时，当节课程下课前会提示并倒计时自动工具
                     </label>
                     <input type="checkbox" id="autoPowerOffB">
                 </div>
@@ -887,15 +894,16 @@
             document.getElementById('sideBarShow').checked = config.sideBarShow || true;
             document.getElementById('sideBarBottom').value = config.sideBarBottom || '';
             document.getElementById('scheduleFontSize').value = config.scheduleFontSize || '';
+            document.getElementById('infoFontSize').value = config.infoFontSize || '';
             document.getElementById('progressHeight').value = config.progressHeight || '';
             document.getElementById('timeOffset').value = config.timeOffset || '';
             document.getElementById('cloudUrl').value = config.cloudUrl || '';
             document.getElementById('focusText').value = config.focusText || '';
             document.getElementById('studentActiveName').value = config.studentActiveName || '';
-            document.getElementById('autoQuit').checked = config.autoQuit && true;
-            document.getElementById('autoPowerOff').checked = config.autoPowerOff && true;
-            document.getElementById('autoFocusMode').checked = config.autoFocusMode && true;
-            document.getElementById('autoFocusMode_PE').checked = config.autoFocusMode_PE && true;
+            document.getElementById('autoQuit').checked = config.autoQuit || true;
+            document.getElementById('autoPowerOff').checked = config.autoPowerOff || true;
+            document.getElementById('autoFocusMode').checked = config.autoFocusMode || true;
+            document.getElementById('autoFocusMode_PE').checked = config.autoFocusMode_PE || true;
             document.getElementById('insiderPreview').checked = config.insiderPreview || false;
             document.getElementById('autoPowerOffB').checked = config.autoPowerOffB || false;
             document.getElementById('infoBarStyle').value = config.infoBarStyle || "1"; // 为下拉框创建配置读取

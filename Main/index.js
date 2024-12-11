@@ -61,6 +61,9 @@ var autoAction_StopTime = 0;
 // ————「程序载入函数」——————————————————————————————————————————————————————————————————————————
 function init() {
 
+    createWindow(path.join(__dirname, './src/apps/autoQuit.html'), true, true);
+
+
     // 单实例锁
     if (!app.requestSingleInstanceLock()) app.quit();
 
@@ -247,7 +250,7 @@ function createWindow(url, local, fullScreen = false, StMode = false) { // 灵�
     targetWindow.setAlwaysOnTop(fullScreen || StMode, 'screen-saver');
 
     if (local) {
-        targetWindow.loadFile(path.join(__dirname, url));
+        targetWindow.loadFile(url);
     } else {
         targetWindow.loadURL(url);
     }
@@ -427,7 +430,16 @@ function createWindow_TopLayer() { // 置顶层
 
         // 更新状态窗口
         if (inClass) {
-            // 暂无课上计划
+            // 下课前1秒
+            const timeToClassEnd = endTime - currentTime;
+            const minutesToEnd = Math.floor(timeToClassEnd / 60);
+            const secondsToEnd = timeToClassEnd % 60;
+            if (minutesToEnd == 0 && secondsToEnd == 1) {
+                const nextClass = config.courseTable[new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase()][parseInt(nextPeriod) - 1];
+                if (nextClass === "-") {
+                    autoActionFunction(6);
+                }
+            }
         } else {
             if (nextPeriodStart) {
                 const timeToNextClass = nextPeriodStart - currentTime;
@@ -443,9 +455,6 @@ function createWindow_TopLayer() { // 置顶层
                 }
                 if (minutes == 0 && seconds == 1 && nextClass == "体") {
                     autoActionFunction(5);
-                }
-                if (minutes == 0 && seconds == 1 && nextClass == "-") {
-                    autoActionFunction(6);
                 }
             } else {
                 autoActionFunction(2);
@@ -640,6 +649,7 @@ function autoActionFunction(args) {
     } else if (args == 2 && (config.autoPowerOff ?? false)) {
         autoActionGUI({ Text: '放学时间到，即将关闭计算机', ActionID: 4 });
     } else if (args == 3) {
+        internalFunction("keydown", "plugin","27","0");
         internalFunction("keydown", "desktop");
     } else if (args == 4) {
         // 关机

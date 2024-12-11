@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-
+<!--<div style="position:fixed;right:0;bottom:0;padding:20px;font-family:Arial,sans-serif;color:#666;z-index:1000">
+    <b>RisClassTool</b><br>InsiderPreview
+</div>-->
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
@@ -8,11 +10,14 @@
     <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>桌面层</title>
+    <!--<link rel="stylesheet" href="https://assets.3r60.top/icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://assets.3r60.top/icons/qweather-icons/font/qweather-icons.css">-->
     <link rel="stylesheet" href="./icons/bootstrap-icons.css">
     <link rel="stylesheet" href="./qweather-icons/font/qweather-icons.css">
     <style>
         :root {
             --font-size: 1em;
+            --font-size2: 1em;
             /* 默认字体大小 */
         }
 
@@ -98,7 +103,7 @@
             }
 
         #infoBar {
-            font-size: calc(0.90*var(--font-size));
+            font-size: calc(0.90*var(--font-size2));
             background-color: rgba(0, 0, 0, 0.3);
             width: fit-content;
             margin: 0;
@@ -153,9 +158,6 @@
 </head>
 
 <body>
-    <!--<div style="position:fixed;right:0;bottom:0;padding:20px;font-family:Arial,sans-serif;color:#666;z-index:1000">
-        <b>RisClassTool</b><br>InsiderPreview
-    </div>-->
     <h2 id="schedules">加载中...</h2>
     <div class="info-bar" id="infoBar"></div>
     <script>
@@ -247,7 +249,7 @@
 
                 if (tomorrowCourses) {
                     extraDiv.innerHTML = `<i class="bi bi-calendar-minus"></i>
-                                &nbsp;&nbsp;${arr2[dayOfWeek]}<span style="flex:1"></span>`;
+                                    &nbsp;&nbsp;${arr2[dayOfWeek]}<span style="flex:1"></span>`;
                     for (let i = 1; i <= count(data.timeTable); i++) {
                         const period = i.toString();
                         const course = tomorrowCourses[i - 1];
@@ -278,10 +280,10 @@
                         .then(data => {
                             // 更新天气元素的内容为实际天气
                             weatherElement.innerHTML = `<i class="qi-${data.icon}"></i>
-                                &nbsp;&nbsp;天气信息<span style="flex:1"></span>
-                                ${data.text}
-                                ${data.temp}℃ &nbsp;
-                                ${data.windDir}${data.windScale}级`;
+                                    &nbsp;&nbsp;天气信息<span style="flex:1"></span>
+                                    ${data.text}
+                                    ${data.temp}℃ &nbsp;
+                                    ${data.windDir}${data.windScale}级`;
                             lastWeather = weatherElement.innerHTML;
 
                         })
@@ -377,6 +379,7 @@
 
             // 个性化设定
             document.documentElement.style.setProperty('--font-size', `${data.scheduleFontSize || '1'}em`);
+            document.documentElement.style.setProperty('--font-size2', `${data.infoFontSize || (data.scheduleFontSize || '1')}em`);
             if (intervalId) {
                 clearInterval(intervalId);
             }

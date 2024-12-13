@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>设置</title>
-    <link rel="stylesheet" href="./icons/bootstrap-icons.css">
+     <link rel="stylesheet" href="./icons/bootstrap-icons.css"> 
     <!--<link rel="stylesheet" href="https://assets.3r60.top/icons/bootstrap-icons.css">-->
     <style>
         * {
@@ -386,15 +386,15 @@
         <div class="content-page" id="appearance">
             <div class="page-title"><i class="bi bi-palette"></i>&nbsp;外观设置</div>
             <!--<div class="card">
-        <label for="infoBarStyle">
-            <h2>桌面信息栏输出样式</h2>请选择一个选项
-        </label>
-        <select id="infoBarStyle">
-            <option value="1">样式1</option>
-            <option value="2">样式2</option>
-            <option value="3">样式3</option>
-        </select>
-    </div>-->
+                <label for="infoBarStyle">
+                    <h2>桌面信息栏输出样式</h2>请选择一个选项
+                </label>
+                <select id="infoBarStyle">
+                    <option value="1">样式1</option>
+                    <option value="2">样式2</option>
+                    <option value="3">样式3</option>
+                </select>
+            </div>-->
             <div class="card">
                 <label for="progressColor">
                     <h2>主题颜色</h2>进度条与课程表的突出主题色
@@ -451,7 +451,7 @@
                 <label for="sideBarShow">
                     <h2>启用侧边栏</h2>重启后生效，关闭后则不再创建侧边栏窗口
                 </label>
-                <input type="checkbox" id="sideBarShow"><br>
+                <input onchange="saveConfigOnBlur(this)" type="checkbox" id="sideBarShow"><br>
             </div>
             <div class="card">
                 <label for="sideBarBottom">
@@ -467,7 +467,7 @@
                     <label for="insiderPreview">
                         <h2>预览体验成员</h2>开启后可视化页面将交给瑞思软件的服务器接管（服务器连接失败时使用本地连接）[重启软件后生效]
                     </label>
-                    <input type="checkbox" id="insiderPreview"><br>
+                    <input onchange="saveConfigOnBlur(this)" type="checkbox" id="insiderPreview"><br>
                 </div>
                 <div class="card">
                     <label for="cloudUrl">
@@ -499,31 +499,31 @@
                     <label for="autoQuit">
                         <h2>课前5分钟准备</h2>课前五分钟时倒计时提示关闭清单内程序
                     </label>
-                    <input type="checkbox" id="autoQuit">
+                    <input onchange="saveConfigOnBlur(this)" type="checkbox" id="autoQuit">
                 </div>
                 <div class="card">
                     <label for="autoFocusMode">
                         <h2>自习课自动进入专注模式</h2>当课程为“自”时，会自动进入专注模式
                     </label>
-                    <input type="checkbox" id="autoFocusMode">
+                    <input onchange="saveConfigOnBlur(this)" type="checkbox" id="autoFocusMode">
                 </div>
                 <div class="card">
                     <label for="autoFocusMode_PE">
                         <h2>体育课自动进入专注模式</h2>当课程为“体”时，会自动进入专注模式
                     </label>
-                    <input type="checkbox" id="autoFocusMode_PE">
+                    <input onchange="saveConfigOnBlur(this)" type="checkbox" id="autoFocusMode_PE">
                 </div>
                 <div class="card">
                     <label for="autoPowerOffB">
-                        <h2>空白课程关机</h2>当下节课程为“-”时，当节课程下课前会提示并倒计时自动工具
+                        <h2>空白课程关机</h2>当课程为“-”时，会提示并倒计时自动工具
                     </label>
-                    <input type="checkbox" id="autoPowerOffB">
+                    <input onchange="saveConfigOnBlur(this)" type="checkbox" id="autoPowerOffB">
                 </div>
                 <div class="card">
                     <label for="autoPowerOff">
                         <h2>放学自动关机</h2>当天最后一节课结束后倒计时关闭计算机
                     </label>
-                    <input type="checkbox" id="autoPowerOff">
+                    <input onchange="saveConfigOnBlur(this)" type="checkbox" id="autoPowerOff">
                 </div>
                 <!-- <div class="card">
                     <button type="button" id="saveBasicConfigButton" onclick="saveAutoQuitConfigButton()">保存</button>
@@ -652,16 +652,16 @@
             for (let key in timeTable) {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                <td contenteditable="true">${timeTable[key]}</td>
-                <td contenteditable="true">${courseTable.Monday ? courseTable.Monday[key - 1] : ''}</td>
-                <td contenteditable="true">${courseTable.Tuesday ? courseTable.Tuesday[key - 1] : ''}</td>
-                <td contenteditable="true">${courseTable.Wednesday ? courseTable.Wednesday[key - 1] : ''}</td>
-                <td contenteditable="true">${courseTable.Thursday ? courseTable.Thursday[key - 1] : ''}</td>
-                <td contenteditable="true">${courseTable.Friday ? courseTable.Friday[key - 1] : ''}</td>
-                <td contenteditable="true">${courseTable.Saturday ? courseTable.Saturday[key - 1] : ''}</td>
-                <td contenteditable="true">${courseTable.Sunday ? courseTable.Sunday[key - 1] : ''}</td>
-                <td><button class="deleteRowButton" data-key="${key}">删除</button></td>
-            `;
+                    <td contenteditable="true">${timeTable[key]}</td>
+                    <td contenteditable="true">${courseTable.Monday ? courseTable.Monday[key - 1] : ''}</td>
+                    <td contenteditable="true">${courseTable.Tuesday ? courseTable.Tuesday[key - 1] : ''}</td>
+                    <td contenteditable="true">${courseTable.Wednesday ? courseTable.Wednesday[key - 1] : ''}</td>
+                    <td contenteditable="true">${courseTable.Thursday ? courseTable.Thursday[key - 1] : ''}</td>
+                    <td contenteditable="true">${courseTable.Friday ? courseTable.Friday[key - 1] : ''}</td>
+                    <td contenteditable="true">${courseTable.Saturday ? courseTable.Saturday[key - 1] : ''}</td>
+                    <td contenteditable="true">${courseTable.Sunday ? courseTable.Sunday[key - 1] : ''}</td>
+                    <td><button class="deleteRowButton" data-key="${key}">删除</button></td>
+                `;
                 tbody.appendChild(row);
             }
         }
@@ -670,16 +670,16 @@
             const tbody = document.querySelector('#scheduleTable tbody');
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td><button class="deleteRowButton">删除</button></td>
-        `;
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td><button class="deleteRowButton">删除</button></td>
+            `;
             tbody.appendChild(newRow);
         });
         // 删除行
@@ -751,10 +751,10 @@
             students.forEach(student => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                        <td contenteditable="true">${student.name}</td>
-                        <td contenteditable="true">${student.activeDate || ''}</td>
-                        <td><button class="deleteStudentButton redBtn">删除</button></td>
-                    `;
+                            <td contenteditable="true">${student.name}</td>
+                            <td contenteditable="true">${student.activeDate || ''}</td>
+                            <td><button class="deleteStudentButton redBtn">删除</button></td>
+                        `;
                 tbody.appendChild(row);
             });
         }
@@ -763,10 +763,10 @@
             const tbody = document.querySelector('#studentsTable tbody');
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td><button class="deleteStudentButton redBtn">删除</button></td>
-        `;
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td><button class="deleteStudentButton redBtn">删除</button></td>
+            `;
             tbody.appendChild(newRow);
         });
         // 删除行
@@ -808,10 +808,10 @@
             plans.forEach(plan => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                <td contenteditable="true">${plan.date}</td>
-                <td contenteditable="true">${JSON.stringify(plan.courses)}</td>
-                <td><button class="deletePlanButton redBtn">删除</button></td>
-            `;
+                    <td contenteditable="true">${plan.date}</td>
+                    <td contenteditable="true">${JSON.stringify(plan.courses)}</td>
+                    <td><button class="deletePlanButton redBtn">删除</button></td>
+                `;
                 tbody.appendChild(row);
             });
         }
@@ -823,10 +823,10 @@
             const courses = getOriginalCourses(date, weekday);
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
-            <td contenteditable="true">${dateInput || formatDate(date)}</td>
-            <td contenteditable="true">${JSON.stringify(courses)}</td>
-            <td><button class="deletePlanButton redBtn">删除</button></td>
-        `;
+                <td contenteditable="true">${dateInput || formatDate(date)}</td>
+                <td contenteditable="true">${JSON.stringify(courses)}</td>
+                <td><button class="deletePlanButton redBtn">删除</button></td>
+            `;
             document.querySelector('#plansTable tbody').appendChild(newRow);
         });
         // 删除规则
@@ -906,7 +906,6 @@
             document.getElementById('autoFocusMode_PE').checked = config.autoFocusMode_PE || true;
             document.getElementById('insiderPreview').checked = config.insiderPreview || false;
             document.getElementById('autoPowerOffB').checked = config.autoPowerOffB || false;
-            document.getElementById('infoBarStyle').value = config.infoBarStyle || "1"; // 为下拉框创建配置读取
 
             if (config.cloudUrl) {
                 alert('云配置已接管所有设置，若不更改云配置设置下次启动时会被云配置覆盖！');

@@ -61,29 +61,18 @@ var autoAction_StopTime = 0;
 // ————「程序载入函数」——————————————————————————————————————————————————————————————————————————
 function init() {
 
-    createWindow(path.join(__dirname, './src/apps/autoQuit.html'), true, true);
-
-
     // 单实例锁
     if (!app.requestSingleInstanceLock()) app.quit();
 
-    // 检查更新
+    // 设置自启动
     if (!isDev) {
-        //autoUpdater.setFeedURL('https://app.3r60.top/webProject/Ris_ClassTool/version/');
-        //autoUpdater.checkForUpdates();
-        //autoUpdater.on('update-available', () => {
-        //    console.log('发现新版本，准备更新');
-        //});
-        //autoUpdater.on('update-downloaded', () => {
-        //    console.log('更新就绪，下次启动时应用');
-        //    new Notification({
-        //        title: '更新已就绪',
-        //        body: '已升级到最新版本，下次启动时生效'
-        //    }).show()
-        //});
-
-
-    }
+        app.setLoginItemSettings({
+            openAtLogin: true,
+            openAsHidden: false,
+            path: process.execPath,
+            args: ["--openAsHidden"],
+        })
+    };
 
     // 配置读取
     try {
@@ -148,66 +137,6 @@ function handleCommand(commandLine) {
         if (commandLine[0] === "setting") {
             createWindow_Setting(commandLine[1]);
         }
-    }
-}
-
-function update() {
-
-
-    // 创建临时目录
-    const tempDir = fs.mkdtempSync(path.join(process.cwd(), 'tmp-'));
-    const asarPath = path.join(tempDir, 'app.asar');
-
-    // 下载asar文件
-    https.get(url, (response) => {
-        if (response.statusCode === 200) {
-            const fileStream = fs.createWriteStream(asarPath);
-            response.pipe(fileStream);
-
-            fileStream.on('finish', () => {
-                fileStream.close(() => {
-                    console.log('Download completed.');
-                    replaceAndRestart(asarPath);
-                });
-            });
-
-            fileStream.on('error', (err) => {
-                fs.unlink(asarPath); // 删除已损坏的文件
-                console.error(`Error writing the file to disk: ${err.message}`);
-            });
-        } else {
-            console.error(`Failed to download file: ${response.statusCode} ${response.statusMessage}`);
-        }
-    }).on('error', (err) => {
-        console.error(`Error downloading the file: ${err.message}`);
-    });
-
-    function replaceAndRestart(asarPath) {
-        const cppProgramPath = path.join(__dirname, 'resources', 'scripts', 'RisClassTool_Function.exe'); // C++程序路径
-        const electronAppPath = path.join(__dirname, 'electron-app'); // Electron应用路径
-        const backupAsarPath = `${asarPath}.bak`;
-        const targetAsarPath = path.join(electronAppPath, 'resources', 'app.asar');
-
-        // 备份旧的asar文件
-        fs.renameSync(targetAsarPath, backupAsarPath);
-        console.log('Old ASAR file backed up.');
-
-        // 移动新的asar文件到目标位置
-        fs.renameSync(asarPath, targetAsarPath);
-        console.log('New ASAR file replaced successfully.');
-
-        // 构建命令行参数
-        const command = `"${cppProgramPath}" "replace_and_restart" "${targetAsarPath}"`;
-
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Error executing C++ program: ${error.message}`);
-                return;
-            }
-
-            console.log(stdout);
-            console.error(stderr);
-        });
     }
 }
 

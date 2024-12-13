@@ -7,6 +7,7 @@ const fs = require('fs'); // 文件读取模块
 const { spawn, exec } = require('child_process'); // 进程执行模块
 const http = require('http'); // HTTP模块
 const https = require('https'); // HTTPS模块
+const { getAllWindows } = require('node-window-manager'); // 窗口控制模块
 
 // 常量定义
 const host = "https://app.3r60.top/webProject/Ris_ClassTool/"; // 带有/结尾
@@ -59,6 +60,7 @@ var autoAction = { Text: '非法操作！', ActionID: 3 };
 var autoAction_StopTime = 0;
 
 // ————「程序载入函数」——————————————————————————————————————————————————————————————————————————
+
 function init() {
 
     // 单实例锁
@@ -130,19 +132,23 @@ function init() {
 
     // 处理参数
     handleCommand(process.argv.slice(2));
-}
-
+} // 载入函数
 function handleCommand(commandLine) {
     if (commandLine && commandLine.length > 1) {
         if (commandLine[0] === "setting") {
             createWindow_Setting(commandLine[1]);
         }
     }
-}
+} // 命令行处理
 
 // ————「窗口创建」——————————————————————————————————————————————————————————————————
-function createWindow(url, local, fullScreen = false, StMode = false) { // 灵活窗口
-    // 检查是否已经有一个相同URL的窗口打开
+let settingsWindow = null;
+var settingsWindow_targetPage = null;
+let scheduleWindow = null;
+let processWindow = null;
+let sidebarWindow_isExpanded = null;
+
+function createWindow(url, local, fullScreen = false, StMode = false) {
     url = url.replaceAll("\\", "/");
     BrowserWindow.getAllWindows().forEach(win => {
         if (win.webContents.getURL() == url || win.webContents.getURL() == 'file:///' + path.join(__dirname, url).replaceAll("\\", "/")) {
@@ -187,11 +193,7 @@ function createWindow(url, local, fullScreen = false, StMode = false) { // 灵�
 
     // targetWindow.webContents.openDevTools({mode:'detach'})
 
-}
-
-// 设置窗口
-let settingsWindow = null;
-var settingsWindow_targetPage = null;
+} // 自由窗口
 function createWindow_Setting(targetPage) {
     if (settingsWindow && !settingsWindow.isDestroyed()) {
         settingsWindow.focus();
@@ -235,10 +237,8 @@ function createWindow_Setting(targetPage) {
     settingsWindow.on('closed', () => {
         settingsWindow = null;
     });
-}
-
-let scheduleWindow = null;
-function createWindow_DesktopLayer() { // 桌面层
+}// 设置
+function createWindow_DesktopLayer() {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
     const winHeight = height;
     //const winY = Math.round(height * 0.01);
@@ -274,10 +274,8 @@ function createWindow_DesktopLayer() { // 桌面层
     scheduleWindow.setVisibleOnAllWorkspaces(true);
 
     //scheduleWindow.webContents.openDevTools({mode:'detach'})
-}
-
-let processWindow = null;
-function createWindow_TopLayer() { // 置顶层
+}// 桌面层
+function createWindow_TopLayer() {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
     const winHeight = 100;
 
@@ -402,9 +400,7 @@ function createWindow_TopLayer() { // 置顶层
     intervalId = setInterval(updateProgress, 1000);
 
     // processWindow.webContents.openDevTools({ mode: 'detach' })
-}
-
-let sidebarWindow_isExpanded = null;
+}// 置顶层
 function createWindow_SideBar() {
     if (!(config.sideBarShow ?? true)) return;
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -461,9 +457,10 @@ function createWindow_SideBar() {
 
     //sidebarWindow.webContents.openDevTools({ mode: 'detach' })
 
-}
+}// 侧边栏
 
 // ————「功能函数」——————————————————————————————————————————————————————————————————
+
 function checkWebsite(url, expectedContent, callback) { // 连通性检查
     const protocol = url.startsWith('https') ? https : http;
     const options = {
@@ -539,7 +536,6 @@ function saveConfig(event, newConfig) { // 配置保存
         });
     });
 }
-
 function internalFunction(functionCategory, functionName, args1, args2) {
     console.log(functionCategory, functionName, args1, args2);
     if (functionName == "desktop") scheduleWindow.setAlwaysOnTop(true, "screen-saver");
@@ -551,7 +547,6 @@ function internalFunction(functionCategory, functionName, args1, args2) {
         scheduleWindow.setAlwaysOnTop(false);
     }, 5000);
 }
-
 function autoActionGUI(args) {
     autoAction = args;
     if (config.insiderPreview) {
@@ -570,7 +565,6 @@ function autoActionGUI(args) {
         }
     });
 }
-
 function autoActionFunction(args) {
     // 1->还有5min上课  2->最后一节课放学时间到 3->返回桌面 4->关机
     if (args == 1 && (config.autoQuit ?? false)) {
@@ -599,7 +593,6 @@ function autoActionFunction(args) {
     }
     console.log(args);
 }
-
 function formatTime(dateTarget, doNotUseOffset) {
     const response = dateTarget.getHours() * 3600 + dateTarget.getMinutes() * 60 + dateTarget.getSeconds() + (doNotUseOffset ? 0 : (config.timeOffset || 0));
     return response;// 加入偏移量
@@ -612,30 +605,30 @@ ipcMain.handle('getConfig', (event, process) => { // 主动获取配置
         tempConfig = config_Processed;
     }
     return tempConfig;
-});
+}); // 获取配置
 ipcMain.handle('temp_autoAction', (event) => { // 主动获取配置
     return autoAction;
-});
+}); // 自动任务配置获取
 ipcMain.handle('settingPage', (event) => { // 主动获取配置
     return settingsWindow_targetPage;
-});
+}); // 设置默认页面设定
 ipcMain.on('function_Keydown', (event, functionName, args1, args2) => { // 执行ahk->exe脚本
     internalFunction("keydown", functionName, args1, args2);
-});
+}); // 键盘事件请求
 ipcMain.on('function_autoAction', (event, args) => { // 自动执行
     autoActionFunction(args);
-});
+}); // 自动任务请求
 ipcMain.on('function_showExplorer', (event, args) => { // 打开资源管理器
     spawn('explorer.exe');
-});
+}); // 打开文件管理器请求
 ipcMain.on('createLink', (event, linkName) => { // 创建快捷方式
     spawn('explorer.exe');
-});
+}); // 创建快捷方式请求
 ipcMain.on('webview_create', (event, url, local, fullScreen, StMode) => { // 创建灵活窗口
     createWindow(url, local, fullScreen, StMode);
-});
-ipcMain.on('config_save', saveConfig);
+}); // 创建窗口请求
+ipcMain.on('config_save', saveConfig); // 配置保存请求
 app.on('second-instance', (event, commandLine, workingDirectory) => {
     handleCommand(commandLine)
-});
-app.on('ready', init); // 载入应用
+}); // 二次启动事件
+app.on('ready', init); // 载入事件 

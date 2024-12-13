@@ -7,7 +7,7 @@ const fs = require('fs'); // 文件读取模块
 const { spawn, exec } = require('child_process'); // 进程执行模块
 const http = require('http'); // HTTP模块
 const https = require('https'); // HTTPS模块
-const { getAllWindows } = require('node-window-manager'); // 窗口控制模块
+const { windowManager } = require('node-window-manager'); // 窗口控制模块
 
 // 常量定义
 const host = "https://app.3r60.top/webProject/Ris_ClassTool/"; // 带有/结尾
@@ -39,11 +39,11 @@ const contextMenu = Menu.buildFromTemplate([
             if (config.insiderPreview) {
                 checkWebsite('https://app.3r60.top/webProject/Ris_ClassTool/check.html', 'Successful', (result) => {
                     if (result) {
-                        createWindow(host + 'apps/random.html',false,false,true);
+                        createWindow(host + 'apps/random.html', false, false, true);
                     }
                 });
             } else {
-                createWindow(path.join(__dirname, './src/apps/random.html'),true,false,true);
+                createWindow(path.join(__dirname, './src/apps/random.html'), true, false, true);
             }
         }
     },
@@ -321,10 +321,13 @@ function createWindow_TopLayer() {
     let intervalId = null;
 
     function updateProgress() {
+
+        // 执行功能函数
+        autoAction_Basic();
+
         const now = new Date();
         const currentTime = formatTime(now, false);
         if (autoAction_StopTime && autoAction_StopTime > currentTime) return;
-
 
         // 检查当前是否在上课时间
         let inClass = false;
@@ -552,7 +555,7 @@ function autoActionGUI(args) {
     if (config.insiderPreview) {
         checkWebsite('https://app.3r60.top/webProject/Ris_ClassTool/check.html', 'Successful', (result) => {
             if (result) {
-                createWindow(host + 'apps/autoQuit.html', false , true);
+                createWindow(host + 'apps/autoQuit.html', false, true);
             }
         });
     } else {
@@ -572,7 +575,7 @@ function autoActionFunction(args) {
     } else if (args == 2 && (config.autoPowerOff ?? false)) {
         autoActionGUI({ Text: '放学时间到，即将关闭计算机', ActionID: 4 });
     } else if (args == 3) {
-        internalFunction("keydown", "plugin","27","0");
+        internalFunction("keydown", "plugin", "27", "0");
         internalFunction("keydown", "desktop");
     } else if (args == 4) {
         // 关机
@@ -597,6 +600,12 @@ function formatTime(dateTarget, doNotUseOffset) {
     const response = dateTarget.getHours() * 3600 + dateTarget.getMinutes() * 60 + dateTarget.getSeconds() + (doNotUseOffset ? 0 : (config.timeOffset || 0));
     return response;// 加入偏移量
 }
+//function autoAction_Basic() {
+//    const win = windowManager.getActiveWindow();
+//    if (win && win.getTitle().includes('PowerPoint 幻灯片放映')) {
+//        console.log('AAA');
+//    }
+//}
 
 // ————「事件定义」——————————————————————————————————————————————————————————————————
 ipcMain.handle('getConfig', (event, process) => { // 主动获取配置

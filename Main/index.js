@@ -600,12 +600,12 @@ function formatTime(dateTarget, doNotUseOffset) {
     const response = dateTarget.getHours() * 3600 + dateTarget.getMinutes() * 60 + dateTarget.getSeconds() + (doNotUseOffset ? 0 : (config.timeOffset || 0));
     return response;// 加入偏移量
 }
-//function autoAction_Basic() {
-//    const win = windowManager.getActiveWindow();
-//    if (win && win.getTitle().includes('PowerPoint 幻灯片放映')) {
-//        console.log('AAA');
-//    }
-//}
+function autoAction_Basic() {
+    //const win = windowManager.getActiveWindow();
+    //if (win && win.getTitle().includes('PowerPoint 幻灯片放映')) {
+    //    console.log('AAA');
+    //}
+}
 
 // ————「事件定义」——————————————————————————————————————————————————————————————————
 ipcMain.handle('getConfig', (event, process) => { // 主动获取配置

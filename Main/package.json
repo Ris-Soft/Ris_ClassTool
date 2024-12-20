@@ -57,7 +57,7 @@
     }
   },
   "dependencies": {
-    "active-win": "^8.2.1",
-    "node-window-manager": "^2.2.4"
+    "node-window-manager": "^2.2.4",
+    "robotjs": "^0.6.0"
   }
 }

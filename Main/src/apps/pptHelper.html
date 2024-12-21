@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPT演示助手</title>
+    <link rel="stylesheet" href="https://assets.3r60.top/icons/bootstrap-icons.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: transparent;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .control-bar {
+            position: fixed;
+            top: calc(100% - 60px);
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 10px;
+            transition: all 0.01s ease;
+            width: fit-content;
+            cursor: grab;
+        }
+
+            .control-bar.sides {
+                bottom: auto;
+                top: auto !important;
+                left: -10px !important;
+                width: fit-content;
+                height: fit-content;
+                flex-direction: column;
+                transform: none;
+                justify-content: space-between;
+                cursor: default;
+                padding: 10px 5px;
+            }
+
+                .control-bar.sides.right {
+                    left: auto !important;
+                    right: -10px !important;
+                }
+
+                .control-bar.sides button {
+                    margin: 2px 0;
+                    padding: 5px 5px;
+                    margin-left: 10px
+                }
+
+        #rightControlBar button {
+            margin-right: 10px;
+            margin-left: 0
+        }
+
+        .control-bar button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.5em;
+            outline: none;
+            transition: all 0.3s ease;
+            margin: 0 2px;
+            padding: 5px 10px;
+        }
+
+            .control-bar button.focused {
+                background-color: #ffffff21;
+                color: white;
+                border-radius: 5px;
+            }
+
+        .tooltip {
+            position: absolute;
+            bottom: 80px;
+            text-align: center;
+            width: 100%;
+            opacity: 0.7;
+        }
+
+        .toggle-button {
+            position: fixed;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .dragging {
+            cursor: grabbing;
+        }
+
+        #toggleButtonUp {
+            padding: 2px 20px;
+            bottom: 0px;
+        }
+
+        #toggleButtonRight {
+            left: 0px;
+            padding: 20px 5px;
+        }
+
+        #toggleButtonLeft {
+            right: 0px;
+            padding: 20px 5px;
+        }
+
+        #sideToggleButtonLeft {
+            left: 0px;
+            padding: 20px 5px;
+        }
+
+        #sideToggleButtonRight {
+            right: 0px;
+            padding: 20px 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="control-bar" id="controlBar" draggable="true">
+        <button class="bi bi-caret-left-fill" onclick="handleClick('prev')"></button>
+        <button class="bi bi-caret-right-fill" onclick="handleClick('next')"></button>
+        <button class="focused" onclick="handleClick('select')" id="selectBtn">
+            <i class="bi bi-cursor-fill" style="transform: rotate(270deg);"> </i>
+        </button>
+        <button class="bi bi-pen-fill" onclick="handleClick('annotate')" id="annotateBtn"></button>
+        <button class="bi bi-eraser-fill" onclick="handleClick('erase')" id="eraseBtn"></button>
+        <button id="leftModeToggleButton" class="bi bi-distribute-horizontal" onclick="toggleMode()"></button>
+        <button id="leftHideButton" class="bi bi-arrow-bar-down" onclick="hideControlBar()"></button>
+        <button class="bi bi-box-arrow-left" onclick="handleClick('exit')"></button>
+    </div>
+    <div class="control-bar sides" id="rightControlBar" draggable="true" style="display:none;">
+        <button class="bi bi-caret-left-fill" onclick="handleClick('prev')"></button>
+        <button class="bi bi-caret-right-fill" onclick="handleClick('next')"></button>
+        <button class="focused" onclick="handleClick('select')" id="rightSelectBtn">
+            <i class="bi bi-cursor-fill" style="transform: rotate(270deg);"> </i>
+        </button>
+        <button class="bi bi-pen-fill" onclick="handleClick('annotate')" id="rightAnnotateBtn"></button>
+        <button class="bi bi-eraser-fill" onclick="handleClick('erase')" id="rightEraseBtn"></button>
+        <button id="rightModeToggleButton" class="bi bi-align-bottom" onclick="toggleMode()"></button>
+        <button id="rightHideButton" class="bi bi-arrow-bar-down" onclick="hideControlBar()"></button>
+        <button class="bi bi-box-arrow-right" onclick="handleClick('exit')"></button>
+    </div>
+    <div class="tooltip" id="tooltip" style="display: none"></div>
+    <button class="toggle-button hidden" id="toggleButtonLeft" onclick="showControlBar()">
+        <i class="bi bi-chevron-double-left"></i>
+    </button>
+    <button class="toggle-button hidden" id="toggleButtonRight" onclick="showControlBar()">
+        <i class="bi bi-chevron-double-right"></i>
+    </button>
+    <button class="toggle-button hidden" id="toggleButtonUp" onclick="showControlBar()">
+        <i class="bi bi-chevron-double-up"></i>
+    </button>
+    <button class="toggle-button hidden" id="sideToggleButtonLeft" onclick="showControlBar()">
+        <i class="bi bi-chevron-double-right"></i>
+    </button>
+    <button class="toggle-button hidden" id="sideToggleButtonRight" onclick="showControlBar()">
+        <i class="bi bi-chevron-double-left"></i>
+    </button>
+
+    <script>
+        let mode = 'bottom';
+        let activeTool = 'select';
+
+        const controlBar = document.getElementById('controlBar');
+        const rightControlBar = document.getElementById('rightControlBar');
+        const toggleButtonLeft = document.getElementById('toggleButtonLeft');
+        const toggleButtonRight = document.getElementById('toggleButtonRight');
+        const toggleButtonUp = document.getElementById('toggleButtonUp');
+        const sideToggleButtonLeft = document.getElementById('sideToggleButtonLeft');
+        const sideToggleButtonRight = document.getElementById('sideToggleButtonRight');
+
+        controlBar.addEventListener('dragstart', () => {
+            controlBar.classList.add('dragging');
+        });
+
+        controlBar.addEventListener('dragend', (e) => {
+            controlBar.classList.remove('dragging');
+            const rect = e.target.getBoundingClientRect();
+            e.target.style.position = 'fixed';
+            e.target.style.left = `${rect.left}px`;
+            e.target.style.top = `${rect.top}px`;
+            e.target.style.transform = 'none';
+        });
+
+        controlBar.addEventListener('drag', (e) => {
+            e.preventDefault();
+            const x = e.clientX - controlBar.offsetWidth / 2;
+            const y = e.clientY - controlBar.offsetHeight / 2;
+            controlBar.style.left = `${x}px`;
+            controlBar.style.top = `${y}px`;
+        });
+
+        rightControlBar.addEventListener('dragstart', () => {
+            rightControlBar.classList.add('dragging');
+        });
+
+        rightControlBar.addEventListener('dragend', (e) => {
+            rightControlBar.classList.remove('dragging');
+            const rect = e.target.getBoundingClientRect();
+            e.target.style.position = 'fixed';
+            e.target.style.right = `${window.innerWidth - rect.right}px`;
+            e.target.style.top = `${rect.top}px`;
+            e.target.style.transform = 'none';
+        });
+
+        rightControlBar.addEventListener('drag', (e) => {
+            e.preventDefault();
+            const x = window.innerWidth - e.clientX - rightControlBar.offsetWidth / 2;
+            const y = e.clientY - rightControlBar.offsetHeight / 2;
+            rightControlBar.style.right = `${x}px`;
+            rightControlBar.style.top = `${y}px`;
+        });
+
+        let taskId = null;
+        function handleClick(tool) {
+            window.api.function_PPTHelper(tool);
+
+            if (!document.getElementById(tool + 'Btn') && !document.getElementById('right' + tool.charAt(0).toUpperCase() + tool.slice(1) + 'Btn')) return;
+
+            if (activeTool === tool) return;
+
+            if (activeTool) {
+                document.getElementById(activeTool + 'Btn')?.classList.remove('focused');
+                document.getElementById('right' + activeTool.charAt(0).toUpperCase() + activeTool.slice(1) + 'Btn')?.classList.remove('focused');
+            }
+
+            activeTool = tool;
+            document.getElementById(tool + 'Btn')?.classList.add('focused');
+            document.getElementById('right' + tool.charAt(0).toUpperCase() + tool.slice(1) + 'Btn')?.classList.add('focused');
+
+            const tooltipText = {
+                select: '选择模式',
+                annotate: '批注模式',
+                erase: '橡皮模式'
+            };
+
+            document.getElementById('tooltip').style.display = 'block';
+
+            document.getElementById('tooltip').innerText = tooltipText[tool] || '';
+            clearTimeout(taskId);
+            taskId = setTimeout(() => {
+                document.getElementById('tooltip').style.display = 'none';
+            }, 2000);
+        }
+
+        function toggleMode() {
+            if (mode === 'bottom') {
+                controlBar.classList.add('sides');
+                rightControlBar.classList.add('sides', 'right');
+				rightControlBar.style.display = 'flex';
+				document.getElementById('leftHideButton').className = "bi bi-arrow-bar-left";
+				document.getElementById('leftModeToggleButton').className = "bi bi-align-bottom";
+				document.getElementById('rightHideButton').className = "bi bi-arrow-bar-right";
+				document.getElementById('rightModeToggleButton').className = "bi bi-align-bottom";
+				mode = 'sides';
+            } else {
+                controlBar.classList.remove('sides');
+                rightControlBar.classList.remove('sides', 'right');
+				rightControlBar.classList.remove('sides', 'right');
+                controlBar.style.top = 'calc(100% - 60px)';
+                controlBar.style.left = "auto";
+                controlBar.style.transform = "none";
+				rightControlBar.style.display = 'none';
+				document.getElementById('leftHideButton').className = "bi bi-arrow-bar-down";
+				document.getElementById('leftModeToggleButton').className = "bi bi-distribute-horizontal";
+                mode = 'bottom';
+            }
+        }
+
+        function hideControlBar() {
+            controlBar.classList.add('hidden');
+            rightControlBar.classList.add('hidden');
+            if (mode === 'bottom') {
+                toggleButtonUp.classList.remove('hidden');
+            } else {
+                sideToggleButtonLeft.classList.remove('hidden');
+                sideToggleButtonRight.classList.remove('hidden');
+            }
+        }
+
+        function showControlBar() {
+            controlBar.classList.remove('hidden');
+            rightControlBar.classList.remove('hidden');
+            sideToggleButtonLeft.classList.add('hidden');
+            sideToggleButtonRight.classList.add('hidden');
+            toggleButtonUp.classList.add('hidden');
+        }
+
+
+        controlBar.addEventListener('mouseenter', () => {
+            window.api.function_PPTHelper("FOCUS");
+        })
+        controlBar.addEventListener('mouseleave', () => {
+            window.api.function_PPTHelper("UNFOCUS");
+        })
+        rightControlBar.addEventListener('mouseenter', () => {
+            window.api.function_PPTHelper("FOCUS");
+        })
+        rightControlBar.addEventListener('mouseleave', () => {
+            window.api.function_PPTHelper("UNFOCUS");
+        })
+        toggleButtonUp.addEventListener('mouseenter', () => {
+            window.api.function_PPTHelper("FOCUS");
+        })
+        toggleButtonUp.addEventListener('mouseleave', () => {
+            window.api.function_PPTHelper("UNFOCUS");
+        })
+        sideToggleButtonRight.addEventListener('mouseenter', () => {
+            window.api.function_PPTHelper("FOCUS");
+        })
+        sideToggleButtonRight.addEventListener('mouseleave', () => {
+            window.api.function_PPTHelper("UNFOCUS");
+        })
+        sideToggleButtonLeft.addEventListener('mouseenter', () => {
+            window.api.function_PPTHelper("FOCUS");
+        })
+        sideToggleButtonLeft.addEventListener('mouseleave', () => {
+            window.api.function_PPTHelper("UNFOCUS");
+        })
+
+    </script>
+</body>
+</html>
+
+
+

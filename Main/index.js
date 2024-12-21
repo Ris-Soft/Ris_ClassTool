@@ -7,19 +7,51 @@ const fs = require('fs'); // 文件读取模块
 const { spawn, exec } = require('child_process'); // 进程执行模块
 const http = require('http'); // HTTP模块
 const https = require('https'); // HTTPS模块
-const { windowManager } = require('node-window-manager'); // 窗口控制模块
+const iohook = require('iohook');
+const { windowManager } = require('node-window-manager');
 
 // 常量定义
 const host = "https://app.3r60.top/webProject/Ris_ClassTool/"; // 带有/结尾
 const isDev = !app.isPackaged;
 const configDataPath = 'D:\\Ris_ClassToolConfig.json'; // 配置文件路径
 const defaultConfig = {
-    "posName": "北京",
-    "countShow": false,
-    "countTime": "6.7",
-    "timeTable": { "1": "06:40-07:45", "2": "08:00-08:45", "3": "08:55-09:40", "4": "10:10-10:55", "5": "11:05-11:50", "6": "14:00-14:45", "7": "14:55-15:40", "8": "15:55-16:40", "9": "16:50-17:30", "10": "18:40-19:50", "11": "20:00-20:50", "12": "21:00-21:40" },
-    "courseTable": { "Monday": ["数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信", "通"], "Tuesday": ["语", "数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信"], "Wednesday": ["数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信", "通"], "Thursday": ["语", "数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信"], "Friday": ["数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信", "通"], "Saturday": ["数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信", "通"], "Sunday": ["自", "自", "自", "自", "自", "自", "自", "自", "自", "自", "自", "自"] },
-    "linePos": [1, 4, 9]
+    posName: "北京",
+    countShow: false,
+    countTime: "6.7",
+    timeTable: {
+        "1": "06:40-07:45",
+        "2": "08:00-08:45",
+        "3": "08:55-09:40",
+        "4": "10:10-10:55",
+        "5": "11:05-11:50",
+        "6": "14:00-14:45",
+        "7": "14:55-15:40",
+        "8": "15:55-16:40",
+        "9": "16:50-17:30",
+        "10": "18:40-19:50",
+        "11": "20:00-20:50",
+        "12": "21:00-21:40"
+    },
+    courseTable: {
+        Monday: ["数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信", "通"],
+        Tuesday: ["语", "数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信"],
+        Wednesday: ["数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信", "通"],
+        Thursday: ["语", "数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信"],
+        Friday: ["数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信", "通"],
+        Saturday: ["数", "英", "物", "化", "生", "历", "地", "体", "音", "美", "信", "通"],
+        Sunday: ["自", "自", "自", "自", "自", "自", "自", "自", "自", "自", "自", "自"]
+    },
+    linePos: [1, 4, 9],
+    insiderPreview: false,
+    students: [{ name: "", activeDate: "" }],
+    autoQuit: false,
+    autoPowerOffB: false,
+    progressColor: "",
+    scheduleFontSize: "",
+    infoFontSize: "",
+    progressHeight: "",
+    countText: "",
+    sideBarBottom: ""
 };  // 默认配置内容
 
 // 菜单定义
@@ -58,6 +90,7 @@ var config_Processed = changeCourseProcessing(config);
 var temp1 = 0;
 var autoAction = { Text: '非法操作！', ActionID: 3 };
 var autoAction_StopTime = 0;
+var lastActivityTime = Date.now();
 
 // ————「程序载入函数」——————————————————————————————————————————————————————————————————————————
 
@@ -145,6 +178,8 @@ function handleCommand(commandLine) {
 let settingsWindow = null;
 var settingsWindow_targetPage = null;
 let scheduleWindow = null;
+let PptHelper = null;
+let IntervalId_PPTH = null;
 let processWindow = null;
 let sidebarWindow_isExpanded = null;
 
@@ -388,7 +423,7 @@ function createWindow_TopLayer() {
                 }
             } else {
                 autoActionFunction(2);
-                clearInterval(intervalId);
+                //clearInterval(intervalId);
             }
         }
     }
@@ -461,8 +496,58 @@ function createWindow_SideBar() {
     //sidebarWindow.webContents.openDevTools({ mode: 'detach' })
 
 }// 侧边栏
+function createWindow_PptHelper(activeWindow) {
+    if (PptHelper && !PptHelper.isDestroyed()) {
+        return;
+    }
+
+    const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
+    PptHelper = new BrowserWindow({
+        x: 0,
+        y: 0,
+        width: width,
+        height: height,
+        frame: false,
+        resizable: false,
+        movable: false,
+        skipTaskbar: true,
+        transparent: true,
+        focusable: false,
+        fullscreen: true,
+        backgroundThrottling: false,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js')
+        }
+    });
+
+    PptHelper.setAlwaysOnTop(true, "pop-up");
+    //PptHelper.setIgnoreMouseEvents(true, { forward: true })
+    PptHelper.loadFile(path.join(__dirname, './src/apps/pptHelper.html'));
+
+    PptHelper.show();
+
+    PptHelper.setVisibleOnAllWorkspaces(true);
+
+    // 监听PPT窗口是否关闭
+    IntervalId_PPTH = setInterval(() => {
+        if (activeWindow && activeWindow.isWindow()) {
+            // PPT窗口未关闭，保持PPT助手窗口开启
+        } else {
+            // PPT窗口已关闭，关闭PPT助手窗口
+            clearInterval(IntervalId_PPTH);
+            PptHelper.close();
+        }
+    }, 1000);
+
+    //PptHelper.webContents.openDevTools({ mode: 'detach' })
+    //PptHelper.minimize();
+}
+
 
 // ————「功能函数」——————————————————————————————————————————————————————————————————
+
+let pptWindow = null;
 
 function checkWebsite(url, expectedContent, callback) { // 连通性检查
     const protocol = url.startsWith('https') ? https : http;
@@ -601,11 +686,61 @@ function formatTime(dateTarget, doNotUseOffset) {
     return response;// 加入偏移量
 }
 function autoAction_Basic() {
-    //const win = windowManager.getActiveWindow();
-    //if (win && win.getTitle().includes('PowerPoint 幻灯片放映')) {
-    //    console.log('AAA');
-    //}
+    if ((Date.now() - lastActivityTime) / 60000 > 30 && config.autoFocusMode2) {
+         
+    }
+    if (pptWindow && !pptWindow.isDestroyed()) {
+        // PPT窗口未关闭
+    } else {
+        const activeWindow = windowManager.getActiveWindow();
+        //processWindow.webContents.send('debug_deliver', activeWindow.getTitle());
+        if (activeWindow && activeWindow.getTitle().includes('PowerPoint 幻灯片放映')) {
+            createWindow_PptHelper(activeWindow);
+        }
+        if (activeWindow && activeWindow.getTitle().includes('Microsoft PowerPoint')) {
+            internalFunction("keydown", "plugin", "13", "0"); // 65 is A, 17 is CTRL
+        }
+    }
+
 }
+function PPTHelper(functionName) {
+    if (functionName == "FOCUS") {
+        PptHelper.setIgnoreMouseEvents(false);
+        return;
+    } else if (functionName == "UNFOCUS") {
+        PptHelper.setIgnoreMouseEvents(true, { forward: true });
+        return;
+    }
+
+    if (!PPTHelper) return;
+
+    switch (functionName) {
+        case 'prev':
+            internalFunction("keydown", "plugin", "37", "0"); // 37 is the CPP actual key code for left arrow
+            break;
+        case 'next':
+            internalFunction("keydown", "plugin", "39", "0"); // 39 is the CPP actual key code for right arrow
+            break;
+        case 'exit':
+            internalFunction("keydown", "plugin", "27", "0"); // 27 is the CPP actual key code for esc
+            break;
+        case 'select':
+            internalFunction("keydown", "plugin", "17", "65"); // 65 is A, 17 is CTRL
+            break;
+        case 'annotate':
+            internalFunction("keydown", "plugin", "17", "65"); // 65 is A, 17 is CTRL
+            internalFunction("keydown", "plugin", "17", "80"); // 80 is P, 17 is CTRL
+            break;
+        case 'erase':
+            internalFunction("keydown", "plugin", "17", "65"); // 65 is A, 17 is CTRL
+            internalFunction("keydown", "plugin", "17", "69"); // 69 is E, 17 is CTRL
+            break;
+        default:
+            console.log('未知功能');
+    }
+}
+
+
 
 // ————「事件定义」——————————————————————————————————————————————————————————————————
 ipcMain.handle('getConfig', (event, process) => { // 主动获取配置
@@ -637,6 +772,15 @@ ipcMain.on('webview_create', (event, url, local, fullScreen, StMode) => { // 创
     createWindow(url, local, fullScreen, StMode);
 }); // 创建窗口请求
 ipcMain.on('config_save', saveConfig); // 配置保存请求
+iohook.on('mouse', () => {
+    lastActivityTime = Date.now();
+});
+iohook.on('keydown', () => {
+    lastActivityTime = Date.now();
+});
+ipcMain.on('function_PPTHelper', (event, functionName) => {
+    PPTHelper(functionName);
+});
 app.on('second-instance', (event, commandLine, workingDirectory) => {
     handleCommand(commandLine)
 }); // 二次启动事件

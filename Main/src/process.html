@@ -54,6 +54,7 @@
 </head>
 
 <body>
+    <!--<h1 id="debuginfo"></h1>-->
     <div id="progressBar">
         <div class="bar"></div>
     </div>
@@ -197,6 +198,8 @@
         }
 
         window.api.config_onRecive(init);
+
+        window.api.config_onReciveDebugInfo((info) => { document.getElementById('debuginfo').innerHTML = info });
 
         window.onload = async () => {
             init(await window.api.config_Get(true));

@@ -10,11 +10,10 @@
   "author": "PYLXU",
   "license": "LGPL-3.0-or-later",
   "devDependencies": {
-    "electron": "^32.1.2",
+    "electron": "^33.2.1",
     "electron-builder": "^25.1.7",
-    "electron-squirrel-startup": "^1.0.1",
-    "electron-updater": "^6.3.9",
-    "eslint": "^9.15.0"
+    "eslint": "^9.15.0",
+    "node-window-manager": "^2.2.4"
   },
   "build": {
     "appId": "rct.trsz.app",
@@ -57,7 +56,6 @@
     }
   },
   "dependencies": {
-    "node-window-manager": "^2.2.4",
-    "robotjs": "^0.6.0"
+    "iohook": "github:JohnJunior/iohook"
   }
 }

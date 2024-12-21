@@ -5,6 +5,9 @@ contextBridge.exposeInMainWorld('api', {
     config_onRecive: (callback) => {
         ipcRenderer.on('config_deliver', (event, data) => callback(data));
     },
+    config_onReciveDebugInfo: (callback) => {
+        ipcRenderer.on('debug_deliver', (event, data) => callback(data));
+    },
     config_Get: (process) => {
         return new Promise((resolve, reject) => {
             ipcRenderer.invoke('getConfig', process).then(resolve).catch(reject);
@@ -31,6 +34,9 @@ contextBridge.exposeInMainWorld('api', {
 
     // 侧边栏
     sideBar_expand: () => ipcRenderer.send('toggle-expand'),
+
+    // PPT助手
+    function_PPTHelper: (functionName) => ipcRenderer.send('function_PPTHelper', functionName),
 
     // 功能区
     function_Keydown: (functionName, args1, args2) => ipcRenderer.send('function_Keydown', functionName, args1, args2),

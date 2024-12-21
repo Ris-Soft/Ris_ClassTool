@@ -7020,6 +7020,7 @@
     <Content Include="scripts\RisClassTool_Function.exe" />
     <Content Include="src\apps\autoQuit.html" />
     <Content Include="src\apps\examMode.html" />
+    <Content Include="src\apps\pptHelper.html" />
     <Content Include="src\apps\random.html" />
     <Content Include="src\icons\bootstrap-icons.css" />
     <Content Include="src\icons\bootstrap-icons.json" />

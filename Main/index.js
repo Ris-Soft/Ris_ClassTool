@@ -734,6 +734,9 @@ function clearActiveTimeouts() {
     activeTimeouts.forEach(id => clearTimeout(id));
     activeTimeouts = [];
 }
+
+let status = null;
+
 function PPTHelper(functionName, args) {
     if (!PPTHelper) return;
     if (functionName !== "exit") clearActiveTimeouts();
@@ -755,14 +758,14 @@ function PPTHelper(functionName, args) {
                 };
 
                 executeKeyPress("93");
-                executeKeyPress("79") // 'O' key for opening menu
+                delayExecution(() => executeKeyPress("79"), 25) // 'O' key for opening menu
                 delayExecution(() => executeKeyPress("67"), 50); // 'C' key for color
 
                 for (let i = 0; i < times; i++) {
-                    delayExecution(() => executeKeyPress("39"), 50 + i * 80); // Right arrow key
+                    delayExecution(() => executeKeyPress("39"), 75 + i * 80); // Right arrow key
                 }
 
-                delayExecution(() => internalFunction("keydown", "plugin", "13", "0"), 50 + times * 80); // Enter key
+                delayExecution(() => internalFunction("keydown", "plugin", "13", "0"), 75 + times * 80); // Enter key
             } else {
                 console.log(`颜色不存在："${args}"`);
             }
@@ -774,20 +777,25 @@ function PPTHelper(functionName, args) {
             internalFunction("keydown", "plugin", "39", "0"); // Right arrow
             break;
         case 'grid':
+            status = functionName;
             internalFunction("keydown", "plugin", "93", "0");
             delayExecution(() => internalFunction("keydown", "plugin", "65", "0"), 50);
             break;
         case 'exit':
             internalFunction("keydown", "plugin", "27", "0"); // Esc key
+            if (annotate != "annotate" || annotate != null) delayExecution(() => internalFunction("keydown", "plugin", "27", "0"), 50);
             break;
         case 'select':
+            status = functionName;
             internalFunction("keydown", "plugin", "17", "65"); // Ctrl + A
             break;
         case 'annotate':
+            status = functionName;
             internalFunction("keydown", "plugin", "17", "65"); // Ctrl + A
             delayExecution(() => internalFunction("keydown", "plugin", "17", "80"), 50); // Ctrl + P
             break;
         case 'erase':
+            status = functionName;
             internalFunction("keydown", "plugin", "17", "65"); // Ctrl + A
             delayExecution(() => internalFunction("keydown", "plugin", "17", "69"), 50); // Ctrl + E
             break;

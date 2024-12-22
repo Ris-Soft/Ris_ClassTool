@@ -328,11 +328,6 @@
         let taskId = null;
         function handleClick(tool) {
             window.api.function_PPTHelper(tool);
-
-            if (tool == "exit" && activeTool !== "select") {
-                window.api.function_PPTHelper("exit");
-            }
-
             if (!document.getElementById(tool + 'Btn') && !document.getElementById('right' + tool.charAt(0).toUpperCase() + tool.slice(1) + 'Btn')) return;
 
             if (activeTool === tool) return;

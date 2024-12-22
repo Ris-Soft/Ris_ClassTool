@@ -36,7 +36,7 @@ contextBridge.exposeInMainWorld('api', {
     sideBar_expand: () => ipcRenderer.send('toggle-expand'),
 
     // PPT助手
-    function_PPTHelper: (functionName) => ipcRenderer.send('function_PPTHelper', functionName),
+    function_PPTHelper: (functionName, args) => ipcRenderer.send('function_PPTHelper', functionName, args),
 
     // 功能区
     function_Keydown: (functionName, args1, args2) => ipcRenderer.send('function_Keydown', functionName, args1, args2),

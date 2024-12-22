@@ -7,7 +7,6 @@ const fs = require('fs'); // 文件读取模块
 const { spawn, exec } = require('child_process'); // 进程执行模块
 const http = require('http'); // HTTP模块
 const https = require('https'); // HTTPS模块
-const iohook = require('iohook');
 const { windowManager } = require('node-window-manager');
 
 // 常量定义
@@ -53,6 +52,13 @@ const defaultConfig = {
     countText: "",
     sideBarBottom: ""
 };  // 默认配置内容
+const colorToNumber = {
+    black: 1,
+    red: 3,
+    orange: 4,
+    green: 7,
+    blue: 8,
+}
 
 // 菜单定义
 const contextMenu = Menu.buildFromTemplate([
@@ -326,6 +332,7 @@ function createWindow_TopLayer() {
         alwaysOnTop: true,
         transparent: true,
         skipTaskbar: true,
+        focusable: false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
         }
@@ -345,7 +352,7 @@ function createWindow_TopLayer() {
     //processWindow.loadFile('./src/process.html');
     processWindow.show();
 
-    processWindow.setAlwaysOnTop(true, 'status')
+    processWindow.setAlwaysOnTop(true, 'dock')
 
     processWindow.setVisibleOnAllWorkspaces(true);
 
@@ -496,7 +503,7 @@ function createWindow_SideBar() {
     //sidebarWindow.webContents.openDevTools({ mode: 'detach' })
 
 }// 侧边栏
-function createWindow_PptHelper(activeWindow) {
+function createWindow_PptHelper() {
     if (PptHelper && !PptHelper.isDestroyed()) {
         return;
     }
@@ -522,23 +529,32 @@ function createWindow_PptHelper(activeWindow) {
     });
 
     PptHelper.setAlwaysOnTop(true, "pop-up");
-    //PptHelper.setIgnoreMouseEvents(true, { forward: true })
+    PptHelper.setIgnoreMouseEvents(true, { forward: true })
     PptHelper.loadFile(path.join(__dirname, './src/apps/pptHelper.html'));
 
     PptHelper.show();
 
     PptHelper.setVisibleOnAllWorkspaces(true);
 
-    // 监听PPT窗口是否关闭
-    IntervalId_PPTH = setInterval(() => {
-        if (activeWindow && activeWindow.isWindow()) {
-            // PPT窗口未关闭，保持PPT助手窗口开启
-        } else {
-            // PPT窗口已关闭，关闭PPT助手窗口
-            clearInterval(IntervalId_PPTH);
-            PptHelper.close();
-        }
-    }, 1000);
+
+    processWindow.show = false;
+    PptHelper.on("close", () => {
+        processWindow.show = true;
+    });
+
+    //pptWindow.bringToTop();
+    //processWindow.focus();
+
+    //// 监听PPT窗口是否关闭
+    //IntervalId_PPTH = setInterval(() => {
+    //    if (activeWindow && activeWindow.isWindow()) {
+    //        // PPT窗口未关闭，保持PPT助手窗口开启
+    //    } else {
+    //        // PPT窗口已关闭，关闭PPT助手窗口
+    //        clearInterval(IntervalId_PPTH);
+    //        PptHelper.close();
+    //    }
+    //}, 1000);
 
     //PptHelper.webContents.openDevTools({ mode: 'detach' })
     //PptHelper.minimize();
@@ -548,6 +564,7 @@ function createWindow_PptHelper(activeWindow) {
 // ————「功能函数」——————————————————————————————————————————————————————————————————
 
 let pptWindow = null;
+let pptWindow_Save = null;
 
 function checkWebsite(url, expectedContent, callback) { // 连通性检查
     const protocol = url.startsWith('https') ? https : http;
@@ -687,53 +704,92 @@ function formatTime(dateTarget, doNotUseOffset) {
 }
 function autoAction_Basic() {
     if ((Date.now() - lastActivityTime) / 60000 > 30 && config.autoFocusMode2) {
-         
+
     }
-    if (pptWindow && !pptWindow.isDestroyed()) {
-        // PPT窗口未关闭
-    } else {
-        const activeWindow = windowManager.getActiveWindow();
-        //processWindow.webContents.send('debug_deliver', activeWindow.getTitle());
-        if (activeWindow && activeWindow.getTitle().includes('PowerPoint 幻灯片放映')) {
-            createWindow_PptHelper(activeWindow);
-        }
-        if (activeWindow && activeWindow.getTitle().includes('Microsoft PowerPoint')) {
-            internalFunction("keydown", "plugin", "13", "0"); // 65 is A, 17 is CTRL
-        }
+    const activeWindow = windowManager.getActiveWindow();
+    //processWindow.webContents.send('debug_deliver', activeWindow.getTitle());
+    if (activeWindow && activeWindow.getTitle().includes('PowerPoint 幻灯片放映')) {
+        pptWindow = activeWindow;
+        createWindow_PptHelper();
+    } else if (PptHelper && !PptHelper.isDestroyed() && activeWindow && activeWindow.getTitle() !== "") {
+        PptHelper.close();
+    }
+
+    if (activeWindow && activeWindow.getTitle().includes('Microsoft PowerPoint') && pptWindow.isWindow()) {
+        pptWindow = activeWindow;
+        internalFunction("keydown", "plugin", "13", "0");
     }
 
 }
-function PPTHelper(functionName) {
-    if (functionName == "FOCUS") {
-        PptHelper.setIgnoreMouseEvents(false);
-        return;
-    } else if (functionName == "UNFOCUS") {
-        PptHelper.setIgnoreMouseEvents(true, { forward: true });
-        return;
-    }
 
+let activeTimeouts = [];
+
+function delayExecution(func, delay) {
+    const timeoutId = setTimeout(func, delay);
+    activeTimeouts.push(timeoutId);
+    return timeoutId;
+}
+
+function clearActiveTimeouts() {
+    activeTimeouts.forEach(id => clearTimeout(id));
+    activeTimeouts = [];
+}
+function PPTHelper(functionName, args) {
     if (!PPTHelper) return;
-
+    if (functionName !== "exit") clearActiveTimeouts();
+    pptWindow.bringToTop();
     switch (functionName) {
+        case 'FOCUS':
+            PptHelper.setIgnoreMouseEvents(false);
+            processWindow.focus();
+            break;
+        case 'UNFOCUS':
+            PptHelper.setIgnoreMouseEvents(true, { forward: true });
+            processWindow.focus();
+            break;
+        case 'changeColor':
+            const times = colorToNumber[args];
+            if (times) {
+                const executeKeyPress = (keyCode) => {
+                    internalFunction("keydown", "plugin", keyCode, "0");
+                };
+
+                executeKeyPress("93");
+                executeKeyPress("79") // 'O' key for opening menu
+                delayExecution(() => executeKeyPress("67"), 50); // 'C' key for color
+
+                for (let i = 0; i < times; i++) {
+                    delayExecution(() => executeKeyPress("39"), 50 + i * 80); // Right arrow key
+                }
+
+                delayExecution(() => internalFunction("keydown", "plugin", "13", "0"), 50 + times * 80); // Enter key
+            } else {
+                console.log(`颜色不存在："${args}"`);
+            }
+            break;
         case 'prev':
-            internalFunction("keydown", "plugin", "37", "0"); // 37 is the CPP actual key code for left arrow
+            internalFunction("keydown", "plugin", "37", "0"); // Left arrow
             break;
         case 'next':
-            internalFunction("keydown", "plugin", "39", "0"); // 39 is the CPP actual key code for right arrow
+            internalFunction("keydown", "plugin", "39", "0"); // Right arrow
+            break;
+        case 'grid':
+            internalFunction("keydown", "plugin", "93", "0");
+            delayExecution(() => internalFunction("keydown", "plugin", "65", "0"), 50);
             break;
         case 'exit':
-            internalFunction("keydown", "plugin", "27", "0"); // 27 is the CPP actual key code for esc
+            internalFunction("keydown", "plugin", "27", "0"); // Esc key
             break;
         case 'select':
-            internalFunction("keydown", "plugin", "17", "65"); // 65 is A, 17 is CTRL
+            internalFunction("keydown", "plugin", "17", "65"); // Ctrl + A
             break;
         case 'annotate':
-            internalFunction("keydown", "plugin", "17", "65"); // 65 is A, 17 is CTRL
-            internalFunction("keydown", "plugin", "17", "80"); // 80 is P, 17 is CTRL
+            internalFunction("keydown", "plugin", "17", "65"); // Ctrl + A
+            delayExecution(() => internalFunction("keydown", "plugin", "17", "80"), 50); // Ctrl + P
             break;
         case 'erase':
-            internalFunction("keydown", "plugin", "17", "65"); // 65 is A, 17 is CTRL
-            internalFunction("keydown", "plugin", "17", "69"); // 69 is E, 17 is CTRL
+            internalFunction("keydown", "plugin", "17", "65"); // Ctrl + A
+            delayExecution(() => internalFunction("keydown", "plugin", "17", "69"), 50); // Ctrl + E
             break;
         default:
             console.log('未知功能');
@@ -772,14 +828,14 @@ ipcMain.on('webview_create', (event, url, local, fullScreen, StMode) => { // 创
     createWindow(url, local, fullScreen, StMode);
 }); // 创建窗口请求
 ipcMain.on('config_save', saveConfig); // 配置保存请求
-iohook.on('mouse', () => {
-    lastActivityTime = Date.now();
-});
-iohook.on('keydown', () => {
-    lastActivityTime = Date.now();
-});
-ipcMain.on('function_PPTHelper', (event, functionName) => {
-    PPTHelper(functionName);
+//iohook.on('mouse', () => {
+//    lastActivityTime = Date.now();
+//});
+//iohook.on('keydown', () => {
+//    lastActivityTime = Date.now();
+//});
+ipcMain.on('function_PPTHelper', (event, functionName, args) => {
+    PPTHelper(functionName, args);
 });
 app.on('second-instance', (event, commandLine, workingDirectory) => {
     handleCommand(commandLine)

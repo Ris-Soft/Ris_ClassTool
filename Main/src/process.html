@@ -83,6 +83,26 @@
             const timeOffset = data.timeOffset || 0; // 时钟偏移
             const weekName = new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase();
 
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+
+            if (!(data.processLayer ?? true)) {
+                progressBar.style.display = "none"
+            } else {
+                progressBar.style.display = ""
+            }
+
+            if (!(data.statusLayer ?? true)) {
+                statusWindow.style.display = "none"
+            } else {
+                statusWindow.style.display = "flex"
+            }
+
+            if (!(data.statusLayer ?? true) && !(data.processLayer ?? true)) {
+                return;
+            }
+
             function updateProgress() {
                 const now = new Date();
                 const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + timeOffset; // 加入偏移量
@@ -141,7 +161,11 @@
                         courseNameBox.style.display = (currentTime - startTime < 30) ? 'block' : 'none';
                         timeRangeBox.style.display = 'none';
                         nextCourseBox.style.display = (endTime - currentTime < 30) ? 'block' : 'none';
-                        statusWindow.style.display = 'flex';
+                        if (!(data.statusLayer ?? true)) {
+                            statusWindow.style.display = "none"
+                        } else {
+                            statusWindow.style.display = "flex"
+                        }
                     } else {
                         statusWindow.style.display = 'none';
                     }
@@ -157,7 +181,11 @@
                         // alert(`${nextPeriod} ${parseInt(nextPeriod) % data.courseTable[weekName].length} ${data.courseTable[weekName][parseInt(nextPeriod)]}`)
                         timeRangeBox.style.display = 'block';
                         nextCourseBox.style.display = 'block';
-                        statusWindow.style.display = 'flex';
+                        if (!(data.statusLayer ?? true)) {
+                            statusWindow.style.display = "none"
+                        } else {
+                            statusWindow.style.display = "flex"
+                        }
                         //if (minutes == 5 && seconds == 0 && data.courseTable[weekName][parseInt(nextPeriod) - 2] !== data.courseTable[weekName][parseInt(nextPeriod) - 1]) { // 300秒
                         //    window.api.function_autoAction(1);
                         //}
@@ -172,7 +200,11 @@
                         // courseName.textContent = '当前: 下课';
                         // timeRangeBox.style.display = 'none';
                         // nextCourse.textContent = '';
-                        statusWindow.style.display = 'none';
+                        if (!(data.statusLayer ?? true)) {
+                            statusWindow.style.display = "none"
+                        } else {
+                            statusWindow.style.display = "flex"
+                        }
                         clearInterval(intervalId);
                     }
                 }

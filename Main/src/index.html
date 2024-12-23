@@ -154,6 +154,15 @@
         .countdown {
             margin-top: 10px;
         }
+
+
+        #tomorrowCourses {
+            white-space: nowrap; /* 防止文本换行 */
+            overflow-x: clip; /* 水平方向超出内容自动滚动 */
+            overflow-y: hidden; /* 垂直方向超出内容隐藏 */
+            box-sizing: border-box; /* 确保padding不影响宽度 */
+            max-width: 65%;
+        }
     </style>
 </head>
 
@@ -165,6 +174,8 @@
         let lastWeatherUpdate = 0; // 记录上次更新天气的时间
         let lastWeather = ''; // 记录上次更新的天气信息
         const WEATHER_UPDATE_INTERVAL = 600000; // 天气数据更新间隔（10分钟）
+
+        let scrollId = null;
 
         function count(o) {
             var t = typeof o;
@@ -248,13 +259,16 @@
                 extraDiv.style.display = tomorrowCourses ? 'flex' : 'none';
 
                 if (tomorrowCourses) {
-                    extraDiv.innerHTML = `<i class="bi bi-calendar-minus"></i>
-                                    &nbsp;&nbsp;${arr2[dayOfWeek]}<span style="flex:1"></span>`;
+                    let courseText = "";
+
                     for (let i = 1; i <= count(data.timeTable); i++) {
                         const period = i.toString();
                         const course = tomorrowCourses[i - 1];
-                        extraDiv.innerHTML += `${course}${data.linePos.includes(i) ? " | " : " "}`;
+                        courseText += `${course}${data.linePos.includes(i) ? " | " : " "}`;
                     }
+                    extraDiv.innerHTML = `<i class="bi bi-calendar-minus"></i>
+                                    &nbsp;&nbsp;${arr2[dayOfWeek]}<span style="flex:1"></span><span id="tomorrowCourses">${courseText}</span>`;
+                    startScroll();
                 }
             } else {
                 extraDiv.style.display = 'none';
@@ -374,6 +388,7 @@
         }
 
         function init(data) {
+
             // 检查日期并显示信息栏
             checkAndDisplayInfoBar(data);
 
@@ -431,6 +446,36 @@
 
         // 开始观察源元素的尺寸变化
         resizeObserver.observe(sourceElement);
+        function startScroll() {
+
+            // 获取滚动容器
+            const scrollContainer = document.getElementById('tomorrowCourses');
+
+            // 设置滚动速度
+            const scrollSpeed = 1; // 滚动速度，数值越大滚动越快
+
+            // 定义滚动函数
+            function scrollText() {
+                // 获取滚动条当前位置
+                const scrollLeft = scrollContainer.scrollLeft;
+                // 获取滚动条最大滚动距离
+                const scrollWidth = scrollContainer.scrollWidth;
+                // 获取容器宽度
+                const clientWidth = scrollContainer.clientWidth;
+
+                // 如果滚动条已经滚动到最右边，则跳转到最左边重新开始滚动
+                if (scrollLeft + clientWidth >= scrollWidth) {
+                    scrollContainer.scrollLeft = 0;
+                } else {
+                    // 否则继续向右滚动
+                    scrollContainer.scrollLeft += scrollSpeed;
+                }
+            }
+
+            // 设置定时器，每隔一段时间执行滚动函数
+            clearInterval(scrollId);
+            scrollId = setInterval(scrollText, 20); // 20毫秒滚动一次
+        }
     </script>
 </body>
 

@@ -1,6 +1,6 @@
 {
   "name": "ris_classtool",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "瑞思课堂工具",
   "main": "index.js",
   "scripts": {
@@ -12,8 +12,7 @@
   "devDependencies": {
     "electron": "^33.2.1",
     "electron-builder": "^25.1.7",
-    "eslint": "^9.15.0",
-    "node-window-manager": "^2.2.4"
+    "eslint": "^9.15.0"
   },
   "build": {
     "appId": "rct.trsz.app",
@@ -56,6 +55,6 @@
     }
   },
   "dependencies": {
-    "iohook": "github:JohnJunior/iohook"
+    "node-window-manager": "^2.2.4"
   }
 }

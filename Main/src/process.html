@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
+<!-- <div style="position: fixed; right: 0; bottom: 0; padding: 20px; font-family: Arial, sans-serif; color: #333;z-index:1000">
+    <b>RisClassTool</b><br>Insider Preview
+</div> -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全局课程进度窗口</title>
+    <title>置顶层</title>
     <style>
         #progressBar {
             width: 100%;
@@ -16,12 +18,12 @@
             z-index: 9999;
         }
 
-        #progressBar .bar {
-            width: 0;
-            height: 100%;
-            background-color: #1E9FFF;
-            transition: width 0.5s ease-in-out;
-        }
+            #progressBar .bar {
+                width: 0;
+                height: 100%;
+                background-color: #1E9FFF;
+                transition: width 0.5s ease-in-out;
+            }
 
         #statusWindow {
             position: fixed;
@@ -42,10 +44,10 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
-        .card>span {
-            font-size: 16px;
-            color: white;
-        }
+            .card > span {
+                font-size: 16px;
+                color: white;
+            }
 
         body {
             overflow-y: hidden;
@@ -200,11 +202,7 @@
                         // courseName.textContent = '当前: 下课';
                         // timeRangeBox.style.display = 'none';
                         // nextCourse.textContent = '';
-                        if (!(data.statusLayer ?? true)) {
-                            statusWindow.style.display = "none"
-                        } else {
-                            statusWindow.style.display = "flex"
-                        }
+                        statusWindow.style.display = "none"
                         clearInterval(intervalId);
                     }
                 }

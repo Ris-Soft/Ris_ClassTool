@@ -161,7 +161,7 @@
             overflow-x: clip; /* 水平方向超出内容自动滚动 */
             overflow-y: hidden; /* 垂直方向超出内容隐藏 */
             box-sizing: border-box; /* 确保padding不影响宽度 */
-            max-width: 65%;
+            max-width: 75%;
         }
     </style>
 </head>
@@ -474,7 +474,7 @@
 
             // 设置定时器，每隔一段时间执行滚动函数
             clearInterval(scrollId);
-            scrollId = setInterval(scrollText, 20); // 20毫秒滚动一次
+            scrollId = setInterval(scrollText, 100); // 100毫秒滚动一次
         }
     </script>
 </body>

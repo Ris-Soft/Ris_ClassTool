@@ -7021,6 +7021,10 @@
     <Content Include="src\apps\autoQuit.html" />
     <Content Include="src\apps\examMode.html" />
     <Content Include="src\apps\pptHelper.html" />
+    <Content Include="src\apps\pptHelper\bottom.html" />
+    <Content Include="src\apps\pptHelper\colorPicker.html" />
+    <Content Include="src\apps\pptHelper\left.html" />
+    <Content Include="src\apps\pptHelper\right.html" />
     <Content Include="src\apps\random.html" />
     <Content Include="src\icons\bootstrap-icons.css" />
     <Content Include="src\icons\bootstrap-icons.json" />
@@ -8359,6 +8363,7 @@
     <Folder Include="scripts\" />
     <Folder Include="src\" />
     <Folder Include="src\apps\" />
+    <Folder Include="src\apps\pptHelper\" />
     <Folder Include="src\icons\" />
     <Folder Include="src\icons\fonts\" />
     <Folder Include="src\qweather-icons\" />

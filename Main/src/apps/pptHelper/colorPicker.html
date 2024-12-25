@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPT��ʾ����-��ɫѡ����</title>
+    <link rel="stylesheet" href="https://assets.3r60.top/icons/bootstrap-icons.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: transparent;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            font-size: 110%;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #colorPicker {
+            position: fixed;
+            bottom: 5px;
+            left: 5px;
+            display: flex;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 5px;
+            border-radius: 10px;
+            z-index: 1000;
+            -webkit-app-region: drag;
+        }
+
+        .color-btn {
+            border: none;
+            margin: 2px;
+            padding: 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            -webkit-app-region: no-drag;
+        }
+
+        body {
+            overflow-y: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="colorPicker">
+        <button class="color-btn" style="background-color: red;" onclick="changeColor('red')"></button>
+        <button class="color-btn" style="background-color: blue;" onclick="changeColor('blue')"></button>
+        <button class="color-btn" style="background-color: green;" onclick="changeColor('green')"></button>
+        <button class="color-btn" style="background-color: black;" onclick="changeColor('black')"></button>
+        <button class="color-btn" style="background-color: orange;" onclick="changeColor('orange')"></button>
+    </div>
+
+    <script>
+        function changeColor(newColor) {
+            window.api.function_PPTHelper('changeColor', newColor); // ������һ��API���Ըı���ע��ɫ
+        }
+    </script>
+</body>
+</html>

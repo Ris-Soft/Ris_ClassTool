@@ -171,6 +171,9 @@ function init() {
 
     // 处理参数
     handleCommand(process.argv.slice(2));
+
+    setInterval(autoAction_Basic, 1000);
+
 } // 载入函数
 function handleCommand(commandLine) {
     if (commandLine && commandLine.length > 1) {
@@ -184,8 +187,7 @@ function handleCommand(commandLine) {
 let settingsWindow = null;
 var settingsWindow_targetPage = null;
 let scheduleWindow = null;
-let PptHelper = null;
-let IntervalId_PPTH = null;
+let bottomBar, leftBar, rightBar, colorPicker;
 let processWindow = null;
 let sidebarWindow_isExpanded = null;
 
@@ -318,7 +320,7 @@ function createWindow_DesktopLayer() {
 
     scheduleWindow.setVisibleOnAllWorkspaces(true);
 
-    scheduleWindow.webContents.openDevTools({mode:'detach'})
+    //scheduleWindow.webContents.openDevTools({mode:'detach'})
 }// 桌面层
 function createWindow_TopLayer() {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -367,9 +369,6 @@ function createWindow_TopLayer() {
     let intervalId = null;
 
     function updateProgress() {
-
-        // 执行功能函数
-        autoAction_Basic();
 
         const now = new Date();
         const currentTime = formatTime(now, false);
@@ -434,7 +433,7 @@ function createWindow_TopLayer() {
                 }
             } else {
                 autoActionFunction(2);
-                //clearInterval(intervalId);
+                clearInterval(intervalId);
             }
         }
     }
@@ -507,51 +506,195 @@ function createWindow_SideBar() {
     //sidebarWindow.webContents.openDevTools({ mode: 'detach' })
 
 }// 侧边栏
-function createWindow_PptHelper() {
-    if (PptHelper && !PptHelper.isDestroyed()) {
+
+function createWindow_PptHelper(mode, show) {
+    // 检查是否已经创建了窗口，如果已创建且需要关闭，则销毁窗口
+    if (mode === 5) { // 全部关闭
+        if (bottomBar && !bottomBar.isDestroyed()) bottomBar.destroy();
+        if (leftBar && !leftBar.isDestroyed()) leftBar.destroy();
+        if (rightBar && !rightBar.isDestroyed()) rightBar.destroy();
+        if (colorPicker && !colorPicker.isDestroyed()) colorPicker.destroy();
+        return;
+    }
+
+    // 创建底部控制条
+    if (mode === 0 || mode === 3) {
+        createBottomBar(show);
+    }
+    if (mode === 6) {
+        createBottomBar(show, mode);
+    }
+
+    // 创建左侧和右侧控制条
+    if (mode === 1 || mode === 3) {
+        createLeftAndRightBars(show);
+    }
+
+    // 创建颜色选择器
+    if (mode === 4 || mode === 3) {
+        if (show) {
+            createColorPicker();
+        } else {
+            if (colorPicker && !colorPicker.isDestroyed()) colorPicker.destroy();
+        }
+    }
+}
+
+let bottombarOpened = true;
+function createBottomBar(show, mode) {
+    const display = screen.getPrimaryDisplay();
+    const scaleFactor = display.scaleFactor; // 获取DPI缩放因子
+    const { width, height } = display.workAreaSize;
+
+    let bottomBarWidth, bottomBarHeight, bottomBarX, bottomBarY;
+
+    if (bottomBar && !bottomBar.isDestroyed()) {
+        if (mode == 6 && !bottombarOpened) {
+            bottomBarWidth = Math.round(width * 0.25 * scaleFactor);
+            bottomBarHeight = Math.round(height * 0.085 * scaleFactor);
+            bottomBarX = Math.round((width / 2 - bottomBarWidth / 2));
+            bottomBarY = Math.round(height * 0.96);
+            bottomBar.setContentSize(bottomBarWidth, bottomBarHeight);
+            bottomBar.setPosition(bottomBarX, bottomBarY);
+            bottombarOpened = true;
+        } else if (mode == 6) {
+            bottomBarWidth = Math.round(width * 0.025 * scaleFactor);
+            bottomBarHeight = Math.round(height * 0.035 * scaleFactor);
+            bottomBarX = Math.round((width / 2 - bottomBarWidth / 2));
+            bottomBarY = Math.round((height + 10));
+            bottomBar.setContentSize(bottomBarWidth, bottomBarHeight);
+            bottomBar.setPosition(bottomBarX, bottomBarY);
+            bottombarOpened = false;
+        }
+        bottomBar.show();
+        return;
+    }
+
+    bottombarOpened = true;
+
+    bottomBarWidth = Math.round(width * 0.25 * scaleFactor);
+    bottomBarHeight = Math.round(height * 0.085 * scaleFactor);
+    bottomBarX = Math.round((width / 2 - bottomBarWidth / 2));
+    bottomBarY = Math.round(height * 0.96);
+
+    bottomBar = new BrowserWindow({
+        width: bottomBarWidth,
+        height: bottomBarHeight,
+        x: bottomBarX,
+        y: bottomBarY,
+        frame: false,
+        movable: true,
+        resizable: false,
+        skipTaskbar: true,
+        transparent: true,
+        focusable: false,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js')
+        }
+    });
+
+    bottomBar.setAlwaysOnTop(true, "dock");
+    bottomBar.loadFile(path.join(__dirname, './src/apps/pptHelper/bottom.html'));
+
+    bottomBar.show();
+
+    if (!show) bottomBar.hide();
+}
+function createLeftAndRightBars(show) {
+    if (leftBar && !leftBar.isDestroyed()) {
+        leftBar.show();
+        rightBar.show();
         return;
     }
 
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-
-    PptHelper = new BrowserWindow({
-        x: 0,
-        y: 0,
-        width: width,
-        height: height,
+    leftBar = new BrowserWindow({
+        width: width * 0.05,
+        height: height * 0.45,
+        x: -5,
+        y: (height - height * 0.45) / 2,
         frame: false,
         resizable: false,
         movable: false,
         skipTaskbar: true,
         transparent: true,
         focusable: false,
-        fullscreen: true,
+        fullscreen: false,
         backgroundThrottling: false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
         }
     });
 
-    PptHelper.setAlwaysOnTop(true, "pop-up-menu");
-    PptHelper.setIgnoreMouseEvents(true, { forward: true })
-    PptHelper.loadFile(path.join(__dirname, './src/apps/pptHelper.html'));
-
-    PptHelper.show();
-
-    PptHelper.setVisibleOnAllWorkspaces(true);
-
-
-    processWindow.show = false;
-    PptHelper.on("close", () => {
-        processWindow.show = true;
+    rightBar = new BrowserWindow({
+        width: width * 0.1,
+        height: height * 0.45,
+        x: width - width * 0.1 + 5,
+        y: (height - height * 0.45) / 2,
+        frame: false,
+        resizable: false,
+        movable: false,
+        skipTaskbar: true,
+        transparent: true,
+        focusable: false,
+        fullscreen: false,
+        backgroundThrottling: false,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js')
+        }
     });
+
+    leftBar.setAlwaysOnTop(true, "pop-up-menu");
+    leftBar.loadFile(path.join(__dirname, './src/apps/pptHelper/left.html'));
+    leftBar.show();
+
+    rightBar.setAlwaysOnTop(true, "pop-up-menu");
+    rightBar.loadFile(path.join(__dirname, './src/apps/pptHelper/right.html'));
+    rightBar.show();
+
+    if (!show) {
+        leftBar.hide();
+        rightBar.hide();
+    }
+}
+function createColorPicker() {
+    if (colorPicker && !colorPicker.isDestroyed()) {
+        colorPicker.show();
+        return;
+    }
+
+    const display = screen.getPrimaryDisplay();
+    const scaleFactor = display.scaleFactor; // 获取DPI缩放因子
+    let { width, height } = display.workAreaSize;
+
+    colorPicker = new BrowserWindow({
+        width: Math.round(width * 0.15 * scaleFactor),
+        height: Math.round(height * 0.075 * scaleFactor),
+        x: bottomBar.x, // 保持2px的间距
+        y: bottomBar.y - Math.round(height * 0.075 * scaleFactor) - Math.round(2 * scaleFactor), // 根据工作区域高度计算y坐标，并减去2px的间距
+        frame: false,
+        resizable: false,
+        movable: true,
+        skipTaskbar: true,
+        transparent: true,
+        focusable: false,
+        fullscreen: false,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js')
+        }
+    });
+
+    colorPicker.setAlwaysOnTop(true, "dock");
+    colorPicker.loadFile(path.join(__dirname, './src/apps/pptHelper/colorPicker.html'));
+    colorPicker.show();
 }
 
 
 // ————「功能函数」——————————————————————————————————————————————————————————————————
 
 let pptWindow = null;
-let pptWindow_Save = null;
+let activeTimeouts = [];
+var status = null;
 
 function checkWebsite(url, expectedContent, callback) { // 连通性检查
     const protocol = url.startsWith('https') ? https : http;
@@ -716,51 +859,53 @@ function formatTime(dateTarget, doNotUseOffset) {
 function autoAction_Basic() {
     if (config.pptHelper ?? true) {
         const activeWindow = windowManager.getActiveWindow();
-        //processWindow.webContents.send('debug_deliver', activeWindow.getTitle());
-        if (activeWindow && activeWindow.getTitle().includes('PowerPoint 幻灯片放映')) {
-            pptWindow = activeWindow;
-            createWindow_PptHelper();
-        } else if (PptHelper && !PptHelper.isDestroyed() && activeWindow && activeWindow.getTitle() !== "") {
-            PptHelper.close();
-        }
-
         if (activeWindow && activeWindow.getTitle().includes('Microsoft PowerPoint') && pptWindow.isWindow()) {
             pptWindow = activeWindow;
             activeWindow.bringToTop();
             internalFunction("keydown", "plugin", "13", "0");
         }
+        //processWindow.webContents.send('debug_deliver', activeWindow.getTitle());
+        if (activeWindow && activeWindow.getTitle().includes('PowerPoint 幻灯片放映')) {
+            pptWindow = activeWindow;
+            if (config.pptHelperMode ?? "bottom" == "bottom") {
+                createWindow_PptHelper(0, true)
+            } else {
+                createWindow_PptHelper(1, true)
+            }
+        } else if ((bottomBar && !bottomBar.isDestroyed() || leftBar && !leftBar.isDestroyed() || rightBar && !rightBar.isDestroyed()) && activeWindow && activeWindow.getTitle() !== "") {
+            createWindow_PptHelper(5);
+        }
     }
 
 
 }
-
-let activeTimeouts = [];
-
 function delayExecution(func, delay) {
     const timeoutId = setTimeout(func, delay);
     activeTimeouts.push(timeoutId);
     return timeoutId;
 }
-
 function clearActiveTimeouts() {
     activeTimeouts.forEach(id => clearTimeout(id));
     activeTimeouts = [];
 }
-
-var status = null;
-
 function PPTHelper(functionName, args) {
     if (!PPTHelper) return;
     if (functionName !== "exit") clearActiveTimeouts();
+    if (functionName == "annotate" || functionName == "changeColor") {
+        createWindow_PptHelper(4, true)
+    } else {
+        createWindow_PptHelper(4, false)
+    }
     pptWindow.bringToTop();
     switch (functionName) {
-        case 'FOCUS':
-            PptHelper.setIgnoreMouseEvents(false);
-            processWindow.focus();
+        //case 'drag':
+        //    bottomBar.setContentSize(args, bottomBar.height);
+        //    break;
+        case 'togglePos':
+            createWindow_PptHelper(6, true)
             break;
-        case 'UNFOCUS':
-            PptHelper.setIgnoreMouseEvents(true, { forward: true });
-            processWindow.focus();
+        case 'toggleMode':
+            createWindow_PptHelper(3, false)
             break;
         case 'changeColor':
             const times = colorToNumber[args];
@@ -800,21 +945,16 @@ function PPTHelper(functionName, args) {
         case 'select':
             status = functionName;
             internalFunction("keydown", "plugin", "17", "65"); // Ctrl + A
-            internalFunction("keydown", "plugin", "17", "65"); // Ctrl + A
             break;
         case 'annotate':
             status = functionName;
             internalFunction("keydown", "plugin", "17", "65"); // Ctrl + A
             delayExecution(() => internalFunction("keydown", "plugin", "17", "80"), 50); // Ctrl + P
-            delayExecution(() => internalFunction("keydown", "plugin", "17", "65"), 70); // Ctrl + A
-            delayExecution(() => internalFunction("keydown", "plugin", "17", "80"), 80); // Ctrl + P
             break;
         case 'erase':
             status = functionName;
             internalFunction("keydown", "plugin", "17", "65"); // Ctrl + A
             delayExecution(() => internalFunction("keydown", "plugin", "17", "69"), 50); // Ctrl + E
-            delayExecution(() => internalFunction("keydown", "plugin", "17", "65"), 70); // Ctrl + A
-            delayExecution(() => internalFunction("keydown", "plugin", "17", "69"), 80); // Ctrl + P
             break;
         default:
             console.log('未知功能');

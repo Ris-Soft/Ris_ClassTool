@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPT—› æ÷˙ ÷-”“≤‡</title>
+    <link rel="stylesheet" href="https://assets.3r60.top/icons/bootstrap-icons.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: transparent;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            font-size: 110%;
+        }
+
+        .control-bar {
+            position: fixed;
+            top: calc(100% - 60px);
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 10px;
+            transition: all 0.01s ease;
+            width: fit-content;
+            cursor: grab;
+        }
+
+            .control-bar.sides {
+                bottom: auto;
+                top: auto !important;
+                left: -10px !important;
+                width: fit-content;
+                height: fit-content;
+                flex-direction: column;
+                transform: none;
+                justify-content: space-between;
+                cursor: default;
+                padding: 10px 5px;
+            }
+
+                .control-bar.sides.right {
+                    left: auto !important;
+                    right: -10px !important;
+                }
+
+                .control-bar.sides button {
+                    margin: 2px 0;
+                    padding: 5px 5px;
+                    margin-left: 10px
+                }
+
+        #rightControlBar button {
+            margin-right: 10px;
+            margin-left: 0
+        }
+
+        .control-bar button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.5em;
+            outline: none;
+            transition: all 0.3s ease;
+            margin: 0 2px;
+            padding: 5px 10px;
+        }
+
+            .control-bar button.focused {
+                background-color: #ffffff21;
+                color: white;
+                border-radius: 5px;
+            }
+
+
+        .toggle-button {
+            position: fixed;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #toggleButtonUp {
+            padding: 2px 20px;
+            bottom: 0px;
+        }
+
+        #toggleButtonRight {
+            left: 0px;
+            padding: 20px 5px;
+        }
+
+        #toggleButtonLeft {
+            right: 0px;
+            padding: 20px 5px;
+        }
+
+        #sideToggleButtonLeft {
+            left: 0px;
+            padding: 20px 5px;
+        }
+
+        #sideToggleButtonRight {
+            right: 0px;
+            padding: 20px 5px;
+        }
+
+        body {
+            overflow-y: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="control-bar sides" id="rightControlBar" draggable="true" style="display:none;">
+        <button class="bi bi-caret-left-fill" onclick="handleClick('prev')"></button>
+        <button class="bi bi-caret-right-fill" onclick="handleClick('next')"></button>
+        <button class="bi bi-grid-fill" onclick="handleClick('grid')"></button>
+        <button class="focused" onclick="handleClick('select')" id="rightSelectBtn">
+            <i class="bi bi-cursor-fill" style="transform: rotate(270deg);"> </i>
+        </button>
+        <button class="bi bi-pen-fill" onclick="handleClick('annotate')" id="rightAnnotateBtn"></button>
+        <button class="bi bi-eraser-fill" onclick="handleClick('erase')" id="rightEraseBtn"></button>
+        <button id="rightModeToggleButton" class="bi bi-align-bottom" onclick="toggleMode()"></button>
+        <button id="rightHideButton" class="bi bi-arrow-bar-down" onclick="hideControlBar()"></button>
+        <button class="bi bi-box-arrow-right" onclick="handleClick('exit')"></button>
+    </div>
+    <button class="toggle-button hidden" id="sideToggleButtonRight" onclick="showControlBar()">
+        <i class="bi bi-chevron-double-left"></i>
+    </button>
+
+    <script>
+        let activeTool = 'select';
+
+        const rightControlBar = document.getElementById('rightControlBar');
+        const sideToggleButtonRight = document.getElementById('sideToggleButtonRight');
+
+
+        function handleClick(tool) {
+            window.api.function_PPTHelper(tool);
+            if (!document.getElementById(tool + 'Btn') && !document.getElementById('right' + tool.charAt(0).toUpperCase() + tool.slice(1) + 'Btn')) return;
+
+            if (activeTool === tool) return;
+
+            if (activeTool) {
+                document.getElementById(activeTool + 'Btn')?.classList.remove('focused');
+                document.getElementById('right' + activeTool.charAt(0).toUpperCase() + activeTool.slice(1) + 'Btn')?.classList.remove('focused');
+            }
+
+            activeTool = tool;
+            document.getElementById(tool + 'Btn')?.classList.add('focused');
+            document.getElementById('right' + tool.charAt(0).toUpperCase() + tool.slice(1) + 'Btn')?.classList.add('focused');
+        }
+
+        function toggleMode() {
+            window.api.function_PPTHelper("toggleMode");
+        }
+
+        function hideControlBar() {
+            rightControlBar.classList.add('hidden');
+            sideToggleButtonRight.classList.remove('hidden');
+        }
+
+        function showControlBar() {
+            rightControlBar.classList.remove('hidden');
+            sideToggleButtonRight.classList.add('hidden');
+        }
+
+    </script>
+</body>
+</html>

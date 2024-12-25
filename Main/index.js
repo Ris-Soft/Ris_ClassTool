@@ -670,8 +670,8 @@ function createColorPicker() {
     colorPicker = new BrowserWindow({
         width: Math.round(width * 0.15 * scaleFactor),
         height: Math.round(height * 0.075 * scaleFactor),
-        x: bottomBar.x, // 保持2px的间距
-        y: bottomBar.y - Math.round(height * 0.075 * scaleFactor) - Math.round(2 * scaleFactor), // 根据工作区域高度计算y坐标，并减去2px的间距
+        x: 2, // 保持2px的间距
+        y: Math.round(height * 0.95), // 根据工作区域高度计算y坐标，并减去2px的间距
         frame: false,
         resizable: false,
         movable: true,

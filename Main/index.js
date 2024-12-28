@@ -113,7 +113,7 @@ function init() {
             openAsHidden: false,
             path: process.execPath,
             args: ["--openAsHidden"],
-        })
+        });
     };
 
     // 配置读取
@@ -159,6 +159,9 @@ function init() {
     var tray = new Tray(iconPath);
     tray.setToolTip('瑞思课堂工具');
     tray.setContextMenu(contextMenu);
+    tray.on('click', () => {
+        createWindow_Setting();
+    });
 
 
     // 载入窗口
@@ -1144,6 +1147,10 @@ ipcMain.on('function_PPTHelper', (event, functionName, args) => {
     PPTHelper(functionName, args);
 });
 app.on('second-instance', (event, commandLine, workingDirectory) => {
-    handleCommand(commandLine)
-}); // 二次启动事件
+    if (commandLine.length > 1) {
+        handleCommand(commandLine);
+    } else {
+        createWindow_Setting();
+    }
+});
 app.on('ready', init); // 载入事件 

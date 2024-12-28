@@ -1019,11 +1019,6 @@ function PPTHelper(functionName, args) {
     }
 }
 function checkUpdate() {
-    const notification = new Notification({
-        title: '更新提示',
-        body: '程序即将更新，请稍候...'
-    });
-    notification.show();
 
     const updateUrl = 'https://app.3r60.top/webProject/Ris_ClassTool/update.json';
     const appPath = isDev ? './' : process.resourcesPath;
@@ -1044,6 +1039,11 @@ function checkUpdate() {
                 const asarUrl = updateInfo.asarUrl;
 
                 if (newVersion !== app.getVersion()) {
+                    const notification = new Notification({
+                        title: '更新提示',
+                        body: '程序即将更新，请稍候...'
+                    });
+                    notification.show();
                     const file = fs.createWriteStream(tempAsarPath);
                     https.get(asarUrl, (response) => {
                         response.pipe(file);

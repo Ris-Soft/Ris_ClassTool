@@ -104,7 +104,17 @@ var lastActivityTime = Date.now();
 function init() {
 
     // 单实例锁
-    if (!app.requestSingleInstanceLock()) app.quit();
+    if (!app.requestSingleInstanceLock()) {
+        app.quit();
+    } else {
+        app.on('second-instance', (event, commandLine, workingDirectory) => {
+            if (commandLine.length > 1) {
+                handleCommand(commandLine);
+            } else {
+                createWindow_Setting();
+            }
+        });
+    }
 
     // 设置自启动
     if (!isDev) {
@@ -1145,12 +1155,5 @@ ipcMain.on('webview_create', (event, url, local, fullScreen, StMode) => { // 创
 ipcMain.on('config_save', saveConfig); // 配置保存请求
 ipcMain.on('function_PPTHelper', (event, functionName, args) => {
     PPTHelper(functionName, args);
-});
-app.on('second-instance', (event, commandLine, workingDirectory) => {
-    if (commandLine.length > 1) {
-        handleCommand(commandLine);
-    } else {
-        createWindow_Setting();
-    }
 });
 app.on('ready', init); // 载入事件 

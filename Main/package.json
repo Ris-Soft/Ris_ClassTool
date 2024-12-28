@@ -16,7 +16,7 @@
   },
   "build": {
     "appId": "rct.trsz.app",
-    "productName": "瑞思课堂工具",
+    "productName": "Ris_ClassTool",
     "directories": {
       "output": "dist"
     },

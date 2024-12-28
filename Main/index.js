@@ -1023,7 +1023,7 @@ function checkUpdate() {
     const updateUrl = 'https://app.3r60.top/webProject/Ris_ClassTool/update.json';
     const appPath = isDev ? './' : process.resourcesPath;
     const asarPath = path.join(appPath, 'app.asar');
-    const tempAsarPath = path.join(appPath, 'temp_app.asar');
+    const tempAsarPath = path.join(appPath, 'app.asar.update');
     const batFilePath = path.join(appPath, 'update.bat');
 
     https.get(updateUrl, (resp) => {
@@ -1057,10 +1057,9 @@ function checkUpdate() {
                                     exit
                                 `;
                                 fs.writeFileSync(batFilePath, batContent, 'utf-8');
-                                exec(`start "" "${batFilePath}"`, (err) => {
-                                    if (err) throw err;
-                                    app.quit();
-                                });
+                                const child = spawn('cmd', ['/c', batFilePath], { detached: true, stdio: 'ignore' });
+                                child.unref();
+                                app.quit();
                             });
                         });
                     }).on('error', (err) => {

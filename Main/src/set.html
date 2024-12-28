@@ -10,6 +10,7 @@
     <title>设置</title>
     <link rel="stylesheet" href="./icons/bootstrap-icons.css">
     <!--<link rel="stylesheet" href="https://assets.3r60.top/icons/bootstrap-icons.css">-->
+    <script src="./js/xlsx.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -43,29 +44,29 @@
             -webkit-app-region: drag;
         }
 
-            #header .title {
-                padding-left: 15px;
-                font-size: 18px;
-                font-weight: bold;
-            }
+        #header .title {
+            padding-left: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
 
-            #header .controls {
-                display: flex;
-                padding-right: 15px;
-            }
+        #header .controls {
+            display: flex;
+            padding-right: 15px;
+        }
 
-                #header .controls button {
-                    background: transparent;
-                    border: none;
-                    cursor: pointer;
-                    font-size: 16px;
-                    padding: 0 10px;
-                    color: #555;
-                }
+        #header .controls button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0 10px;
+            color: #555;
+        }
 
-                    #header .controls button:hover {
-                        color: #ff4d4d;
-                    }
+        #header .controls button:hover {
+            color: #ff4d4d;
+        }
 
         #sidebar {
             position: absolute;
@@ -90,14 +91,14 @@
             cursor: pointer;
         }
 
-            .sidebar-item:hover {
-                background-color: #f1f1f1;
-            }
+        .sidebar-item:hover {
+            background-color: #f1f1f1;
+        }
 
-            .sidebar-item.active {
-                background-image: linear-gradient(to right, #0097fb 0%, #1e71f5 100%);
-                color: white;
-            }
+        .sidebar-item.active {
+            background-image: linear-gradient(to right, #0097fb 0%, #1e71f5 100%);
+            color: white;
+        }
 
         #main-content {
             position: absolute;
@@ -116,10 +117,10 @@
             transition: opacity 0.3s ease;
         }
 
-            .content-page.active {
-                display: block;
-                opacity: 1;
-            }
+        .content-page.active {
+            display: block;
+            opacity: 1;
+        }
 
         @media (max-width: 768px) {
             #sidebar {
@@ -147,14 +148,14 @@
             width: 180px;
         }
 
-            input:focus,
-            textarea:focus,
-            input:focus-visible,
-            textarea:focus-visible,
-            select:focus {
-                border: 1px solid #0097fb;
-                outline: none;
-            }
+        input:focus,
+        textarea:focus,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus {
+            border: 1px solid #0097fb;
+            outline: none;
+        }
 
         label {
             font-size: 12px;
@@ -175,70 +176,70 @@
             font-size: 14px;
         }
 
-            table th {
-                background-color: #007bff;
-                color: white;
-                padding: 10px;
-                text-align: center;
-                font-weight: 100;
-            }
+        table th {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: 100;
+        }
 
-            table td {
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: center;
-            }
+        table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
 
-                table td[contenteditable="true"] {
-                    background-color: #fff;
-                    padding: 5px;
-                    min-width: 80px;
-                }
+        table td[contenteditable="true"] {
+            background-color: #fff;
+            padding: 5px;
+            min-width: 80px;
+        }
 
-                    table td[contenteditable="true"]:focus-visible {
-                        border: 2px solid #0097fb;
-                        outline: none;
-                    }
+        table td[contenteditable="true"]:focus-visible {
+            border: 2px solid #0097fb;
+            outline: none;
+        }
 
-                    table td[contenteditable="true"]:hover {
-                        background-color: #f0f0f0;
-                    }
+        table td[contenteditable="true"]:hover {
+            background-color: #f0f0f0;
+        }
 
-            /* 操作按钮样式 */
-            table .deleteRowButton,
-            .redBtn {
-                background-color: #dc3545;
-                color: white;
-                border: none;
-                padding: 5px 10px;
-                cursor: pointer;
-                border-radius: 4px;
-            }
+        /* 操作按钮样式 */
+        table .deleteRowButton,
+        .redBtn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
 
-                table .deleteRowButton:hover,
-                .redBtn:hover {
-                    background-color: #c82333;
-                }
+        table .deleteRowButton:hover,
+        .redBtn:hover {
+            background-color: #c82333;
+        }
 
-            table tr:first-child th:first-child {
-                border-top-left-radius: 5px;
-                /* 设置table左上圆角 */
-            }
+        table tr:first-child th:first-child {
+            border-top-left-radius: 5px;
+            /* 设置table左上圆角 */
+        }
 
-            table tr:first-child th:last-child {
-                border-top-right-radius: 5px;
-                /* 设置table右上圆角 */
-            }
+        table tr:first-child th:last-child {
+            border-top-right-radius: 5px;
+            /* 设置table右上圆角 */
+        }
 
-            table tr:last-child td:first-child {
-                border-bottom-left-radius: 5px;
-                /* 设置table左下圆角 */
-            }
+        table tr:last-child td:first-child {
+            border-bottom-left-radius: 5px;
+            /* 设置table左下圆角 */
+        }
 
-            table tr:last-child td:last-child {
-                border-bottom-right-radius: 5px;
-                /* 设置table右下圆角 */
-            }
+        table tr:last-child td:last-child {
+            border-bottom-right-radius: 5px;
+            /* 设置table右下圆角 */
+        }
 
         /* 新增行按钮样式 */
         #addRowButton,
@@ -251,10 +252,10 @@
             border-radius: 4px;
         }
 
-            #addRowButton:hover,
-            .greenBtn:hover {
-                background-color: #218838;
-            }
+        #addRowButton:hover,
+        .greenBtn:hover {
+            background-color: #218838;
+        }
 
         /* 保存按钮样式 */
         button {
@@ -267,10 +268,10 @@
             margin: 5px;
         }
 
-            button:hover {
-                opacity: 0.7;
-                background-color: #0069d9;
-            }
+        button:hover {
+            opacity: 0.7;
+            background-color: #0069d9;
+        }
 
         .card {
             background-color: rgba(255, 255, 255, 0.8);
@@ -282,24 +283,24 @@
             margin-bottom: 10px;
         }
 
-            .card > label {
-                flex: 1;
-                color: rgb(82, 82, 82);
-            }
+        .card>label {
+            flex: 1;
+            color: rgb(82, 82, 82);
+        }
 
-                .card > label > h2 {
-                    margin: 0;
-                    font-weight: 500;
-                    font-size: 16px;
-                    color: black;
-                }
+        .card>label>h2 {
+            margin: 0;
+            font-weight: 500;
+            font-size: 16px;
+            color: black;
+        }
 
-            .card > input {
-                width: 180px;
-                height: 35px;
-                margin-top: auto;
-                margin-bottom: auto;
-            }
+        .card>input {
+            width: 180px;
+            height: 35px;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
 
         input[type="checkbox"] {
             display: inline-block;
@@ -324,17 +325,17 @@
             border-radius: 8px;
         }
 
-            .about-container h1 {
-                color: #333;
-                font-size: 24px;
-                margin-bottom: 10px;
-            }
+        .about-container h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
 
-            .about-container h3 {
-                color: #666;
-                font-size: 18px;
-                margin-bottom: 20px;
-            }
+        .about-container h3 {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
 
         .about-list {
             list-style: none;
@@ -342,15 +343,15 @@
             text-align: left;
         }
 
-            .about-list li {
-                padding: 5px 0;
-                font-size: 16px;
-                color: #333;
-            }
+        .about-list li {
+            padding: 5px 0;
+            font-size: 16px;
+            color: #333;
+        }
 
-                .about-list li strong {
-                    color: #000;
-                }
+        .about-list li strong {
+            color: #000;
+        }
 
         .about-footer {
             margin-top: 20px;
@@ -367,6 +368,7 @@
     </div>
     <div id="sidebar">
         <div class="sidebar-item active" data-target="#control"><i class="bi bi-toggle2-off"></i>&nbsp;功能开关</div>
+        <div class="sidebar-item" data-target="#data"><i class="bi bi-database"></i>&nbsp;数据管理</div>
         <div class="sidebar-item" data-target="#basic"><i class="bi bi-gear"></i>&nbsp;通用选项</div>
         <div class="sidebar-item" data-target="#schedule"><i class="bi bi-calendar2-day"></i>&nbsp;课程设定</div>
         <div class="sidebar-item" data-target="#students"><i class="bi bi-people"></i>&nbsp;学生管理</div>
@@ -377,7 +379,7 @@
         <div class="sidebar-item" data-target="#sidebarSettings"><i class="bi bi-layout-sidebar"></i>&nbsp;侧边栏设置</div>
         <div class="sidebar-item" data-target="#about"><i class="bi bi-info-circle"></i>&nbsp;关于程序</div>
         <a id="createLink"
-           style="position: fixed;left: 0;bottom: 0;padding: 15px;font-family: Arial, sans-serif;color: #007bff;z-index:1000;font-size: 12px;text-decoration: underline;cursor: pointer;">
+            style="position: fixed;left: 0;bottom: 0;padding: 15px;font-family: Arial, sans-serif;color: #007bff;z-index:1000;font-size: 12px;text-decoration: underline;cursor: pointer;">
             <b>创建当前快捷方式</b><br>在桌面生成此页的快捷方式
         </a>
     </div>
@@ -416,19 +418,65 @@
                 <input onchange="saveConfigOnBlur(this)" type="checkbox" id="pptHelper"><br>
             </div>
         </div>
+        <!--数据管理页面-->
+        <div class="content-page" id="data">
+            <div class="page-title"><i class="bi bi-database"></i>&nbsp;数据管理</div>
+            <div class="card" style="display: block;">
+                <label style="margin-bottom: 5px;">
+                    <h2>数据导出</h2>导出课程数据或应用程序配置
+                </label>
+                <button type="button" onclick="exportSchedules()">导出课程与时间为表格</button>
+                <button type="button" onclick="exportStudents()">导出学生列表为表格</button>
+                <button type="button" onclick="exportAll()">导出应用程序配置</button>
+            </div>
+            <div class="card" style="display: block;">
+                <label style="margin-bottom: 5px;">
+                    <h2>导入时间表</h2>通过导入课程表Excel文件来快速设置课程表的时间部分
+                </label>
+                时间数据开始行：<input class="doNotSave" id="T_startX" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始行,从1开始" value="1" /><br>
+                时间数据开始列：<input class="doNotSave" id="T_startY" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始列,从1开始" value="1" /><br>
+                选择时间的文件：<input class="doNotSave" type="file" id="T_importTime" style="margin-bottom: 5px;"
+                    accept=".xls,.xlsx"><br>
+                <button type="button" onclick="importTime()">导入时间表</button>
+            </div>
+            <div class="card" style="display: block;">
+                <label style="margin-bottom: 5px;">
+                    <h2>导入课程表</h2>通过导入课程表Excel文件来快速设置课程表
+                </label>
+                课表数据开始行：<input class="doNotSave" id="S_startX" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始行,从1开始" value="2" /><br>
+                课表数据开始列：<input class="doNotSave" id="S_startY" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始列,从1开始" value="2" /><br>
+                选择课表的文件：<input class="doNotSave" type="file" id="S_importSchedule" style="margin-bottom: 5px;"
+                    accept=".xls,.xlsx"><br>
+                是否取首个汉字：<input class="doNotSave" type="checkbox" id="S_Tidy" style="width: 20px;" checked><br>
+                <button type="button" onclick="importSchedule()">导入课程表</button>
+            </div>
+            <div class="card" style="display: block;">
+                <label style="margin-bottom: 5px;">
+                    <h2>导入学生列表</h2>通过导入Excel文件来快速设置学生
+                </label>
+                学生数据开始行：<input class="doNotSave" id="ST_startX" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始行,从1开始" value="2" /><br>
+                学生数据开始列：<input class="doNotSave" id="ST_startY" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始列,从1开始" value="1" /><br>
+                选择课表的文件：<input class="doNotSave" type="file" id="ST_importStudents" style="margin-bottom: 5px;"
+                    accept=".xls,.xlsx"><br>
+                是否包含活动日：<input class="doNotSave" type="checkbox" id="ST_includeDate" style="width: 20px;" checked><br>
+                <button type="button" onclick="importStudents()">导入学生列表</button>
+            </div>
+            <div class="card" style="display: block;">
+                <label style="margin-bottom: 5px;">
+                    <h2>全量导入</h2>直接导入JSON配置并应用
+                </label>
+                <button type="button" onclick="importAll()">全量导入</button>
+            </div>
+        </div>
         <!-- 外观设置页面 -->
         <div class="content-page" id="appearance">
             <div class="page-title"><i class="bi bi-palette"></i>&nbsp;外观设置</div>
-            <!--<div class="card">
-                <label for="infoBarStyle">
-                    <h2>桌面信息栏输出样式</h2>请选择一个选项
-                </label>
-                <select id="infoBarStyle">
-                    <option value="1">样式1</option>
-                    <option value="2">样式2</option>
-                    <option value="3">样式3</option>
-                </select>
-            </div>-->
             <div class="card">
                 <label for="progressColor">
                     <h2>主题颜色</h2>进度条与课程表的突出主题色
@@ -454,7 +502,6 @@
                 <input type="text" id="progressHeight" placeholder="默认值：2px"><br><br>
             </div>
         </div>
-
         <!-- 倒计时与提醒页面 -->
         <div class="content-page" id="countdown">
             <div class="page-title"><i class="bi bi-clock"></i>&nbsp;倒计时与提醒</div>
@@ -477,7 +524,6 @@
                 <input type="text" id="posName" placeholder="位置名称"><br><br>
             </div>
         </div>
-
         <!-- 侧边栏设置页面 -->
         <div class="content-page" id="sidebarSettings">
             <div class="page-title"><i class="bi bi-layout-sidebar"></i>&nbsp;侧边栏设置</div>
@@ -494,6 +540,7 @@
                 <input type="text" id="sideBarBottom" placeholder="默认值：200"><br><br>
             </div>
         </div>
+        <!-- 基本设置页面 -->
         <div class="content-page" id="basic">
             <div class="page-title"><i class="bi bi-gear"></i>&nbsp;通用设定</div>
             <form id="basicSettingsForm">
@@ -522,10 +569,11 @@
                     <input type="text" id="focusText" placeholder="专注模式默认文本"><br><br>
                 </div>
                 <!-- <div class="card">
-                    <button type="button" id="saveAutoQuitConfigButton" onclick="saveBasicConfigButton()">保存</button>
-                </div> -->
+                <button type="button" id="saveAutoQuitConfigButton" onclick="saveBasicConfigButton()">保存</button>
+            </div> -->
             </form>
         </div>
+        <!--自动任务配置页面-->
         <div class="content-page" id="autoQuit">
             <div class="page-title"><i class="bi bi-code-square"></i>&nbsp;自动执行</div>
             <form id="autoQuitSettingsForm">
@@ -560,13 +608,15 @@
                     <input onchange="saveConfigOnBlur(this)" type="checkbox" id="autoPowerOff">
                 </div>
                 <!-- <div class="card">
-                    <button type="button" id="saveBasicConfigButton" onclick="saveAutoQuitConfigButton()">保存</button>
-                </div> -->
+                <button type="button" id="saveBasicConfigButton" onclick="saveAutoQuitConfigButton()">保存</button>
+            </div> -->
             </form>
         </div>
+        <!--课表编辑页面-->
         <div class="content-page" id="schedule">
             <div class="page-title">
-                <i class="bi bi-calendar2-day"></i>&nbsp;课程设定<label style="display: unset;">&nbsp;提示：页面底部有保存按钮，编辑后请不要忘记保存</label>
+                <i class="bi bi-calendar2-day"></i>&nbsp;课程设定<label
+                    style="display: unset;">&nbsp;提示：页面底部有保存按钮，编辑后请不要忘记保存</label>
             </div>
             <div class="card">
                 <label for="linePos">
@@ -594,12 +644,13 @@
                 </table>
                 <div class="card">
                     <button type="button" id="addRowButton" style="margin-left: 0;">新增行</button><button type="button"
-                                                                                                        id="saveScheduleConfigButton">
+                        id="saveScheduleConfigButton">
                         保存课表
                     </button>
                 </div>
             </div>
         </div>
+        <!--学生管理页面-->
         <div class="content-page" id="students">
             <div class="page-title"><i class="bi bi-people"></i>&nbsp;学生管理</div>
             <div class="card">
@@ -611,8 +662,9 @@
             <div class="card" style="display:block">
                 <span style="display:flex;">
                     <i class="bi bi-list" style="font-size: 26px;margin: 10px;"></i>
-                    <button type="button" class="greenBtn" id="addStudentButton"><i class="bi bi-plus-circle"></i>&nbsp;新增</button><button type="button"
-                                                                                                                                           id="saveStudentsConfigButton">
+                    <button type="button" class="greenBtn" id="addStudentButton"><i
+                            class="bi bi-plus-circle"></i>&nbsp;新增</button><button type="button"
+                        id="saveStudentsConfigButton">
                         <i class="bi bi-archive"></i>&nbsp;保存
                     </button>
                 </span><br>
@@ -629,6 +681,7 @@
                 </table>
             </div>
         </div>
+        <!--调休换课页面-->
         <div class="content-page" id="switch">
             <div class="page-title"><i class="bi bi-toggles"></i>&nbsp;调休换课</div>
             <table id="plansTable">
@@ -645,11 +698,12 @@
             <div class="card">
                 <input type="text" placeholder="目标日期" id="planDate" style="width: 72px;">
                 <button type="button" class="greenBtn" id="addPlanButton">新增规则</button><button type="button"
-                                                                                               id="savePlansConfigButton">
+                    id="savePlansConfigButton">
                     保存
                 </button>
             </div>
         </div>
+        <!--关于页面-->
         <div class="content-page" id="about">
             <div class="about-container">
                 <h1><i class="bi bi-info-circle"></i> RisClassTool <span id="version"></span></h1>
@@ -670,10 +724,249 @@
         </div>
     </div>
 
-    <script src="https://edu.3r60.top/app/phrase/pinyin-pro.js"></script>
+    <script src="./js/pinyin-pro.js"></script>
     <script>
         var Config;
         const { pinyin } = pinyinPro;
+
+        // 数据管理
+        function exportSchedules() {
+            const courseTable = Config.courseTable || {};
+            const timeTable = Config.timeTable || {};
+            const maxRows = Math.max(
+                Object.keys(timeTable).length,
+                Object.keys(courseTable.Monday || {}).length
+            );
+
+            const sheetData = [['时间', '周一', '周二', '周三', '周四', '周五', '周六', '周日']];
+
+            for (let i = 1; i <= maxRows; i++) {
+                sheetData.push([
+                    timeTable[i] || '00:00-00:00',
+                    courseTable.Monday ? courseTable.Monday[i - 1] || '' : '',
+                    courseTable.Tuesday ? courseTable.Tuesday[i - 1] || '' : '',
+                    courseTable.Wednesday ? courseTable.Wednesday[i - 1] || '' : '',
+                    courseTable.Thursday ? courseTable.Thursday[i - 1] || '' : '',
+                    courseTable.Friday ? courseTable.Friday[i - 1] || '' : '',
+                    courseTable.Saturday ? courseTable.Saturday[i - 1] || '' : '',
+                    courseTable.Sunday ? courseTable.Sunday[i - 1] || '' : ''
+                ]);
+            }
+
+            const workbook = XLSX.utils.book_new();
+            const sheet = XLSX.utils.aoa_to_sheet(sheetData);
+            XLSX.utils.book_append_sheet(workbook, sheet, '课程表');
+            XLSX.writeFile(workbook, '课程表.xlsx');
+        }
+        function exportStudents() {
+            const students = Config.students || [];
+            const sheetData = [['姓名', '活动日期']];
+
+            students.forEach(student => {
+                sheetData.push([student.name, student.activeDate || '']);
+            });
+
+            const workbook = XLSX.utils.book_new();
+            const sheet = XLSX.utils.aoa_to_sheet(sheetData);
+            XLSX.utils.book_append_sheet(workbook, sheet, '学生列表');
+            XLSX.writeFile(workbook, '学生列表.xlsx');
+        }
+        function exportAll() {
+            const configData = JSON.stringify(Config, null, 2);
+            const blob = new Blob([configData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Ris_ClassToolConfig.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        function importSchedule() {
+            if (!confirm('此操作将清除现有课程数据，是否继续？')) {
+                return;
+            }
+            const file = document.getElementById('S_importSchedule').files[0];
+            const tidy = document.getElementById('S_Tidy').checked;
+            const startX = parseInt(document.getElementById('S_startX').value) || 2;
+            const startY = parseInt(document.getElementById('S_startY').value) || 2;
+            if (!file) {
+                alert('请先选择文件');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                const courseTable = {
+                    Monday: [],
+                    Tuesday: [],
+                    Wednesday: [],
+                    Thursday: [],
+                    Friday: [],
+                    Saturday: [],
+                    Sunday: []
+                };
+
+                for (let i = startX - 1; i < sheetData.length; i++) {
+                    const row = sheetData[i];
+                    for (let j = startY - 1; j < row.length; j++) {
+                        let cell = row[j];
+                        if (tidy) {
+                            cell = cell.match(/[\u4e00-\u9fa5]/)?.[0] || cell;
+                        }
+                        switch (j - startY + 1) {
+                            case 0:
+                                courseTable.Monday.push(cell);
+                                break;
+                            case 1:
+                                courseTable.Tuesday.push(cell);
+                                break;
+                            case 2:
+                                courseTable.Wednesday.push(cell);
+                                break;
+                            case 3:
+                                courseTable.Thursday.push(cell);
+                                break;
+                            case 4:
+                                courseTable.Friday.push(cell);
+                                break;
+                            case 5:
+                                courseTable.Saturday.push(cell);
+                                break;
+                            case 6:
+                                courseTable.Sunday.push(cell);
+                                break;
+                        }
+                    }
+                }
+
+                // 获取当前配置的时间表
+                const timeTable = Config.timeTable || {};
+                const timeTableKeys = Object.keys(timeTable).map(Number);
+                const maxTimeKey = Math.max(...timeTableKeys);
+                let lastTimeValue = timeTable[maxTimeKey].toString() || '00:00-00:00';
+                lastTimeValue = lastTimeValue.indexOf("-") === -1 ? '00:00-00:00' : lastTimeValue;
+                if (lastTimeValue.indexOf("-") === -1) alert('您的时间表格式有误，将自动使用默认数据补全');
+
+                // 如果原配置的时间节次小于导入的课程表，则补充时间表
+                if (timeTableKeys.length < sheetData.length - startX + 1) {
+                    alert('您的节次（时间表行数）小于导入课程表的最大行数，将自动补齐相同时间');
+                    for (let i = timeTableKeys.length + 1; i <= sheetData.length - startX + 1; i++) {
+                        const lastTimeParts = lastTimeValue.split('-');
+                        const lastStartTime = lastTimeParts[0].split(':');
+                        const lastEndTime = lastTimeParts[1].split(':');
+                        const newStartTime = new Date();
+                        const newEndTime = new Date();
+
+                        newStartTime.setHours(parseInt(lastEndTime[0]));
+                        newStartTime.setMinutes(parseInt(lastEndTime[1]) + 1);
+                        newEndTime.setHours(parseInt(lastEndTime[0]));
+                        newEndTime.setMinutes(parseInt(lastEndTime[1]) + 2);
+
+                        const newTimeValue = `${newStartTime.getHours()}:${newStartTime.getMinutes()}-${newEndTime.getHours()}:${newEndTime.getMinutes()}`;
+                        timeTable[i] = newTimeValue;
+                    }
+                    // 保存更新后的时间表
+                    window.api.config_save({ timeTable });
+                }
+
+                // 保存课程表
+                window.api.config_save({ courseTable });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        function importTime() {
+            if (!confirm('此操作将覆盖现有时间数据，是否继续？')) {
+                return;
+            }
+            const file = document.getElementById('T_importTime').files[0];
+            const startX = parseInt(document.getElementById('T_startX').value) || 2;
+            const startY = parseInt(document.getElementById('T_startY').value) || 2;
+            if (!file) {
+                alert('请先选择文件');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                const timeTable = {};
+
+                for (let i = startX - 1; i < sheetData.length; i++) {
+                    const row = sheetData[i];
+                    const timeValue = row[startY - 1];
+                    if (timeValue) {
+                        timeTable[i - startX + 2] = timeValue;
+                    }
+                }
+
+                window.api.config_save({ timeTable });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        function importStudents() {
+            if (!confirm('此操作将覆盖现有学生数据，是否继续？')) {
+                return;
+            }
+            const file = document.getElementById('ST_importStudents').files[0];
+            const startX = parseInt(document.getElementById('ST_startX').value) || 2;
+            const startY = parseInt(document.getElementById('ST_startY').value) || 1;
+            const includeDate = document.getElementById('ST_includeDate').checked;
+            if (!file) {
+                alert('请先选择文件');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                const students = [];
+
+                for (let i = startX - 1; i < sheetData.length; i++) {
+                    const row = sheetData[i];
+                    const student = {
+                        name: row[startY - 1],
+                        activeDate: includeDate ? row[startY] : ''
+                    };
+                    students.push(student);
+                }
+
+                window.api.config_save({ students });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        function importAll() {
+            const file = document.createElement('input');
+            file.type = 'file';
+            file.accept = '.json';
+            file.onchange = (event) => {
+                const selectedFile = event.target.files[0];
+                if (!selectedFile) {
+                    alert('请先选择文件');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        const importedConfig = JSON.parse(e.target.result);
+                        window.api.config_save(importedConfig);
+                        alert('配置导入成功');
+                    } catch (error) {
+                        alert('导入失败，请检查文件格式');
+                    }
+                };
+                reader.readAsText(selectedFile);
+            };
+            file.click();
+        }
 
         // ================================================================
         // 动态载入
@@ -738,9 +1031,19 @@
             };
 
             const rows = document.querySelectorAll('#scheduleTable tbody tr');
+            let valid = true;
+
             rows.forEach((row, index) => {
                 const cells = row.querySelectorAll('td');
-                newConfig.timeTable[index + 1] = cells[0].textContent.trim(); // 获取时间列的内容
+                const timeValue = cells[0].textContent.trim();
+
+                if (!timeValue.includes('-')) {
+                    alert(`时间格式错误: ${timeValue}，请确保时间包含“-”`);
+                    valid = false;
+                    return;
+                }
+
+                newConfig.timeTable[index + 1] = timeValue; // 获取时间列的内容
                 newConfig.courseTable.Monday.push(cells[1].textContent.trim());
                 newConfig.courseTable.Tuesday.push(cells[2].textContent.trim());
                 newConfig.courseTable.Wednesday.push(cells[3].textContent.trim());
@@ -750,7 +1053,9 @@
                 newConfig.courseTable.Sunday.push(cells[7].textContent.trim());
             });
 
-            window.api.config_save(newConfig);
+            if (valid) {
+                window.api.config_save(newConfig);
+            }
         });
         // --------------------------
 
@@ -910,7 +1215,9 @@
             const courseTable = Config.courseTable || {};
             return courseTable[weekday] || [];
         }
-
+        async function getConfig() {
+            Config = await window.api.config_Get(false);
+        }
 
 
         // ===============================================================
@@ -961,6 +1268,8 @@
         // 保存配置
         function saveConfigOnBlur(element) {
             const newConfig = {};
+
+            if (element.classList.contains('doNotSave')) return;
 
             // 根据元素类型处理值
             if (element.type === 'checkbox' || element.type === 'radio') {

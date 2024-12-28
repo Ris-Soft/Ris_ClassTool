@@ -184,12 +184,11 @@ function handleCommand(commandLine) {
 } // 命令行处理
 
 // ————「窗口创建」——————————————————————————————————————————————————————————————————
-let settingsWindow = null;
-var settingsWindow_targetPage = null;
-let scheduleWindow = null;
+let settingsWindow_targetPage;
 let bottomBar, leftBar, rightBar, colorPicker;
-let processWindow = null;
-let sidebarWindow_isExpanded = null;
+let bottomBarLeft, bottomBarRight;
+let processWindow, scheduleWindow, settingsWindow;
+let sidebarWindow_isExpanded , bottombarOpened = true;
 
 function createWindow(url, local, fullScreen = false, StMode = false) {
     url = url.replaceAll("\\", "/");
@@ -508,12 +507,13 @@ function createWindow_SideBar() {
 }// 侧边栏
 
 function createWindow_PptHelper(mode, show) {
-    // 检查是否已经创建了窗口，如果已创建且需要关闭，则销毁窗口
     if (mode === 5) { // 全部关闭
         if (bottomBar && !bottomBar.isDestroyed()) bottomBar.destroy();
         if (leftBar && !leftBar.isDestroyed()) leftBar.destroy();
         if (rightBar && !rightBar.isDestroyed()) rightBar.destroy();
         if (colorPicker && !colorPicker.isDestroyed()) colorPicker.destroy();
+        if (bottomBarLeft && !bottomBarLeft.isDestroyed()) bottomBarLeft.destroy();
+        if (bottomBarRight && !bottomBarRight.isDestroyed()) bottomBarRight.destroy();
         return;
     }
 
@@ -539,43 +539,51 @@ function createWindow_PptHelper(mode, show) {
         }
     }
 }
-
-let bottombarOpened = true;
 function createBottomBar(show, mode) {
     const display = screen.getPrimaryDisplay();
     const scaleFactor = display.scaleFactor; // 获取DPI缩放因子
     const { width, height } = display.workAreaSize;
 
-    let bottomBarWidth, bottomBarHeight, bottomBarX, bottomBarY;
+    let bottomBarWidth, bottomBarHeight, bottomBarX, bottomBarY, bottomBarSideX2;
 
     if (bottomBar && !bottomBar.isDestroyed()) {
         if (mode == 6 && !bottombarOpened) {
-            bottomBarWidth = Math.round(width * 0.25 * scaleFactor);
-            bottomBarHeight = Math.round(height * 0.085 * scaleFactor);
+            bottomBarWidth = Math.round(width * 0.20 * scaleFactor);
+            bottomBarHeight = Math.round(height * 0.072 * scaleFactor);
             bottomBarX = Math.round((width / 2 - bottomBarWidth / 2));
-            bottomBarY = Math.round(height * 0.96);
+            bottomBarY = Math.round((height - (bottomBarHeight) / (2.5)) - 2);
             bottomBar.setContentSize(bottomBarWidth, bottomBarHeight);
             bottomBar.setPosition(bottomBarX, bottomBarY);
             bottombarOpened = true;
+            bottomBar.show();
+            bottomBarLeft.show();
+            bottomBarRight.show();
         } else if (mode == 6) {
             bottomBarWidth = Math.round(width * 0.025 * scaleFactor);
-            bottomBarHeight = Math.round(height * 0.035 * scaleFactor);
+            bottomBarHeight = Math.round(height * 0.02 * scaleFactor);
             bottomBarX = Math.round((width / 2 - bottomBarWidth / 2));
             bottomBarY = Math.round((height + 10));
             bottomBar.setContentSize(bottomBarWidth, bottomBarHeight);
             bottomBar.setPosition(bottomBarX, bottomBarY);
             bottombarOpened = false;
+            bottomBar.show();
+            bottomBarLeft.hide();
+            bottomBarRight.hide();
+        } else {
+            bottomBar.show();
         }
-        bottomBar.show();
         return;
     }
 
     bottombarOpened = true;
 
-    bottomBarWidth = Math.round(width * 0.25 * scaleFactor);
-    bottomBarHeight = Math.round(height * 0.085 * scaleFactor);
+    bottomBarWidth = Math.round(width * 0.20 * scaleFactor);
+    bottomBarHeight = Math.round(height * 0.072 * scaleFactor);
     bottomBarX = Math.round((width / 2 - bottomBarWidth / 2));
-    bottomBarY = Math.round(height * 0.96);
+    bottomBarY = Math.round((height - (bottomBarHeight) / (2.5)) - 2);
+
+    bottomBarSideWidth = Math.round(width * 0.075 * scaleFactor);
+    bottomBarSideX2 = Math.round(width - bottomBarSideWidth - 2);
 
     bottomBar = new BrowserWindow({
         width: bottomBarWidth,
@@ -593,12 +601,53 @@ function createBottomBar(show, mode) {
         }
     });
 
+    bottomBarLeft = new BrowserWindow({
+        width: bottomBarSideWidth,
+        height: bottomBarHeight,
+        x: 2,
+        y: bottomBarY,
+        frame: false,
+        movable: true,
+        resizable: false,
+        skipTaskbar: true,
+        transparent: true,
+        focusable: false,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js')
+        }
+    });
+
+    bottomBarRight = new BrowserWindow({
+        width: bottomBarSideWidth,
+        height: bottomBarHeight,
+        x: bottomBarSideX2,
+        y: bottomBarY,
+        frame: false,
+        movable: true,
+        resizable: false,
+        skipTaskbar: true,
+        transparent: true,
+        focusable: false,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js')
+        }
+    });
+
     bottomBar.setAlwaysOnTop(true, "dock");
+    bottomBarLeft.setAlwaysOnTop(true, "dock");
+    bottomBarRight.setAlwaysOnTop(true, "dock");
+
     bottomBar.loadFile(path.join(__dirname, './src/apps/pptHelper/bottom.html'));
+    bottomBarLeft.loadFile(path.join(__dirname, './src/apps/pptHelper/side.html'));
+    bottomBarRight.loadFile(path.join(__dirname, './src/apps/pptHelper/side.html'));
 
     bottomBar.show();
+    bottomBarLeft.show();
+    bottomBarRight.show();
 
     if (!show) bottomBar.hide();
+    if (!show) bottomBarLeft.hide();
+    if (!show) bottomBarRight.hide();
 }
 function createLeftAndRightBars(show) {
     if (leftBar && !leftBar.isDestroyed()) {
@@ -609,10 +658,10 @@ function createLeftAndRightBars(show) {
 
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
     leftBar = new BrowserWindow({
-        width: width * 0.05,
-        height: height * 0.45,
+        width: Math.round(width * 0.05),
+        height: Math.round(height * 0.45),
         x: -5,
-        y: (height - height * 0.45) / 2,
+        y: Math.round((height - height * 0.45) / 2),
         frame: false,
         resizable: false,
         movable: false,
@@ -627,10 +676,10 @@ function createLeftAndRightBars(show) {
     });
 
     rightBar = new BrowserWindow({
-        width: width * 0.1,
-        height: height * 0.45,
-        x: width - width * 0.1 + 5,
-        y: (height - height * 0.45) / 2,
+        width: Math.round(width * 0.1),
+        height: Math.round(height * 0.45),
+        x: Math.round(width - width * 0.1 + 5),
+        y: Math.round((height - height * 0.45) / 2),
         frame: false,
         resizable: false,
         movable: false,
@@ -670,8 +719,8 @@ function createColorPicker() {
     colorPicker = new BrowserWindow({
         width: Math.round(width * 0.15 * scaleFactor),
         height: Math.round(height * 0.075 * scaleFactor),
-        x: 2, // 保持2px的间距
-        y: Math.round(height * 0.95), // 根据工作区域高度计算y坐标，并减去2px的间距
+        x: bottomBar.getPosition()[0], // 保持2px的间距
+        y: Math.round(bottomBar.getPosition()[1] - Math.round(height * 0.075 * scaleFactor)), // 根据工作区域高度计算y坐标，并减去2px的间距
         frame: false,
         resizable: false,
         movable: true,
@@ -772,6 +821,8 @@ function saveConfig(event, newConfig) { // 配置保存
                 } else {
                     scheduleWindow.hide();
                 }
+            } else if (win.webContents.getURL().endsWith('set.html')) {
+                win.webContents.send('config_deliver', config);
             } else if (win.webContents.getURL().endsWith('process.html')) {
                 win.webContents.send('config_deliver', config_Processed);
             } else if (win.webContents.getURL().endsWith('pptHelper.html')) {
@@ -891,8 +942,9 @@ function clearActiveTimeouts() {
 function PPTHelper(functionName, args) {
     if (!PPTHelper) return;
     if (functionName !== "exit") clearActiveTimeouts();
-    if (functionName == "annotate" || functionName == "changeColor") {
+    if (status == "annotate" && functionName == "annotate") {
         createWindow_PptHelper(4, true)
+        status = "colorPicker"
     } else {
         createWindow_PptHelper(4, false)
     }
@@ -940,7 +992,7 @@ function PPTHelper(functionName, args) {
             break;
         case 'exit':
             internalFunction("keydown", "plugin", "27", "0"); // Esc key
-            if (status != "annotate" || status != null) delayExecution(() => internalFunction("keydown", "plugin", "27", "0"), 50);
+            if (status != "colorPicker" || status != "erase" || status != "annotate" || status != null) delayExecution(() => internalFunction("keydown", "plugin", "27", "0"), 50);
             break;
         case 'select':
             status = functionName;

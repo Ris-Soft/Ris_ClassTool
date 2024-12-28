@@ -124,7 +124,7 @@ function init() {
         if (error.code === 'ENOENT') {
             fs.writeFileSync(configDataPath, JSON.stringify(defaultConfig, null, 2), 'utf-8');
         } else {
-            createSetWindow();
+            createWindow_Setting();
         }
     }
 

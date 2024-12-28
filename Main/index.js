@@ -121,11 +121,8 @@ function init() {
         var configData = fs.readFileSync(configDataPath, 'utf-8');
         config = JSON.parse(configData);
     } catch (error) {
-        if (error.code === 'ENOENT') {
-            fs.writeFileSync(configDataPath, JSON.stringify(defaultConfig, null, 2), 'utf-8');
-        } else {
-            createWindow_Setting();
-        }
+        fs.writeFileSync(configDataPath, JSON.stringify(defaultConfig, null, 2), 'utf-8');
+        createWindow_Setting();
     }
 
     if (config.cloudUrl) {
@@ -192,7 +189,7 @@ let settingsWindow_targetPage;
 let bottomBar, leftBar, rightBar, colorPicker;
 let bottomBarLeft, bottomBarRight;
 let processWindow, scheduleWindow, settingsWindow;
-let sidebarWindow_isExpanded , bottombarOpened = true;
+let sidebarWindow_isExpanded, bottombarOpened = true;
 
 function createWindow(url, local, fullScreen = false, StMode = false) {
     url = url.replaceAll("\\", "/");
@@ -450,7 +447,7 @@ function createWindow_TopLayer() {
     }
     intervalId = setInterval(updateProgress, 1000);
 
-     //processWindow.webContents.openDevTools({ mode: 'detach' })
+    //processWindow.webContents.openDevTools({ mode: 'detach' })
 }// 置顶层
 function createWindow_SideBar() {
     if (!(config.sideBarShow ?? true)) return;

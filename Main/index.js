@@ -8,6 +8,7 @@ const { spawn, exec } = require('child_process'); // 进程执行模块
 const http = require('http'); // HTTP模块
 const https = require('https'); // HTTPS模块
 const { windowManager } = require('node-window-manager');
+const unzipper = require('unzipper');
 
 // 常量定义
 const host = "https://app.3r60.top/webProject/Ris_ClassTool/"; // 带有/结尾
@@ -152,6 +153,7 @@ function init() {
     }
 
     config['version'] = app.getVersion(); // 动态写入程序版本
+    config['insiderPreview'] = false; // 内部预览版本
     config_Processed = changeCourseProcessing(config);
 
 
@@ -173,6 +175,10 @@ function init() {
     handleCommand(process.argv.slice(2));
 
     setInterval(autoAction_Basic, 1000);
+
+    if (!isDev) {
+        checkUpdate();
+    } // 自动更新
 
 } // 载入函数
 function handleCommand(commandLine) {
@@ -1012,7 +1018,64 @@ function PPTHelper(functionName, args) {
             console.log('未知功能');
     }
 }
+function checkUpdate() {
+    const notification = new Notification({
+        title: '更新提示',
+        body: '程序即将更新，请稍候...'
+    });
+    notification.show();
 
+    const updateUrl = 'https://app.3r60.top/webProject/Ris_ClassTool/update.json';
+    const appPath = isDev ? './' : process.resourcesPath;
+    const asarPath = path.join(appPath, 'app.asar');
+    const tempAsarPath = path.join(appPath, 'temp_app.asar');
+    const batFilePath = path.join(appPath, 'update.bat');
+
+    https.get(updateUrl, (resp) => {
+        let data = '';
+        resp.on('data', (chunk) => {
+            data += chunk;
+        });
+
+        resp.on('end', () => {
+            try {
+                const updateInfo = JSON.parse(data);
+                const newVersion = updateInfo.version;
+                const asarUrl = updateInfo.asarUrl;
+
+                if (newVersion !== app.getVersion()) {
+                    const file = fs.createWriteStream(tempAsarPath);
+                    https.get(asarUrl, (response) => {
+                        response.pipe(file);
+                        file.on('finish', () => {
+                            file.close(() => {
+                                const batContent = `
+                                    @echo off
+                                    timeout /t 5 /nobreak
+                                    move /y "${tempAsarPath}" "${asarPath}"
+                                    start "" "${process.execPath}"
+                                    exit
+                                `;
+                                fs.writeFileSync(batFilePath, batContent, 'utf-8');
+                                exec(`start "" "${batFilePath}"`, (err) => {
+                                    if (err) throw err;
+                                    app.quit();
+                                });
+                            });
+                        });
+                    }).on('error', (err) => {
+                        console.log("下载更新失败: " + err.message);
+                    });
+                }
+            } catch (error) {
+                console.log("更新信息解析失败: " + error.message);
+            }
+        });
+
+    }).on("error", (err) => {
+        console.log("请求更新信息失败: " + err.message);
+    });
+}
 
 
 // ————「事件定义」——————————————————————————————————————————————————————————————————
@@ -1038,6 +1101,44 @@ ipcMain.on('function_autoAction', (event, args) => { // 自动执行
 ipcMain.on('function_showExplorer', (event, args) => { // 打开资源管理器
     spawn('explorer.exe');
 }); // 打开文件管理器请求
+ipcMain.on('function_desktopIcon', (event, args) => { // 打开资源管理器
+    const desktopPath = path.join(require('os').homedir(), 'Desktop');
+    const batFilePath = path.join(desktopPath, 'script.bat');
+    const zipFilePath = path.join(desktopPath, 'archive.zip');
+    const extractPath = path.join(desktopPath);
+
+    // 复制bat文件到桌面
+    const appPath = isDev ? './' : process.resourcesPath;
+    fs.copyFile(path.join(appPath, 'scripts', 'icons', 'icon.bat'), batFilePath, (err) => {
+        if (err) throw err;
+        console.log('BAT file copied to desktop.');
+
+        // 复制zip文件到桌面
+        fs.copyFile(path.join(appPath, 'scripts', 'icons', 'desktopIcon.zip'), zipFilePath, (err) => {
+            if (err) throw err;
+            console.log('ZIP file copied to desktop.');
+
+            // 解压zip文件到桌面
+            fs.createReadStream(zipFilePath)
+                .pipe(unzipper.Extract({ path: extractPath }))
+                .on('close', () => {
+                    console.log('ZIP file extracted.');
+
+                    // 删除zip文件
+                    fs.unlink(zipFilePath, (err) => {
+                        if (err) throw err;
+                        console.log('ZIP file deleted.');
+
+                        // 执行bat文件
+                        exec(`cd /d "${desktopPath}" && start "" "${batFilePath}"`, (err) => {
+                            if (err) throw err;
+                            console.log('BAT file executed.');
+                        });
+                    });
+                });
+        });
+    });
+}); // 桌面精美图标
 ipcMain.on('createLink', (event, linkName) => { // 创建快捷方式
     spawn('explorer.exe');
 }); // 创建快捷方式请求

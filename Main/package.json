@@ -55,6 +55,7 @@
     }
   },
   "dependencies": {
-    "node-window-manager": "^2.2.4"
+    "node-window-manager": "^2.2.4",
+    "unzipper": "^0.12.3"
   }
 }

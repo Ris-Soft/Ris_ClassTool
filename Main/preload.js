@@ -42,6 +42,7 @@ contextBridge.exposeInMainWorld('api', {
     function_Keydown: (functionName, args1, args2) => ipcRenderer.send('function_Keydown', functionName, args1, args2),
     function_showExplorer: () => ipcRenderer.send('function_showExplorer'),
     function_autoAction: (args) => ipcRenderer.send('function_autoAction', args),
+    function_desktopIcon: () => ipcRenderer.send('function_desktopIcon'),
 
     // WebView
     webview_create: (url, local, fullScreen, StMode) => {

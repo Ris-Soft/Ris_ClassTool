@@ -101,20 +101,20 @@ var lastActivityTime = Date.now();
 
 // ————「程序载入函数」——————————————————————————————————————————————————————————————————————————
 
-function init() {
+// 单实例锁
+if (!app.requestSingleInstanceLock()) {
+    app.quit();
+} else {
+    app.on('second-instance', (event, commandLine, workingDirectory) => {
+        if (commandLine.length > 1) {
+            handleCommand(commandLine);
+        } else {
+            createWindow_Setting();
+        }
+    });
+}
 
-    // 单实例锁
-    if (!app.requestSingleInstanceLock()) {
-        app.quit();
-    } else {
-        app.on('second-instance', (event, commandLine, workingDirectory) => {
-            if (commandLine.length > 1) {
-                handleCommand(commandLine);
-            } else {
-                createWindow_Setting();
-            }
-        });
-    }
+function init() {
 
     // 设置自启动
     if (!isDev) {

@@ -3,6 +3,7 @@
 <!--<div style="position:fixed;right:0;bottom:0;padding:20px;font-family:Arial,sans-serif;color:#666;z-index:1000">
     <b>RisClassTool</b><br>InsiderPreview
 </div>-->
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
@@ -93,14 +94,14 @@
             margin-right: 15px;
         }
 
-            .vertical-divider::after {
-                position: absolute;
-                top: 0;
-                bottom: 0;
-                right: calc(-0.225 * var(--font-size));
-                color: rgba(190, 190, 190, 0.5);
-                font-size: calc(0.55 * var(--font-size));
-            }
+        .vertical-divider::after {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: calc(-0.225 * var(--font-size));
+            color: rgba(190, 190, 190, 0.5);
+            font-size: calc(0.55 * var(--font-size));
+        }
 
         #infoBar {
             font-size: calc(0.90*var(--font-size2));
@@ -122,32 +123,32 @@
             display: block;
         }
 
-            #infoBar div {
-                margin: 10px 15px;
-                display: flex;
-                align-items: flex-end;
-                padding: 0px 8px;
-            }
+        #infoBar div {
+            margin: 10px 15px;
+            display: flex;
+            align-items: flex-end;
+            padding: 0px 8px;
+        }
 
-                #infoBar div:not(:last-child) {
-                    margin-bottom: 10px;
-                    border-bottom: 1px solid rgba(255, 255, 255, .1);
-                    padding-bottom: 10px;
-                }
+        #infoBar div:not(:last-child) {
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, .1);
+            padding-bottom: 10px;
+        }
 
-                #infoBar div:first-child {
-                    padding-top: 0;
-                    margin-top: 10px;
-                }
+        #infoBar div:first-child {
+            padding-top: 0;
+            margin-top: 10px;
+        }
 
-                #infoBar div:last-child {
-                    border-bottom: none;
-                    padding-bottom: 0;
-                }
+        #infoBar div:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
 
-            #infoBar span {
-                display: block;
-            }
+        #infoBar span {
+            display: block;
+        }
 
         .weather,
         .activity,
@@ -157,10 +158,14 @@
 
 
         #tomorrowCourses {
-            white-space: nowrap; /* 防止文本换行 */
-            overflow-x: clip; /* 水平方向超出内容自动滚动 */
-            overflow-y: hidden; /* 垂直方向超出内容隐藏 */
-            box-sizing: border-box; /* 确保padding不影响宽度 */
+            white-space: nowrap;
+            /* 防止文本换行 */
+            overflow-x: clip;
+            /* 水平方向超出内容自动滚动 */
+            overflow-y: hidden;
+            /* 垂直方向超出内容隐藏 */
+            box-sizing: border-box;
+            /* 确保padding不影响宽度 */
             max-width: 75%;
         }
     </style>
@@ -476,6 +481,26 @@
             clearInterval(scrollId);
             scrollId = setInterval(scrollText, 100); // 100毫秒滚动一次
         }
+
+        // 获取元素
+        var schedules = document.getElementById('schedules');
+        var infoBar = document.getElementById('infoBar');
+
+        // 鼠标移入事件
+        schedules.onmouseenter = function () {
+            this.style.opacity = '0.5';
+        };
+        infoBar.onmouseenter = function () {
+            this.style.opacity = '0.5';
+        };
+
+        // 鼠标移出事件
+        schedules.onmouseleave = function () {
+            this.style.opacity = '1';
+        };
+        infoBar.onmouseleave = function () {
+            this.style.opacity = '1';
+        };
     </script>
 </body>
 

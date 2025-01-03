@@ -51,3 +51,9 @@ contextBridge.exposeInMainWorld('api', {
 
     openFile: (filePath, mode) => ipcRenderer.send('open-file', filePath, mode)
 });
+
+contextBridge.exposeInMainWorld('node_Api', {
+    titleBarOverlay: (args) => {
+        ipcRenderer.send('titleBarOverlay', args);
+    }
+});

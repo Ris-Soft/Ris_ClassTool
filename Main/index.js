@@ -201,7 +201,7 @@ function handleCommand(commandLine) {
 let settingsWindow_targetPage;
 let bottomBar, leftBar, rightBar, colorPicker;
 let bottomBarLeft, bottomBarRight;
-let processWindow, scheduleWindow, settingsWindow;
+let processWindow, scheduleWindow, settingsWindow, targetWindow;
 let sidebarWindow_isExpanded, bottombarOpened = true;
 
 function createWindow(url, local, fullScreen = false, StMode = false) {
@@ -217,7 +217,7 @@ function createWindow(url, local, fullScreen = false, StMode = false) {
         return;
     }
     Menu.setApplicationMenu(null);
-    const targetWindow = new BrowserWindow({
+    targetWindow = new BrowserWindow({
         width: StMode ? 420 : 1366,
         height: StMode ? 400 : 768,
         frame: !fullScreen,
@@ -250,6 +250,10 @@ function createWindow(url, local, fullScreen = false, StMode = false) {
     // targetWindow.webContents.openDevTools({mode:'detach'})
 
 } // 自由窗口
+ipcMain.on('titleBarOverlay', (event, args) => {
+    targetWindow.setTitleBarOverlay(args);
+});
+
 function createWindow_Setting(targetPage) {
     if (settingsWindow && !settingsWindow.isDestroyed()) {
         settingsWindow.focus();
@@ -929,7 +933,7 @@ function autoAction_Basic() {
             activeWindow.bringToTop();
             internalFunction("keydown", "plugin", "13", "0");
         }
-        //processWindow.webContents.send('debug_deliver', activeWindow.getTitle());
+        processWindow.webContents.send('debug_deliver', activeWindow.getTitle());
         if (activeWindow && activeWindow.getTitle().includes('PowerPoint 幻灯片放映')) {
             pptWindow = activeWindow;
             if (config.pptHelperMode ?? "bottom" == "bottom") {

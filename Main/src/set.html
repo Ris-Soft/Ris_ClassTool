@@ -590,6 +590,12 @@
                     <input onchange="saveConfigOnBlur(this)" type="checkbox" id="autoQuit">
                 </div>
                 <div class="card">
+                    <label for="autoOpenFolder">
+                        <h2>上课时自动打开相应学科文件夹</h2>仅支持文件夹在桌面时
+                    </label>
+                    <input onchange="saveConfigOnBlur(this)" type="checkbox" id="autoOpenFolder">
+                </div>
+                <div class="card">
                     <label for="autoFocusMode">
                         <h2>自习课自动进入专注模式</h2>当课程为“自”时，会自动进入专注模式
                     </label>
@@ -1257,6 +1263,7 @@
             document.getElementById('desktopLayer').checked = config.desktopLayer ?? true;
             document.getElementById('statusLayer').checked = config.statusLayer ?? true;
             document.getElementById('processLayer').checked = config.processLayer ?? true;
+            document.getElementById('autoOpenFolder').checked = config.autoOpenFolder ?? false;
 
             if (config.cloudUrl) {
                 alert('云配置已接管所有设置，若不更改云配置设置下次启动时会被云配置覆盖！');

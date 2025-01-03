@@ -9,6 +9,7 @@ const http = require('http'); // HTTP模块
 const https = require('https'); // HTTPS模块
 const { windowManager } = require('node-window-manager');
 const unzipper = require('unzipper');
+const { Configuration } = require('electron-builder');
 
 // 常量定义
 const host = "https://app.3r60.top/webProject/Ris_ClassTool/"; // 带有/结尾
@@ -59,7 +60,30 @@ const colorToNumber = {
     orange: 4,
     green: 7,
     blue: 8,
-}
+};
+const shortNameToFullName = {
+    "数": "数学",
+    "语": "语文",
+    "英": "英语",
+    "物": "物理",
+    "化": "化学",
+    "生": "生物",
+    "历": "历史",
+    "地": "地理",
+    "体": "体育",
+    "音": "音乐",
+    "美": "美术",
+    "信": "信息技术",
+    "通": "通用技术",
+    "自": "自习",
+    "政": "政治",
+};
+let autoAction_currentPeriod = null;
+let autoAction_currentCourse = null;
+let autoAction_startTime = null;
+let autoAction_endTime = null;
+let autoAction_intervalId = null;
+
 
 // 菜单定义
 const contextMenu = Menu.buildFromTemplate([
@@ -182,7 +206,13 @@ function init() {
     // 处理参数
     handleCommand(process.argv.slice(2));
 
-    setInterval(autoAction_Basic, 1000);
+    setInterval(autoAction_Basic, 1000); // 自动任务-基础
+
+    autoAction_Advance(); // 自动任务-高级
+    if (autoAction_intervalId) {
+        clearInterval(autoAction_intervalId);
+    }
+    autoAction_intervalId = setInterval(autoAction_Advance, 1000);
 
     if (!isDev) {
         checkUpdate();
@@ -318,7 +348,7 @@ function createWindow_DesktopLayer() {
         }
     });
 
-    scheduleWindow.setIgnoreMouseEvents(true); // 全局穿透
+    scheduleWindow.setIgnoreMouseEvents(true, { forward: true }); // 全局穿透
     if (config.insiderPreview) {
         checkWebsite('https://app.3r60.top/webProject/Ris_ClassTool/check.html', 'Successful', (result) => {
             if (result) {
@@ -378,93 +408,6 @@ function createWindow_TopLayer() {
     processWindow.setAlwaysOnTop(true, 'dock')
 
     processWindow.setVisibleOnAllWorkspaces(true);
-
-    let currentPeriod = null;
-    let currentCourse = null;
-    let startTime = null;
-    let endTime = null;
-    let intervalId = null;
-
-    function updateProgress() {
-
-        const now = new Date();
-        const currentTime = formatTime(now, false);
-        if (autoAction_StopTime && autoAction_StopTime > currentTime) return;
-
-        // 检查当前是否在上课时间
-        let inClass = false;
-        let nextPeriodStart = null;
-        let nextPeriod = 0;
-
-        for (let period in config.timeTable) {
-            const [startStr, endStr] = config.timeTable[period].split('-');
-            const start = parseInt(startStr.split(':')[0]) * 3600 + parseInt(startStr.split(':')[1]) * 60;
-            const end = parseInt(endStr.split(':')[0]) * 3600 + parseInt(endStr.split(':')[1]) * 60;
-
-            if (currentTime >= start && currentTime < end) {
-                inClass = true;
-                currentPeriod = period;
-                currentCourse = config.courseTable[new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase()][parseInt(period) - 1];
-                startTime = start;
-                endTime = end;
-                nextPeriod = parseInt(period) + 1;
-                break;
-            } else if (currentTime < start) {
-                if (!nextPeriodStart || start < nextPeriodStart) {
-                    nextPeriodStart = start;
-                    nextPeriod = period;
-                    if (endTime === null) {
-                        endTime = currentTime;
-                    }
-                }
-            }
-        }
-
-        // 更新状态窗口
-        if (inClass) {
-            // 下课前1秒
-            const timeToClassEnd = endTime - currentTime;
-            const minutesToEnd = Math.floor(timeToClassEnd / 60);
-            const secondsToEnd = timeToClassEnd % 60;
-            if (minutesToEnd == 0 && secondsToEnd == 1) {
-                const nextClass = config.courseTable[new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase()][parseInt(nextPeriod) - 1];
-                if (nextClass === "-") {
-                    autoActionFunction(6);
-                }
-            }
-        } else {
-            if (nextPeriodStart) {
-                const timeToNextClass = nextPeriodStart - currentTime;
-                const minutes = Math.floor(timeToNextClass / 60);
-                const seconds = timeToNextClass % 60;
-                const lastClass = config.courseTable[new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase()][parseInt(nextPeriod) - 2];
-                const nextClass = config.courseTable[new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase()][parseInt(nextPeriod) - 1];
-                if (minutes == 5 && seconds == 0 && lastClass !== nextClass) { // 300秒
-                    autoActionFunction(1);
-                }
-                if (minutes == 0 && seconds == 1 && nextClass == "自") {
-                    autoActionFunction(5);
-                }
-                if (minutes == 0 && seconds == 1 && nextClass == "体") {
-                    autoActionFunction(5);
-                }
-            } else {
-                autoActionFunction(2);
-                clearInterval(intervalId);
-            }
-        }
-    }
-
-    // 初始更新
-    updateProgress();
-
-    // 每 1 秒更新一次进度
-    if (intervalId) {
-        clearInterval(intervalId);
-    }
-    intervalId = setInterval(updateProgress, 1000);
-
-    //processWindow.webContents.openDevTools({ mode: 'detach' })
 }// 置顶层
 function createWindow_SideBar() {
     if (!(config.sideBarShow ?? true)) return;
@@ -925,6 +868,90 @@ function formatTime(dateTarget, doNotUseOffset) {
     const response = dateTarget.getHours() * 3600 + dateTarget.getMinutes() * 60 + dateTarget.getSeconds() + (doNotUseOffset ? 0 : (config.timeOffset || 0));
     return response;// 加入偏移量
 }
+
+function autoAction_Advance() {
+    const now = new Date();
+    const currentTime = formatTime(now, false);
+    if (autoAction_StopTime && autoAction_StopTime > currentTime) return;
+
+    // 检查当前是否在上课时间
+    let inClass = false;
+    let nextPeriodStart = null;
+    let nextPeriod = 0;
+
+    for (let period in config.timeTable) {
+        const [startStr, endStr] = config.timeTable[period].split('-');
+        const start = parseInt(startStr.split(':')[0]) * 3600 + parseInt(startStr.split(':')[1]) * 60;
+        const end = parseInt(endStr.split(':')[0]) * 3600 + parseInt(endStr.split(':')[1]) * 60;
+
+        if (currentTime >= start && currentTime < end) {
+            inClass = true;
+            autoAction_currentPeriod = period;
+            autoAction_currentCourse = config.courseTable[new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase()][parseInt(period) - 1];
+            autoAction_startTime = start;
+            autoAction_endTime = end;
+            nextPeriod = parseInt(period) + 1;
+            break;
+        } else if (currentTime < start) {
+            if (!nextPeriodStart || start < nextPeriodStart) {
+                nextPeriodStart = start;
+                nextPeriod = period;
+                if (autoAction_endTime === null) {
+                    autoAction_endTime = currentTime;
+                }
+            }
+        }
+    }
+
+    // 更新状态窗口
+    if (inClass) {
+        // 下课前1秒
+        const timeToClassEnd = autoAction_endTime - currentTime;
+        const minutesToEnd = Math.floor(timeToClassEnd / 60);
+        const secondsToEnd = timeToClassEnd % 60;
+        if (minutesToEnd == 0 && secondsToEnd == 1) {
+            const nextClass = config.courseTable[new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase()][parseInt(nextPeriod) - 1];
+            if (nextClass === "-") {
+                autoActionFunction(6);
+            }
+        }
+    } else {
+        if (nextPeriodStart) {
+            const timeToNextClass = nextPeriodStart - currentTime;
+            const minutes = Math.floor(timeToNextClass / 60);
+            const seconds = timeToNextClass % 60;
+            const lastClass = config.courseTable[new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase()][parseInt(nextPeriod) - 2];
+            const nextClass = config.courseTable[new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase()][parseInt(nextPeriod) - 1];
+            if (minutes == 5 && seconds == 0 && lastClass !== nextClass) { // 300秒
+                autoActionFunction(1);
+            }
+            if (minutes == 0 && seconds == 1) {
+                if (nextClass == "自") {
+                    autoActionFunction(5);
+                }
+                if (nextClass == "体") {
+                    autoActionFunction(5);
+                }
+                if (config.autoOpenFolder ?? false) {
+                    if (shortNameToFullName[nextClass]) {
+                        const folderPath = path.join(require('os').homedir(), 'Desktop', shortNameToFullName[nextClass]);
+                        if (fs.existsSync(folderPath)) {
+                            console.log(shortNameToFullName[nextClass]);
+                            console.log(folderPath);
+                            spawn('explorer.exe', ['/n,' + folderPath]);
+                        } else {
+                            console.log(`Folder does not exist: ${folderPath}`);
+                        }
+                    }
+                }
+            }
+        } else {
+            autoActionFunction(2);
+            clearInterval(autoAction_intervalId);
+        }
+    }
+}
+
 function autoAction_Basic() {
     if (config.pptHelper ?? true) {
         const activeWindow = windowManager.getActiveWindow();
@@ -933,7 +960,7 @@ function autoAction_Basic() {
             activeWindow.bringToTop();
             internalFunction("keydown", "plugin", "13", "0");
         }
-        processWindow.webContents.send('debug_deliver', activeWindow.getTitle());
+        // processWindow.webContents.send('debug_deliver', activeWindow.getTitle());
         if (activeWindow && activeWindow.getTitle().includes('PowerPoint 幻灯片放映')) {
             pptWindow = activeWindow;
             if (config.pptHelperMode ?? "bottom" == "bottom") {

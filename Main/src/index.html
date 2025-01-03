@@ -486,20 +486,29 @@
         var schedules = document.getElementById('schedules');
         var infoBar = document.getElementById('infoBar');
 
-        // 鼠标移入事件
+        var toggleTaskId = null;
+
+        function handleToggle() {
+            if (toggleTaskId) {
+                clearTimeout(toggleTaskId);
+            }
+            schedules.style.color = 'rgba(255, 255, 255, .6)';
+            infoBar.style.color = 'rgba(255, 255, 255, .6)';
+            schedules.style.backgroundColor = 'rgba(35, 35, 35, .2)';
+            infoBar.style.backgroundColor = 'rgba(35, 35, 35, .2)';
+            toggleTaskId = setTimeout(() => {
+                schedules.style.color = 'white';
+                infoBar.style.color = 'white';
+                schedules.style.backgroundColor = 'rgba(35, 35, 35, .9)';
+                infoBar.style.backgroundColor = 'rgba(35, 35, 35, .9)';
+            }, 2000);
+        }
+
         schedules.onmouseenter = function () {
-            this.style.opacity = '0.5';
+            handleToggle();
         };
         infoBar.onmouseenter = function () {
-            this.style.opacity = '0.5';
-        };
-
-        // 鼠标移出事件
-        schedules.onmouseleave = function () {
-            this.style.opacity = '1';
-        };
-        infoBar.onmouseleave = function () {
-            this.style.opacity = '1';
+            handleToggle();
         };
     </script>
 </body>

@@ -9,7 +9,6 @@ const http = require('http'); // HTTP模块
 const https = require('https'); // HTTPS模块
 const { windowManager } = require('node-window-manager');
 const unzipper = require('unzipper');
-const { Configuration } = require('electron-builder');
 
 // 常量定义
 const host = "https://app.3r60.top/webProject/Ris_ClassTool/"; // 带有/结尾

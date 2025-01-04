@@ -410,7 +410,7 @@ function createWindow_TopLayer() {
 
     processWindow.setVisibleOnAllWorkspaces(true);
 
-    processWindow.webContents.openDevTools({ mode: 'detach' })
+    // processWindow.webContents.openDevTools({ mode: 'detach' })
 
 }// 置顶层
 function createWindow_SideBar() {

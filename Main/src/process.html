@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- <div style="position: fixed; right: 0; bottom: 0; padding: 20px; font-family: Arial, sans-serif; color: #333;z-index:1000">
-    <b>RisClassTool</b><br>Insider Preview
-</div> -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>置顶层</title>
+    <link rel="stylesheet" href="./icons/bootstrap-icons.css">
     <style>
         #progressBar {
             width: 100%;
@@ -18,36 +16,37 @@
             z-index: 9999;
         }
 
-            #progressBar .bar {
-                width: 0;
-                height: 100%;
-                background-color: #1E9FFF;
-                transition: width 0.5s ease-in-out;
-            }
+        #progressBar .bar {
+            width: 0;
+            height: 100%;
+            background-color: #1E9FFF;
+            transition: width 0.5s ease-in-out;
+        }
 
         #statusWindow {
             position: fixed;
-            top: 30px;
-            right: 5px;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
             color: white;
-            font-size: 12px;
+            font-size: 16px;
             z-index: 9998;
-        }
-
-        .card {
-            margin-right: 5px;
-            background-color: rgb(46, 46, 46);
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
             border-radius: 5px;
-            font-size: 12px;
-            padding: 4px 8px;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.8);
+            display: none;
+            animation: fadeInOut 1s ease-in-out;
         }
 
-            .card > span {
-                font-size: 16px;
-                color: white;
-            }
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            40%, 60% { opacity: 0; }
+        }
 
         body {
             overflow-y: hidden;
@@ -61,9 +60,8 @@
         <div class="bar"></div>
     </div>
     <div id="statusWindow">
-        <div class="card" id="courseNameBox">当前活动<br><span id="courseName"></span></div>
-        <div class="card" id="timeRangeBox">剩余时间<br><span id="timeRange"></span></div>
-        <div class="card" id="nextActivityBox">下一活动<br><span id="nextActivity"></span></div>
+        <i id="statusIcon" class="bi"></i>
+        <span id="statusText"></span>
     </div>
 
     <script>
@@ -72,17 +70,33 @@
         let startTime = null;
         let endTime = null;
         let intervalId = null;
+        let blinkIntervalId = null;
 
         function init(data) {
             const progressBar = document.querySelector('#progressBar .bar');
             const statusWindow = document.querySelector('#statusWindow');
-            const courseName = document.querySelector('#courseName');
-            const courseNameBox = document.querySelector('#courseNameBox');
-            const timeRange = document.querySelector('#timeRange');
-            const timeRangeBox = document.querySelector('#timeRangeBox');
-            const nextCourse = document.querySelector('#nextActivity');
-            const nextCourseBox = document.querySelector('#nextActivityBox');
-            const timeOffset = data.timeOffset || 0; // 时钟偏移
+            const statusIcon = document.querySelector('#statusIcon');
+            const statusText = document.querySelector('#statusText');
+            const timeOffset = data.timeOffset || 0;
+            const shortNameToFullName = {
+                "数": "数学",
+                "语": "语文",
+                "英": "英语",
+                "物": "物理",
+                "化": "化学",
+                "生": "生物",
+                "历": "历史",
+                "地": "地理",
+                "体": "体育",
+                "音": "音乐",
+                "美": "美术",
+                "信": "信息技术",
+                "通": "通用技术",
+                "自": "自习",
+                "政": "政治",
+                "信息" : "信息技术",
+                "技术" : "通用技术"
+            };
             const weekName = new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase();
 
             if (intervalId) {
@@ -107,11 +121,11 @@
 
             function updateProgress() {
                 const now = new Date();
-                const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + timeOffset; // 加入偏移量
+                const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + timeOffset;
 
-                // 检查当前是否在上课时间
                 let inClass = false;
                 let nextPeriodStart = null;
+                let nextPeriodEnd = null;
                 let nextPeriod = 0;
 
                 for (let period in data.timeTable) {
@@ -130,6 +144,7 @@
                     } else if (currentTime < start) {
                         if (!nextPeriodStart || start < nextPeriodStart) {
                             nextPeriodStart = start;
+                            nextPeriodEnd = end;
                             nextPeriod = period;
                             if (endTime === null) {
                                 endTime = currentTime;
@@ -137,93 +152,83 @@
                         }
                     }
                 }
-
-                // 更新进度条
                 if (inClass) {
                     const totalDuration = endTime - startTime;
                     const elapsed = currentTime - startTime;
                     const progress = (elapsed / totalDuration) * 100;
                     progressBar.style.width = `${progress.toFixed(2)}%`;
-                } else if (nextPeriodStart) {
-                    const totalDuration = nextPeriodStart - endTime;
-                    const elapsed = nextPeriodStart - currentTime;
-                    const progress = 100 - (elapsed / totalDuration) * 100;
-                    progressBar.style.width = `${100 - progress.toFixed(2)}%`;
-                } else {
-                    progressBar.style.width = '0%';
-                }
 
-                // 更新状态窗口
-                if (inClass) {
-                    if ((currentTime - startTime < 30 || endTime - currentTime < 30)) {
-                        // if (true) {
-                        courseName.textContent = `${currentCourse}`;
-                        nextCourse.textContent = `${data.courseTable[weekName][parseInt(nextPeriod) - 1] || '放学'}`;
-                        // alert(`${nextPeriod} ${data.courseTable[weekName][parseInt(nextPeriod) - 1]}`)
-                        courseNameBox.style.display = (currentTime - startTime < 30) ? 'block' : 'none';
-                        timeRangeBox.style.display = 'none';
-                        nextCourseBox.style.display = (endTime - currentTime < 30) ? 'block' : 'none';
-                        if (!(data.statusLayer ?? true)) {
-                            statusWindow.style.display = "none"
-                        } else {
-                            statusWindow.style.display = "flex"
+                    if (currentTime - startTime < 10) {
+                        statusIcon.className = 'bi bi-bell';
+                        statusText.innerHTML = `&nbsp;&nbsp;上课时间到 : ${shortNameToFullName[currentCourse] ?? currentCourse} 已${currentCourse === '自习' ? '开始' : '上课'} 请保持安静`;
+                        statusWindow.style.display = 'flex';
+                        statusWindow.style.animation = 'none';
+                        if (blinkIntervalId) {
+                            clearInterval(blinkIntervalId);
+                        }
+                        setTimeout(() => { statusWindow.style.display = 'none'; }, 10000);
+                    } else if (endTime - currentTime <= 10) {
+                        statusIcon.className = 'bi bi-bell';
+                        statusText.innerHTML = `&nbsp;&nbsp;即将下课 请稍安勿躁 下一节课 ${shortNameToFullName[data.courseTable[weekName][parseInt(nextPeriod) - 1]] ?? (data.courseTable[weekName][parseInt(nextPeriod) - 1] ?? '放学')}`;
+                        statusWindow.style.display = 'flex';
+                        statusWindow.style.animation = 'none';
+                        if (blinkIntervalId) {
+                            clearInterval(blinkIntervalId);
                         }
                     } else {
                         statusWindow.style.display = 'none';
                     }
-                } else {
-                    if (nextPeriodStart) {
-                        const timeToNextClass = nextPeriodStart - currentTime;
-                        const minutes = Math.floor(timeToNextClass / 60);
-                        const seconds = timeToNextClass % 60;
-                        // courseName.textContent = '课间';
-                        timeRange.textContent = `${minutes}:${seconds < 10 ? `0${seconds}` : `${seconds}`}`;
-                        nextCourse.textContent = `${data.courseTable[weekName][parseInt(nextPeriod) - 1]}`;
-                        courseNameBox.style.display = 'none';
-                        // alert(`${nextPeriod} ${parseInt(nextPeriod) % data.courseTable[weekName].length} ${data.courseTable[weekName][parseInt(nextPeriod)]}`)
-                        timeRangeBox.style.display = 'block';
-                        nextCourseBox.style.display = 'block';
-                        if (!(data.statusLayer ?? true)) {
-                            statusWindow.style.display = "none"
-                        } else {
-                            statusWindow.style.display = "flex"
-                        }
-                        //if (minutes == 5 && seconds == 0 && data.courseTable[weekName][parseInt(nextPeriod) - 2] !== data.courseTable[weekName][parseInt(nextPeriod) - 1]) { // 300秒
-                        //    window.api.function_autoAction(1);
-                        //}
-                        //if (minutes == 0 && seconds == 1 && data.courseTable[weekName][parseInt(nextPeriod) - 1] == "自") {
-                        //    window.api.function_autoAction(5);
-                        //}
-                        //if (minutes == 0 && seconds == 1 && data.courseTable[weekName][parseInt(nextPeriod) - 1] == "体") {
-                        //    window.api.function_autoAction(5);
-                        //}
+                } else if (nextPeriodStart) {
+                    const totalDuration = nextPeriodStart - endTime;
+                    const elapsed = nextPeriodStart - currentTime;
+                    const progress = (elapsed / totalDuration) * 100;
+                    progressBar.style.width = `${progress.toFixed(2)}%`;
+
+                    const timeToNextClass = nextPeriodStart - currentTime;
+                    const minutes = Math.floor(timeToNextClass / 60);
+                    const seconds = timeToNextClass % 60;
+                    statusIcon.className = 'bi bi-clock';
+                    statusText.innerHTML = `&nbsp;&nbsp;距离下节课 ${shortNameToFullName[data.courseTable[weekName][parseInt(nextPeriod) - 1]] ?? data.courseTable[weekName][parseInt(nextPeriod) - 1]} 还有 ${minutes}分${seconds < 10 ? `0${seconds}` : `${seconds}`}秒 课程长度 ${Math.floor((nextPeriodEnd - nextPeriodStart) / 60)} 分钟`;
+                    if (blinkIntervalId) {
+                        clearInterval(blinkIntervalId);
+                    }
+
+                    statusWindow.style.display = 'flex';
+                    if (timeToNextClass > 5) {
+                        statusWindow.style.animation = 'blink 12s infinite';
+                        blinkIntervalId = setInterval(() => {
+                            statusWindow.style.display = statusWindow.style.display === 'none' ? 'flex' : 'none';
+                        }, 12000);
                     } else {
-                        //window.api.function_autoAction(2);
-                        // courseName.textContent = '当前: 下课';
-                        // timeRangeBox.style.display = 'none';
-                        // nextCourse.textContent = '';
-                        statusWindow.style.display = "none"
-                        clearInterval(intervalId);
+                        statusWindow.style.animation = 'none';
+                        if (blinkIntervalId) {
+                            clearInterval(blinkIntervalId);
+                        }
+                    }
+                } else {
+                    statusIcon.className = 'bi bi-bell';
+                    statusText.innerHTML = `&nbsp;&nbsp;今日课程已结束 请自行安排学习或活动`;
+                    statusWindow.style.display = 'flex';
+                    statusWindow.style.animation = 'none';
+                    if (blinkIntervalId) {
+                        clearInterval(blinkIntervalId);
                     }
                 }
 
                 progressBar.style.backgroundColor = data.progressColor ?? '#1E9FFF';
-                // courseName.style.color = data.progressColor ?? '#1E9FFF';
                 progressBar.parentElement.style.height = data.progressHeight ?? '2px';
             }
 
-            // 初始更新
             updateProgress();
 
-            // 每 5 秒更新一次进度
             if (intervalId) {
                 clearInterval(intervalId);
             }
             intervalId = setInterval(updateProgress, 1000);
 
-            // 确保在窗口关闭时清除定时器
             window.addEventListener('beforeunload', () => {
                 clearInterval(intervalId);
+                clearInterval(blinkIntervalId);
             });
         }
 
@@ -233,6 +238,26 @@
 
         window.onload = async () => {
             init(await window.api.config_Get(true));
+        };
+
+        // 获取元素
+        var statusWindow = document.querySelector('#statusWindow');
+        var toggleTaskId = null;
+
+        function handleToggle() {
+            if (toggleTaskId) {
+                clearTimeout(toggleTaskId);
+            }
+            statusWindow.style.color = 'rgba(255, 255, 255, .6)';
+            statusWindow.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+            toggleTaskId = setTimeout(() => {
+                statusWindow.style.color = 'white';
+                statusWindow.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            }, 2000);
+        }
+
+        statusWindow.onmouseenter = function () {
+            handleToggle();
         };
     </script>
 </body>

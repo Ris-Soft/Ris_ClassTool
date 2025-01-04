@@ -76,6 +76,8 @@ const shortNameToFullName = {
     "通": "通用技术",
     "自": "自习",
     "政": "政治",
+    "信息" : "信息技术",
+    "技术" : "通用技术"
 };
 let autoAction_currentPeriod = null;
 let autoAction_currentCourse = null;
@@ -390,7 +392,7 @@ function createWindow_TopLayer() {
         }
     });
 
-    processWindow.setIgnoreMouseEvents(true); // 全局穿透
+    processWindow.setIgnoreMouseEvents(true,{forward: true}); // 全局穿透
     if (config.insiderPreview) {
         checkWebsite('https://app.3r60.top/webProject/Ris_ClassTool/check.html', 'Successful', (result) => {
             if (result) {
@@ -407,6 +409,9 @@ function createWindow_TopLayer() {
     processWindow.setAlwaysOnTop(true, 'dock')
 
     processWindow.setVisibleOnAllWorkspaces(true);
+
+    processWindow.webContents.openDevTools({ mode: 'detach' })
+
 }// 置顶层
 function createWindow_SideBar() {
     if (!(config.sideBarShow ?? true)) return;
@@ -704,6 +709,7 @@ function createColorPicker() {
 let pptWindow = null;
 let activeTimeouts = [];
 var status = null;
+var pptHelperMode = "MS";
 
 function checkWebsite(url, expectedContent, callback) { // 连通性检查
     const protocol = url.startsWith('https') ? https : http;
@@ -954,13 +960,23 @@ function autoAction_Advance() {
 function autoAction_Basic() {
     if (config.pptHelper ?? true) {
         const activeWindow = windowManager.getActiveWindow();
-        if (activeWindow && activeWindow.getTitle().includes('Microsoft PowerPoint') && pptWindow.isWindow()) {
+        const isPPTWindown = activeWindow && activeWindow.getTitle().includes('PowerPoint 幻灯片放映') 
+        || activeWindow && activeWindow.getTitle().includes('WPS演示 幻灯片放映') 
+        || activeWindow && activeWindow.getTitle().includes('WPS Presentation Slide Show');
+        const isPPTMainWindown = activeWindow && activeWindow.getTitle().includes('Microsoft PowerPoint') 
+        || activeWindow && activeWindow.getTitle().includes('WPS Office')
+        if (isPPTMainWindown && pptWindow.isWindow()) {
             pptWindow = activeWindow;
             activeWindow.bringToTop();
             internalFunction("keydown", "plugin", "13", "0");
         }
         // processWindow.webContents.send('debug_deliver', activeWindow.getTitle());
-        if (activeWindow && activeWindow.getTitle().includes('PowerPoint 幻灯片放映')) {
+        if (isPPTWindown) {
+            if (activeWindow.getTitle().includes('WPS演示 幻灯片放映') || activeWindow.getTitle().includes('WPS Presentation Slide Show')) {
+                pptHelperMode = "WPS";
+            } else {
+                pptHelperMode = "MS";
+            }
             pptWindow = activeWindow;
             if (config.pptHelperMode ?? "bottom" == "bottom") {
                 createWindow_PptHelper(0, true)
@@ -1030,9 +1046,15 @@ function PPTHelper(functionName, args) {
             internalFunction("keydown", "plugin", "34", "0"); // Right arrow
             break;
         case 'grid':
+            if (pptHelperMode == "WPS") {
+                internalFunction("keydown", "plugin", "93", "0"); // Menu key
+                delayExecution(() => internalFunction("keydown", "plugin", "71", "0"), 50); // G key
+                delayExecution(() => internalFunction("keydown", "plugin", "83", "0"), 100); // S key
+            } else if (pptHelperMode == "MS") {
+                internalFunction("keydown", "plugin", "93", "0"); // Menu key
+                delayExecution(() => internalFunction("keydown", "plugin", "65", "0"), 50); // A key
+            }
             status = functionName;
-            internalFunction("keydown", "plugin", "93", "0");
-            delayExecution(() => internalFunction("keydown", "plugin", "65", "0"), 50);
             break;
         case 'exit':
             internalFunction("keydown", "plugin", "27", "0"); // Esc key

@@ -470,7 +470,11 @@
 
                 // 如果滚动条已经滚动到最右边，则跳转到最左边重新开始滚动
                 if (scrollLeft + clientWidth >= scrollWidth) {
-                    scrollContainer.scrollLeft = 0;
+                    clearInterval(scrollId);
+                    setTimeout(() => {
+                        scrollContainer.scrollLeft = 0;
+                        scrollId = setInterval(scrollText, 100); // 100毫秒滚动一次
+                    }, 1000); // 停止1秒
                 } else {
                     // 否则继续向右滚动
                     scrollContainer.scrollLeft += scrollSpeed;
@@ -510,6 +514,12 @@
         infoBar.onmouseenter = function () {
             handleToggle();
         };
+
+        function reportVisibility() {
+            window.api.reportVisibility();
+        }
+
+        setInterval(reportVisibility, 1000);
     </script>
 </body>
 

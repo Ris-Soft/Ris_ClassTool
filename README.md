@@ -86,6 +86,26 @@
 ## 贡献者
 
 <!-- readme: collaborators,contributors -start -->
+<table>
+	<tbody>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/Jursin">
+                    <img src="https://avatars.githubusercontent.com/u/127487914?v=4" width="100;" alt="Jursin"/>
+                    <br />
+                    <sub><b>Jursin</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/PYLXU">
+                    <img src="https://avatars.githubusercontent.com/u/104706823?v=4" width="100;" alt="PYLXU"/>
+                    <br />
+                    <sub><b>PYLXU</b></sub>
+                </a>
+            </td>
+		</tr>
+	<tbody>
+</table>
 <!-- readme: collaborators,contributors -end -->
 
 ## Stars 历史

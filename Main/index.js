@@ -1117,7 +1117,7 @@ function checkUpdate() {
                             file.close(() => {
                                 const batContent = `
                                     @echo off
-                                    timeout /t 5 /nobreak
+                                    timeout /t 2 /nobreak
                                     move /y "${tempAsarPath}" "${asarPath}"
                                     start "" "${process.execPath}"
                                     exit

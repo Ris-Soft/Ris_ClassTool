@@ -964,7 +964,7 @@ function autoAction_Basic() {
         || activeWindow && activeWindow.getTitle().includes('WPS演示 幻灯片放映') 
         || activeWindow && activeWindow.getTitle().includes('WPS Presentation Slide Show');
         const isPPTMainWindown = activeWindow && activeWindow.getTitle().includes('Microsoft PowerPoint') 
-        || activeWindow && activeWindow.getTitle().includes('WPS Office')
+        || activeWindow && activeWindow.getTitle().includes('WPS 演示')
         if (isPPTMainWindown && pptWindow.isWindow()) {
             pptWindow = activeWindow;
             activeWindow.bringToTop();
@@ -983,7 +983,9 @@ function autoAction_Basic() {
             } else {
                 createWindow_PptHelper(1, true)
             }
-        } else if ((bottomBar && !bottomBar.isDestroyed() || leftBar && !leftBar.isDestroyed() || rightBar && !rightBar.isDestroyed()) && activeWindow && activeWindow.getTitle() !== "") {
+        } else if ((bottomBar && !bottomBar.isDestroyed() || leftBar && !leftBar.isDestroyed() || rightBar && !rightBar.isDestroyed()) 
+            && activeWindow && activeWindow.getTitle() !== ""
+            && activeWindow.getTitle() !== "幻灯片漫游") {
             createWindow_PptHelper(5);
         }
     }
@@ -1020,7 +1022,7 @@ function PPTHelper(functionName, args) {
             createWindow_PptHelper(3, false)
             break;
         case 'changeColor':
-            const times = colorToNumber[args];
+            let times = colorToNumber[args];
             if (times) {
                 const executeKeyPress = (keyCode) => {
                     internalFunction("keydown", "plugin", keyCode, "0");
@@ -1029,6 +1031,10 @@ function PPTHelper(functionName, args) {
                 executeKeyPress("93");
                 delayExecution(() => executeKeyPress("79"), 25) // 'O' key for opening menu
                 delayExecution(() => executeKeyPress("67"), 50); // 'C' key for color
+
+                if (pptHelperMode == "WPS") {
+                    times = times + 1;
+                }
 
                 for (let i = 0; i < times; i++) {
                     delayExecution(() => executeKeyPress("39"), 75 + i * 30); // Right arrow key

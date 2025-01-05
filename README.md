@@ -114,6 +114,6 @@
 
 [![Star 历史](https://starchart.cc/Ris-Soft/Ris_ClassTool.svg?variant=adaptive)](https://starchart.cc/Ris-Soft/Ris_ClassTool/stargazers)
 
-如果这个项目对您有帮助，请点亮 Star [⭐](#ris__classtool_瑞思课堂工具_综合存储库)
+如果这个项目对您有帮助，请点亮 Star [⭐](#ris_classtool-%E7%91%9E%E6%80%9D%E8%AF%BE%E5%A0%82%E5%B7%A5%E5%85%B7-%E7%BB%BC%E5%90%88%E5%AD%98%E5%82%A8%E5%BA%93)
 
 </div>

@@ -81,7 +81,7 @@
 
 ## 开发进度
 
-正在 [`master`](https://github.com/Ris-Soft/Ris_ClassTool/tree/master) 分支上开发版本 `0.3.2` 。
+正在 [`master`](https://github.com/Ris-Soft/Ris_ClassTool/tree/master) 分支上开发版本 `0.3.3` 。
 
 ## 贡献者
 

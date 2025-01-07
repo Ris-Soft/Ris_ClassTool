@@ -1291,6 +1291,8 @@
                 newConfig[element.id] = element.value !== '';
             } else if (element.id === 'linePos') {
                 newConfig[element.id] = JSON.parse(element.value) ?? null;
+            } else if (element.id === 'timeOffset') {
+                newConfig[element.id] = parseInt(element.value) || 0;
             } else {
                 newConfig[element.id] = element.value;
             }

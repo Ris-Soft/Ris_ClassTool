@@ -173,7 +173,7 @@
 
                     if (currentTime - startTime < 10) {
                         updateStatusWindow('bi-bell', `&nbsp;&nbsp;<span style="flex:1"></span>${shortNameToFullName[currentCourse] ?? currentCourse} 已${currentCourse === '自习' ? '开始' : '上课'} 请保持安静`, true);
-                        setTimeout(() => { updateStatusWindow('', '', false); }, 10000);
+                        setTimeout(() => { updateStatusWindow('bi-bell', `&nbsp;&nbsp;<span style="flex:1"></span>${shortNameToFullName[currentCourse] ?? currentCourse} 已${currentCourse === '自习' ? '开始' : '上课'} 请保持安静`, false); }, 10000);
                     } else if (endTime - currentTime <= 10) {
                         updateStatusWindow('bi-bell', `&nbsp;&nbsp;<span style="flex:1"></span>即将下课 请稍安勿躁 下一节课 ${shortNameToFullName[data.courseTable[weekName][parseInt(nextPeriod) - 1]] ?? (data.courseTable[weekName][parseInt(nextPeriod) - 1] ?? '放学')}`, true);
                     } else {
@@ -250,6 +250,7 @@
         };
 
 
+        let lastReportTime = 0;
             window.api.get_reportVisibility((visible)=>{
                 const now = Date.now();
                 if (visible == true) {
@@ -260,7 +261,7 @@
                         },
                     });
                     alwaysShowStatusWindow = false;
-                } else {
+                } else if (now - lastReportTime >= 1000) {
                     alwaysShowStatusWindow = true;
                 }
             });

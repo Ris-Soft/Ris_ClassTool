@@ -992,6 +992,16 @@ function autoAction_Basic() {
             && activeWindow.getTitle() !== "幻灯片漫游") {
             createWindow_PptHelper(5);
         }
+
+        if (activeWindow.getTitle().includes("hhtx") || activeWindow.getTitle().includes("鸿合视频展台")) {
+            if (scheduleWindow && !scheduleWindow.isDestroyed()) {
+                scheduleWindow.hide();
+            }
+        } else {
+            if (!scheduleWindow.isVisible()) {
+                scheduleWindow.show();
+            }
+        }
     }
 
 

@@ -183,6 +183,8 @@
             return false;
         }
 
+        let lastLinePosPassed = false;
+
         function updateSchedules(data) {
             const coursesDiv = document.getElementById('schedules');
             coursesDiv.innerHTML = '';
@@ -205,7 +207,8 @@
             const timeTable = data.timeTable;
             const timeOffset = data.timeOffset || 0;
             const now = new Date();
-            const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + timeOffset;
+            const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + timeOffset; // 加入偏移量
+            // 显示今天的课程
             for (let i = 1; i <= count(data.timeTable); i++) {
                 const period = i.toString();
                 const course = dailyCourses[i - 1];
@@ -217,23 +220,24 @@
                 courseElement.className = 'schedule';
                 if (currentTime >= start && currentTime < end) {
                     courseElement.classList.add('current');
+                    if (i > data.linePos[data.linePos.length - 1]) {
+                        lastLinePosPassed = true;
+                    }
                 } else if (currentTime < start) {
                     courseElement.classList.add('future');
                 } else {
                     courseElement.classList.add('past');
                 }
                 courseElement.textContent = `${course}`;
+
                 if (data.linePos.includes(i)) {
                     courseElement.classList.add('vertical-divider');
                 }
                 coursesDiv.appendChild(courseElement);
             }
-            updateTomorrowCourses(data, now);
-        }
 
-        function updateTomorrowCourses(data, now) {
+            // 如果已经过了最后一个linePos，并且有明天的课程，则显示明天的课程
             const extraDiv = document.getElementById('extra');
-            const lastLinePosPassed = data.linePos.some(pos => pos > data.timeTable.length);
             if (lastLinePosPassed) {
                 const tomorrowData = new Date();
                 tomorrowData.setDate(now.getDate() + 1);
@@ -242,9 +246,13 @@
                 const dayOfWeek = tomorrowData.getDay();
                 const tomorrow = arr_eng[dayOfWeek];
                 const tomorrowCourses = data.courseTable[tomorrow];
+
+                // console.log(tomorrow, tomorrowCourses);
                 extraDiv.style.display = tomorrowCourses ? 'flex' : 'none';
+
                 if (tomorrowCourses) {
                     let courseText = "";
+
                     for (let i = 1; i <= count(data.timeTable); i++) {
                         const period = i.toString();
                         const course = tomorrowCourses[i - 1];
@@ -307,11 +315,15 @@
             const students = data.students;
             const studentsWithActiveDate = students.filter(student => student.activeDate === todaysDate);
             infoBar.innerHTML = '';
+
+            const toplayerInfoElement = document.createElement('div');
+            toplayerInfoElement.id = "toplayerInfoElement";
             if (toplayerInfo) {
-                const toplayerInfoElement = document.createElement('div');
-                toplayerInfoElement.innerHTML = `<i class="${toplayerInfo.info.icon}"></i>&nbsp;&nbsp;当前状态${toplayerInfo.info.text}`; 
-                infoBar.appendChild(toplayerInfoElement);
+                toplayerInfoElement.innerHTML = `<i class="${toplayerInfo.info.icon}"></i>&nbsp;&nbsp;当前状态${toplayerInfo.info.text}`;
+            } else {
+                toplayerInfoElement.style.display = 'none';
             }
+            infoBar.appendChild(toplayerInfoElement);
             const timeElement = document.createElement('div');
             timeElement.innerHTML = `<i class="bi bi-calendar-check"></i>&nbsp;&nbsp;今天<span style="flex:1"></span>${month}月${day}日 ${weekday}`;
             infoBar.appendChild(timeElement);
@@ -363,11 +375,13 @@
             }
             intervalId = setInterval(() => {
                 checkAndDisplayInfoBar(data);
-            }, 1000);
+            }, 10000);
         }
 
         window.addEventListener('beforeunload', () => {
             clearInterval(intervalId);
+            clearInterval(scrollId);
+            resizeObserver.disconnect();
         });
 
         window.api.config_onRecive(init);
@@ -453,7 +467,7 @@
         let visibility = true;
 
         function reportVisibility() {
-            window.api.reportVisibility(visibility);
+            window.api.reportVisibility(!document.hidden);
         }
 
         document.addEventListener("visibilitychange", (event) => {
@@ -466,12 +480,18 @@
             }
         });
 
-            window.api.get_toplayerInfo((info)=> {
-                toplayerInfo = info;
-            });
+        window.api.get_toplayerInfo((info) => {
+            const toplayerInfoElement = document.getElementById('toplayerInfoElement');
+            toplayerInfoElement.innerHTML = `<i class="${info.info.icon}"></i>&nbsp;&nbsp;当前状态${info.info.text}`;
+            toplayerInfoElement.style.display = 'flex';
+            toplayerInfo = info;
+        });
+        const visibilityIntervalId = setInterval(reportVisibility, 1000);
+        window.addEventListener('beforeunload', () => {
+            clearInterval(visibilityIntervalId);
+        });
 
-
-        setInterval(reportVisibility, 800);
+        setInterval(reportVisibility, 1000);
     </script>
 </body>
 

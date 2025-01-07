@@ -372,7 +372,7 @@ function createWindow_DesktopLayer() {
 
     scheduleWindow.setVisibleOnAllWorkspaces(true);
 
-    scheduleWindow.webContents.openDevTools({mode:'detach'})
+    // scheduleWindow.webContents.openDevTools({mode:'detach'})
 }// 桌面层
 function createWindow_TopLayer() {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -414,7 +414,7 @@ function createWindow_TopLayer() {
 
     processWindow.setVisibleOnAllWorkspaces(true);
 
-    processWindow.webContents.openDevTools({ mode: 'detach' })
+    // processWindow.webContents.openDevTools({ mode: 'detach' })
 
 }// 置顶层
 function createWindow_SideBar() {
@@ -1216,7 +1216,6 @@ ipcMain.on('webview_create', (event, url, local, fullScreen, StMode) => { // 创
 }); // 创建窗口请求
 ipcMain.on('desktoplayer-report', (event, timestamp) => {
     desktopLayerVisibility = timestamp;
-    console.log("input1",timestamp);
     if (processWindow && !processWindow.isDestroyed()) {
         processWindow.webContents.send('get_reportVisibility',timestamp);
     }
@@ -1227,7 +1226,6 @@ ipcMain.on('toplayer-report', (event, info) => {
     if (scheduleWindow && !scheduleWindow.isDestroyed()) {
         scheduleWindow.webContents.send('get_toplayerInfo',info);
     }
-    console.log("input2",topLayerInfo);
 }); // 报告置顶层信息
 ipcMain.on('config_save', saveConfig); // 配置保存请求
 ipcMain.on('function_PPTHelper', (event, functionName, args) => {

@@ -1,6 +1,16 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
+    // 窗口管理
+    reportVisibility: (timestamp) => ipcRenderer.send('desktoplayer-report', timestamp),
+    get_reportVisibility: (callback) => {
+        ipcRenderer.on('get_reportVisibility', (event, data) => callback(data));
+    },
+    toplayer_reportInfo: (info) => ipcRenderer.send('toplayer-report', info),
+    get_toplayerInfo: (callback) => {
+        ipcRenderer.on('get_toplayerInfo', (event, data) => callback(data));
+    },
+
     // 配置传递
     config_onRecive: (callback) => {
         ipcRenderer.on('config_deliver', (event, data) => callback(data));

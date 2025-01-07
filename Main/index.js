@@ -9,6 +9,8 @@ const http = require('http'); // HTTP模块
 const https = require('https'); // HTTPS模块
 const { windowManager } = require('node-window-manager');
 const unzipper = require('unzipper');
+const { TIMEOUT } = require('dns');
+const { timeStamp } = require('console');
 
 // 常量定义
 const host = "https://app.3r60.top/webProject/Ris_ClassTool/"; // 带有/结尾
@@ -123,6 +125,8 @@ var temp1 = 0;
 var autoAction = { Text: '非法操作！', ActionID: 3 };
 var autoAction_StopTime = 0;
 var lastActivityTime = Date.now();
+var desktopLayerVisibility = 0;
+var topLayerInfo = null;
 
 // ————「程序载入函数」——————————————————————————————————————————————————————————————————————————
 
@@ -368,7 +372,7 @@ function createWindow_DesktopLayer() {
 
     scheduleWindow.setVisibleOnAllWorkspaces(true);
 
-    //scheduleWindow.webContents.openDevTools({mode:'detach'})
+    scheduleWindow.webContents.openDevTools({mode:'detach'})
 }// 桌面层
 function createWindow_TopLayer() {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -410,7 +414,7 @@ function createWindow_TopLayer() {
 
     processWindow.setVisibleOnAllWorkspaces(true);
 
-    // processWindow.webContents.openDevTools({ mode: 'detach' })
+    processWindow.webContents.openDevTools({ mode: 'detach' })
 
 }// 置顶层
 function createWindow_SideBar() {
@@ -1210,6 +1214,21 @@ ipcMain.on('createLink', (event, linkName) => { // 创建快捷方式
 ipcMain.on('webview_create', (event, url, local, fullScreen, StMode) => { // 创建灵活窗口
     createWindow(url, local, fullScreen, StMode);
 }); // 创建窗口请求
+ipcMain.on('desktoplayer-report', (event, timestamp) => {
+    desktopLayerVisibility = timestamp;
+    console.log("input1",timestamp);
+    if (processWindow && !processWindow.isDestroyed()) {
+        processWindow.webContents.send('get_reportVisibility',timestamp);
+    }
+}); // 报告桌面未遮挡
+
+ipcMain.on('toplayer-report', (event, info) => {
+    topLayerInfo = info;
+    if (scheduleWindow && !scheduleWindow.isDestroyed()) {
+        scheduleWindow.webContents.send('get_toplayerInfo',info);
+    }
+    console.log("input2",topLayerInfo);
+}); // 报告置顶层信息
 ipcMain.on('config_save', saveConfig); // 配置保存请求
 ipcMain.on('function_PPTHelper', (event, functionName, args) => {
     PPTHelper(functionName, args);

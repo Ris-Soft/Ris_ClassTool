@@ -1,6 +1,6 @@
 {
   "name": "ris_classtool",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "瑞思课堂工具",
   "main": "index.js",
   "scripts": {

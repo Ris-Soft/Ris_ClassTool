@@ -71,12 +71,25 @@
         let endTime = null;
         let intervalId = null;
         let blinkIntervalId = null;
+        let alwaysShowStatusWindow = true; // Global variable to control visibility
 
-        function init(data) {
-            const progressBar = document.querySelector('#progressBar .bar');
+        function updateStatusWindow(icon, text, show) {
             const statusWindow = document.querySelector('#statusWindow');
             const statusIcon = document.querySelector('#statusIcon');
             const statusText = document.querySelector('#statusText');
+
+            statusIcon.className = `bi ${icon}`;
+            statusText.innerHTML = text;
+
+            if (alwaysShowStatusWindow) {
+                statusWindow.style.display = show ? 'flex' : 'none';
+            } else {
+                statusWindow.style.display = 'none';
+            }
+        }
+
+        function init(data) {
+            const progressBar = document.querySelector('#progressBar .bar');
             const timeOffset = data.timeOffset || 0;
             const shortNameToFullName = {
                 "数": "数学",
@@ -110,9 +123,9 @@
             }
 
             if (!(data.statusLayer ?? true)) {
-                statusWindow.style.display = "none"
+                updateStatusWindow('', '', false);
             } else {
-                statusWindow.style.display = "flex"
+                updateStatusWindow('', '', true);
             }
 
             if (!(data.statusLayer ?? true) && !(data.processLayer ?? true)) {
@@ -159,24 +172,14 @@
                     progressBar.style.width = `${progress.toFixed(2)}%`;
 
                     if (currentTime - startTime < 10) {
-                        statusIcon.className = 'bi bi-bell';
-                        statusText.innerHTML = `&nbsp;&nbsp;上课时间到 : ${shortNameToFullName[currentCourse] ?? currentCourse} 已${currentCourse === '自习' ? '开始' : '上课'} 请保持安静`;
-                        statusWindow.style.display = 'flex';
-                        statusWindow.style.animation = 'none';
-                        if (blinkIntervalId) {
-                            clearInterval(blinkIntervalId);
-                        }
-                        setTimeout(() => { statusWindow.style.display = 'none'; }, 10000);
+                        updateStatusWindow('bi-bell', `&nbsp;&nbsp;<span style="flex:1"></span>${shortNameToFullName[currentCourse] ?? currentCourse} 已${currentCourse === '自习' ? '开始' : '上课'} 请保持安静`, true);
+                        setTimeout(() => { updateStatusWindow('', '', false); }, 10000);
                     } else if (endTime - currentTime <= 10) {
-                        statusIcon.className = 'bi bi-bell';
-                        statusText.innerHTML = `&nbsp;&nbsp;即将下课 请稍安勿躁 下一节课 ${shortNameToFullName[data.courseTable[weekName][parseInt(nextPeriod) - 1]] ?? (data.courseTable[weekName][parseInt(nextPeriod) - 1] ?? '放学')}`;
-                        statusWindow.style.display = 'flex';
-                        statusWindow.style.animation = 'none';
-                        if (blinkIntervalId) {
-                            clearInterval(blinkIntervalId);
-                        }
+                        updateStatusWindow('bi-bell', `&nbsp;&nbsp;<span style="flex:1"></span>即将下课 请稍安勿躁 下一节课 ${shortNameToFullName[data.courseTable[weekName][parseInt(nextPeriod) - 1]] ?? (data.courseTable[weekName][parseInt(nextPeriod) - 1] ?? '放学')}`, true);
                     } else {
-                        statusWindow.style.display = 'none';
+                        const elapsedMinutes = Math.floor((currentTime - startTime) / 60);
+                        const elapsedSeconds = (currentTime - startTime) % 60;
+                        updateStatusWindow('bi-book', `&nbsp;&nbsp;<span style="flex:1"></span>${shortNameToFullName[currentCourse] ?? currentCourse} 已上课 ${elapsedMinutes} 分 ${elapsedSeconds < 10 ? `0${elapsedSeconds}` : `${elapsedSeconds}`} 秒`, false);
                     }
                 } else if (nextPeriodStart) {
                     const totalDuration = nextPeriodStart - endTime;
@@ -187,18 +190,10 @@
                     const timeToNextClass = nextPeriodStart - currentTime;
                     const minutes = Math.floor(timeToNextClass / 60);
                     const seconds = timeToNextClass % 60;
-                    statusIcon.className = 'bi bi-clock';
-                    statusText.innerHTML = `&nbsp;&nbsp;距离下节课 ${shortNameToFullName[data.courseTable[weekName][parseInt(nextPeriod) - 1]] ?? data.courseTable[weekName][parseInt(nextPeriod) - 1]} 还有 ${minutes}分${seconds < 10 ? `0${seconds}` : `${seconds}`}秒 课程长度 ${Math.floor((nextPeriodEnd - nextPeriodStart) / 60)} 分钟`;
-                    if (blinkIntervalId) {
-                        clearInterval(blinkIntervalId);
-                    }
+                    updateStatusWindow('bi-clock', `&nbsp;&nbsp;<span style="flex:1"></span>距离下节课 ${shortNameToFullName[data.courseTable[weekName][parseInt(nextPeriod) - 1]] ?? data.courseTable[weekName][parseInt(nextPeriod) - 1]} 还有 ${minutes}分${seconds < 10 ? `0${seconds}` : `${seconds}`}秒 课程长度 ${Math.floor((nextPeriodEnd - nextPeriodStart) / 60)} 分钟`, true);
 
-                    statusWindow.style.display = 'flex';
                     if (timeToNextClass > 5) {
-                        statusWindow.style.animation = 'blink 12s infinite';
-                        blinkIntervalId = setInterval(() => {
-                            statusWindow.style.display = statusWindow.style.display === 'none' ? 'flex' : 'none';
-                        }, 12000);
+                        statusWindow.style.animation = 'blink 10s infinite';
                     } else {
                         statusWindow.style.animation = 'none';
                         if (blinkIntervalId) {
@@ -206,13 +201,7 @@
                         }
                     }
                 } else {
-                    statusIcon.className = 'bi bi-bell';
-                    statusText.innerHTML = `&nbsp;&nbsp;今日课程已结束 请自行安排学习或活动`;
-                    statusWindow.style.display = 'flex';
-                    statusWindow.style.animation = 'none';
-                    if (blinkIntervalId) {
-                        clearInterval(blinkIntervalId);
-                    }
+                    updateStatusWindow('bi-bell', `&nbsp;&nbsp;今日课程已结束 请自行安排学习或活动`, true);
                 }
 
                 progressBar.style.backgroundColor = data.progressColor ?? '#1E9FFF';
@@ -259,6 +248,22 @@
         statusWindow.onmouseenter = function () {
             handleToggle();
         };
+
+
+            window.api.get_reportVisibility((visible)=>{
+                const now = Date.now();
+                if (visible == true) {
+                    window.api.toplayer_reportInfo({
+                        info: {
+                            icon: statusIcon.className,
+                            text: statusText.innerHTML
+                        },
+                    });
+                    alwaysShowStatusWindow = false;
+                } else {
+                    alwaysShowStatusWindow = true;
+                }
+            });
     </script>
 </body>
 

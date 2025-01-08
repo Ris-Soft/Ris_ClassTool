@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -39,13 +40,26 @@
         }
 
         @keyframes fadeInOut {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
         @keyframes blink {
-            0%, 100% { opacity: 1; }
-            40%, 60% { opacity: 0; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            40%,
+            60% {
+                opacity: 0;
+            }
         }
 
         body {
@@ -86,6 +100,13 @@
             } else {
                 statusWindow.style.display = 'none';
             }
+
+            window.api.toplayer_reportInfo({
+                info: {
+                    icon: statusIcon.className,
+                    text: statusText.innerHTML
+                },
+            });
         }
 
         function init(data) {
@@ -107,8 +128,8 @@
                 "通": "通用技术",
                 "自": "自习",
                 "政": "政治",
-                "信息" : "信息技术",
-                "技术" : "通用技术"
+                "信息": "信息技术",
+                "技术": "通用技术"
             };
             const weekName = new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(0, 1).toUpperCase() + new Date().toLocaleDateString('en-US', { weekday: 'long' }).slice(1).toLowerCase();
 
@@ -251,20 +272,14 @@
 
 
         let lastReportTime = 0;
-            window.api.get_reportVisibility((visible)=>{
-                const now = Date.now();
-                if (visible == true) {
-                    window.api.toplayer_reportInfo({
-                        info: {
-                            icon: statusIcon.className,
-                            text: statusText.innerHTML
-                        },
-                    });
-                    alwaysShowStatusWindow = false;
-                } else if (now - lastReportTime >= 1000) {
-                    alwaysShowStatusWindow = true;
-                }
-            });
+        window.api.get_reportVisibility((visible) => {
+            const now = Date.now();
+            if (visible == true) {
+                alwaysShowStatusWindow = false;
+            } else if (now - lastReportTime >= 1000) {
+                alwaysShowStatusWindow = true;
+            }
+        });
     </script>
 </body>
 

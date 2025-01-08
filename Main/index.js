@@ -995,7 +995,7 @@ function autoAction_Basic() {
             createWindow_PptHelper(5);
         }
 
-        processWindow.webContents.send('debug_deliver', activeWindow.getTitle());
+        // processWindow.webContents.send('debug_deliver', activeWindow.getTitle());
 
         const bounds = activeWindow.getBounds();
         const screenBounds = screen.getPrimaryDisplay().workAreaSize;

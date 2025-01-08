@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
@@ -165,9 +165,9 @@
         let intervalId = null;
         let lastWeatherUpdate = 0;
         let lastWeather = '';
-        const WEATHER_UPDATE_INTERVAL = 600000;
         let scrollId = null;
         let toplayerInfo = null;
+        let lastLinePosPassed = false;
 
         function count(o) {
             var t = typeof o;
@@ -183,8 +183,7 @@
             return false;
         }
 
-        let lastLinePosPassed = false;
-
+        // 课程表更新函数
         function updateSchedules(data) {
             const coursesDiv = document.getElementById('schedules');
             coursesDiv.innerHTML = '';
@@ -192,78 +191,79 @@
             const month = today2.getMonth() + 1;
             const day = today2.getDate();
             const weekday = today2.toLocaleDateString('zh-CN', {
-                weekday: 'long'
+            weekday: 'long'
             });
             const cycleElement = document.createElement('span');
             cycleElement.textContent = `${weekday}`;
             cycleElement.className = 'today';
             coursesDiv.appendChild(cycleElement);
             const today = today2.toLocaleDateString('en-US', {
-                weekday: 'long'
+            weekday: 'long'
             }).charAt(0).toUpperCase() + today2.toLocaleDateString('en-US', {
-                weekday: 'long'
+            weekday: 'long'
             }).slice(1).toLowerCase();
             const dailyCourses = data.courseTable[today];
             const timeTable = data.timeTable;
             const timeOffset = data.timeOffset || 0;
             const now = new Date();
             const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + timeOffset; // 加入偏移量
+            const fragment = document.createDocumentFragment(); // 使用文档片段优化性能
             // 显示今天的课程
             for (let i = 1; i <= count(data.timeTable); i++) {
-                const period = i.toString();
-                const course = dailyCourses[i - 1];
-                const time = timeTable[period];
-                const [startStr, endStr] = time.split('-');
-                const start = parseInt(startStr.split(':')[0]) * 3600 + parseInt(startStr.split(':')[1]) * 60;
-                const end = parseInt(endStr.split(':')[0]) * 3600 + parseInt(endStr.split(':')[1]) * 60;
-                const courseElement = document.createElement('span');
-                courseElement.className = 'schedule';
-                if (currentTime >= start && currentTime < end) {
-                    courseElement.classList.add('current');
-                    if (i > data.linePos[data.linePos.length - 1]) {
-                        lastLinePosPassed = true;
-                    }
-                } else if (currentTime < start) {
-                    courseElement.classList.add('future');
-                } else {
-                    courseElement.classList.add('past');
+            const period = i.toString();
+            const course = dailyCourses[i - 1];
+            const time = timeTable[period];
+            const [startStr, endStr] = time.split('-');
+            const start = parseInt(startStr.split(':')[0]) * 3600 + parseInt(startStr.split(':')[1]) * 60;
+            const end = parseInt(endStr.split(':')[0]) * 3600 + parseInt(endStr.split(':')[1]) * 60;
+            const courseElement = document.createElement('span');
+            courseElement.className = 'schedule';
+            if (currentTime >= start && currentTime < end) {
+                courseElement.classList.add('current');
+                if (i > data.linePos[data.linePos.length - 1]) {
+                lastLinePosPassed = true;
                 }
-                courseElement.textContent = `${course}`;
-
-                if (data.linePos.includes(i)) {
-                    courseElement.classList.add('vertical-divider');
-                }
-                coursesDiv.appendChild(courseElement);
+            } else if (currentTime < start) {
+                courseElement.classList.add('future');
+            } else {
+                courseElement.classList.add('past');
             }
+            courseElement.textContent = `${course}`;
+
+            if (data.linePos.includes(i)) {
+                courseElement.classList.add('vertical-divider');
+            }
+            fragment.appendChild(courseElement);
+            }
+            coursesDiv.appendChild(fragment); // 一次性添加所有元素
 
             // 如果已经过了最后一个linePos，并且有明天的课程，则显示明天的课程
             const extraDiv = document.getElementById('extra');
             if (lastLinePosPassed) {
-                const tomorrowData = new Date();
-                tomorrowData.setDate(now.getDate() + 1);
-                const arr_eng = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                const arr2 = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-                const dayOfWeek = tomorrowData.getDay();
-                const tomorrow = arr_eng[dayOfWeek];
-                const tomorrowCourses = data.courseTable[tomorrow];
+            const tomorrowData = new Date();
+            tomorrowData.setDate(now.getDate() + 1);
+            const arr_eng = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const arr2 = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const dayOfWeek = tomorrowData.getDay();
+            const tomorrow = arr_eng[dayOfWeek];
+            const tomorrowCourses = data.courseTable[tomorrow];
 
-                // console.log(tomorrow, tomorrowCourses);
-                extraDiv.style.display = tomorrowCourses ? 'flex' : 'none';
+            extraDiv.style.display = tomorrowCourses ? 'flex' : 'none';
 
-                if (tomorrowCourses) {
-                    let courseText = "";
+            if (tomorrowCourses) {
+                let courseText = "";
 
-                    for (let i = 1; i <= count(data.timeTable); i++) {
-                        const period = i.toString();
-                        const course = tomorrowCourses[i - 1];
-                        courseText += `${course}${data.linePos.includes(i) ? " | " : " "}`;
-                    }
-                    extraDiv.innerHTML = `<i class="bi bi-calendar-minus"></i>
-                                    &nbsp;&nbsp;${arr2[dayOfWeek]}<span style="flex:1"></span><span id="tomorrowCourses">${courseText}</span>`;
-                    startScroll();
+                for (let i = 1; i <= count(data.timeTable); i++) {
+                const period = i.toString();
+                const course = tomorrowCourses[i - 1];
+                courseText += `${course}${data.linePos.includes(i) ? " | " : " "}`;
                 }
+                extraDiv.innerHTML = `<i class="bi bi-calendar-minus"></i>
+                        &nbsp;&nbsp;${arr2[dayOfWeek]}<span style="flex:1"></span><span id="tomorrowCourses">${courseText}</span>`;
+                startScroll();
+            }
             } else {
-                extraDiv.style.display = 'none';
+            extraDiv.style.display = 'none';
             }
         }
 
@@ -273,14 +273,13 @@
             weatherElement.innerHTML = '<i class="bi bi-stars"></i>&nbsp;&nbsp;天气信息<span style="flex:1"></span>正在获取...';
             weatherElement.className = 'weather';
             infoBar.appendChild(weatherElement);
-            if (data.posName && Date.now() - lastWeatherUpdate > WEATHER_UPDATE_INTERVAL) {
+            if (data.posName && Date.now() - lastWeatherUpdate > 600000) {
                 lastWeatherUpdate = Date.now();
                 fetchWeatherData(data.posName, weatherElement);
             } else {
                 weatherElement.innerHTML = lastWeather;
             }
         }
-
         function fetchWeatherData(posName, weatherElement) {
             fetch(`https://api.3r60.top/v2/project/weather/?pos=${posName ?? '北京'}`)
                 .then(response => {
@@ -366,6 +365,7 @@
             return countdownElement;
         }
 
+        // 载入函数
         function init(data) {
             checkAndDisplayInfoBar(data);
             document.documentElement.style.setProperty('--font-size', `${data.scheduleFontSize || '1'}em`);
@@ -377,45 +377,28 @@
                 checkAndDisplayInfoBar(data);
             }, 10000);
         }
+        
 
+        // 事件区
+        window.api.config_onRecive(init);
         window.addEventListener('beforeunload', () => {
             clearInterval(intervalId);
             clearInterval(scrollId);
             resizeObserver.disconnect();
         });
-
-        window.api.config_onRecive(init);
-
-        function removeUrlParameter(param) {
-            const url = new URL(window.location);
-            const params = new URLSearchParams(url.search);
-            params.delete(param);
-            url.search = params.toString();
-            window.history.replaceState(null, '', url);
-        }
-
         window.onload = async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (!urlParams.has('firstVisit')) {
-                const newUrl = `${window.location.pathname}?firstVisit=true`;
-                window.location.href = newUrl;
-            } else {
-                removeUrlParameter('firstVisit');
-            }
             init(await window.api.config_Get(true));
         };
-
-        const sourceElement = document.getElementById('schedules');
-        const targetElement = document.getElementById('infoBar');
         const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
-                if (entry.target === sourceElement) {
-                    targetElement.style.width = `${entry.contentRect.width}px`;
+                if (entry.target === document.getElementById('schedules')) {
+                    document.getElementById('infoBar').style.width = `${entry.contentRect.width}px`;
                 }
             }
         });
-        resizeObserver.observe(sourceElement);
+        resizeObserver.observe(document.getElementById('schedules'));
 
+        // 滚动函数
         function startScroll() {
             const scrollContainer = document.getElementById('tomorrowCourses');
             const scrollSpeed = 1;
@@ -486,12 +469,12 @@
             toplayerInfoElement.style.display = 'flex';
             toplayerInfo = info;
         });
-        const visibilityIntervalId = setInterval(reportVisibility, 1000);
+        const visibilityIntervalId = setInterval(reportVisibility, 5000);
         window.addEventListener('beforeunload', () => {
             clearInterval(visibilityIntervalId);
         });
-
-        setInterval(reportVisibility, 1000);
+        clearInterval(visibilityIntervalId);
+        setInterval(reportVisibility, 5000);
     </script>
 </body>
 

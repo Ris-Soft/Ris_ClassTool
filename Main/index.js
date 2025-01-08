@@ -78,14 +78,15 @@ const shortNameToFullName = {
     "通": "通用技术",
     "自": "自习",
     "政": "政治",
-    "信息" : "信息技术",
-    "技术" : "通用技术"
+    "信息": "信息技术",
+    "技术": "通用技术"
 };
 let autoAction_currentPeriod = null;
 let autoAction_currentCourse = null;
 let autoAction_startTime = null;
 let autoAction_endTime = null;
 let autoAction_intervalId = null;
+let activeWindowFullScreen = false;
 
 
 // 菜单定义
@@ -396,7 +397,7 @@ function createWindow_TopLayer() {
         }
     });
 
-    processWindow.setIgnoreMouseEvents(true,{forward: true}); // 全局穿透
+    processWindow.setIgnoreMouseEvents(true, { forward: true }); // 全局穿透
     if (config.insiderPreview) {
         checkWebsite('https://app.3r60.top/webProject/Ris_ClassTool/check.html', 'Successful', (result) => {
             if (result) {
@@ -437,6 +438,7 @@ function createWindow_SideBar() {
         transparent: true,
         skipTaskbar: true,
         resizable: false,
+        focusable: false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
         }
@@ -964,43 +966,45 @@ function autoAction_Advance() {
 function autoAction_Basic() {
     if (config.pptHelper ?? true) {
         const activeWindow = windowManager.getActiveWindow();
-        const isPPTWindown = activeWindow && activeWindow.getTitle().includes('PowerPoint 幻灯片放映') 
-        || activeWindow && activeWindow.getTitle().includes('WPS演示 幻灯片放映') 
-        || activeWindow && activeWindow.getTitle().includes('WPS Presentation Slide Show');
-        const isPPTMainWindown = activeWindow && activeWindow.getTitle().includes('Microsoft PowerPoint') 
-        || activeWindow && activeWindow.getTitle().includes('WPS 演示')
-        if (isPPTMainWindown && pptWindow.isWindow()) {
+        const isPPTWindow = activeWindow && (
+            activeWindow.getTitle().includes('PowerPoint 幻灯片放映') ||
+            activeWindow.getTitle().includes('WPS演示 幻灯片放映') ||
+            activeWindow.getTitle().includes('WPS Presentation Slide Show')
+        );
+        const isPPTMainWindow = activeWindow && (
+            activeWindow.getTitle().includes('Microsoft PowerPoint') ||
+            activeWindow.getTitle().includes('WPS 演示')
+        );
+
+        if (isPPTMainWindow && pptWindow && pptWindow.isWindow()) {
             pptWindow = activeWindow;
             activeWindow.bringToTop();
             internalFunction("keydown", "plugin", "13", "0");
         }
-        // processWindow.webContents.send('debug_deliver', activeWindow.getTitle());
-        if (isPPTWindown) {
-            if (activeWindow.getTitle().includes('WPS演示 幻灯片放映') || activeWindow.getTitle().includes('WPS Presentation Slide Show')) {
-                pptHelperMode = "WPS";
-            } else {
-                pptHelperMode = "MS";
-            }
+
+        if (isPPTWindow) {
+            pptHelperMode = activeWindow.getTitle().includes('WPS') ? "WPS" : "MS";
             pptWindow = activeWindow;
-            if (config.pptHelperMode ?? "bottom" == "bottom") {
-                createWindow_PptHelper(0, true)
-            } else {
-                createWindow_PptHelper(1, true)
-            }
-        } else if ((bottomBar && !bottomBar.isDestroyed() || leftBar && !leftBar.isDestroyed() || rightBar && !rightBar.isDestroyed()) 
-            && activeWindow && activeWindow.getTitle() !== ""
-            && activeWindow.getTitle() !== "幻灯片漫游") {
+            const mode = config.pptHelperMode ?? "bottom";
+            createWindow_PptHelper(mode === "bottom" ? 0 : 1, true);
+        } else if (
+            (bottomBar && !bottomBar.isDestroyed()) ||
+            (leftBar && !leftBar.isDestroyed()) ||
+            (rightBar && !rightBar.isDestroyed())
+        ) {
             createWindow_PptHelper(5);
         }
 
-        if (activeWindow.getTitle().includes("hhtx") || activeWindow.getTitle().includes("鸿合视频展台")) {
-            if (scheduleWindow && !scheduleWindow.isDestroyed()) {
-                scheduleWindow.hide();
-            }
+        processWindow.webContents.send('debug_deliver', activeWindow.getTitle());
+
+        const bounds = activeWindow.getBounds();
+        const screenBounds = screen.getPrimaryDisplay().workAreaSize;
+        const isFullScreen = (bounds.width >= screenBounds.width && bounds.height >= screenBounds.height);
+
+        if (isFullScreen && !["Program Manager", "桌面整理", "桌面层"].includes(activeWindow.getTitle())) {
+            activeWindowFullScreen = true;
         } else {
-            if (!scheduleWindow.isVisible()) {
-                scheduleWindow.show();
-            }
+            activeWindowFullScreen = false;
         }
     }
 
@@ -1227,14 +1231,14 @@ ipcMain.on('webview_create', (event, url, local, fullScreen, StMode) => { // 创
 ipcMain.on('desktoplayer-report', (event, timestamp) => {
     desktopLayerVisibility = timestamp;
     if (processWindow && !processWindow.isDestroyed()) {
-        processWindow.webContents.send('get_reportVisibility',timestamp);
+        processWindow.webContents.send('get_reportVisibility', activeWindowFullScreen ? false : timestamp);
     }
 }); // 报告桌面未遮挡
 
 ipcMain.on('toplayer-report', (event, info) => {
     topLayerInfo = info;
     if (scheduleWindow && !scheduleWindow.isDestroyed()) {
-        scheduleWindow.webContents.send('get_toplayerInfo',info);
+        scheduleWindow.webContents.send('get_toplayerInfo', info);
     }
 }); // 报告置顶层信息
 ipcMain.on('config_save', saveConfig); // 配置保存请求

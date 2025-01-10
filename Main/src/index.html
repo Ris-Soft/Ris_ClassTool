@@ -168,6 +168,7 @@
         let scrollId = null;
         let toplayerInfo = null;
         let lastLinePosPassed = false;
+        let tomorrowCoursesContent = '';
 
         function count(o) {
             var t = typeof o;
@@ -191,16 +192,16 @@
             const month = today2.getMonth() + 1;
             const day = today2.getDate();
             const weekday = today2.toLocaleDateString('zh-CN', {
-            weekday: 'long'
+                weekday: 'long'
             });
             const cycleElement = document.createElement('span');
             cycleElement.textContent = `${weekday}`;
             cycleElement.className = 'today';
             coursesDiv.appendChild(cycleElement);
             const today = today2.toLocaleDateString('en-US', {
-            weekday: 'long'
+                weekday: 'long'
             }).charAt(0).toUpperCase() + today2.toLocaleDateString('en-US', {
-            weekday: 'long'
+                weekday: 'long'
             }).slice(1).toLowerCase();
             const dailyCourses = data.courseTable[today];
             const timeTable = data.timeTable;
@@ -210,60 +211,60 @@
             const fragment = document.createDocumentFragment(); // 使用文档片段优化性能
             // 显示今天的课程
             for (let i = 1; i <= count(data.timeTable); i++) {
-            const period = i.toString();
-            const course = dailyCourses[i - 1];
-            const time = timeTable[period];
-            const [startStr, endStr] = time.split('-');
-            const start = parseInt(startStr.split(':')[0]) * 3600 + parseInt(startStr.split(':')[1]) * 60;
-            const end = parseInt(endStr.split(':')[0]) * 3600 + parseInt(endStr.split(':')[1]) * 60;
-            const courseElement = document.createElement('span');
-            courseElement.className = 'schedule';
-            if (currentTime >= start && currentTime < end) {
-                courseElement.classList.add('current');
-                if (i > data.linePos[data.linePos.length - 1]) {
-                lastLinePosPassed = true;
+                const period = i.toString();
+                const course = dailyCourses[i - 1];
+                const time = timeTable[period];
+                const [startStr, endStr] = time.split('-');
+                const start = parseInt(startStr.split(':')[0]) * 3600 + parseInt(startStr.split(':')[1]) * 60;
+                const end = parseInt(endStr.split(':')[0]) * 3600 + parseInt(endStr.split(':')[1]) * 60;
+                const courseElement = document.createElement('span');
+                courseElement.className = 'schedule';
+                if (currentTime >= start && currentTime < end) {
+                    courseElement.classList.add('current');
+                    if (i > data.linePos[data.linePos.length - 1]) {
+                        lastLinePosPassed = true;
+                    }
+                } else if (currentTime < start) {
+                    courseElement.classList.add('future');
+                } else {
+                    courseElement.classList.add('past');
                 }
-            } else if (currentTime < start) {
-                courseElement.classList.add('future');
-            } else {
-                courseElement.classList.add('past');
-            }
-            courseElement.textContent = `${course}`;
+                courseElement.textContent = `${course}`;
 
-            if (data.linePos.includes(i)) {
-                courseElement.classList.add('vertical-divider');
-            }
-            fragment.appendChild(courseElement);
+                if (data.linePos.includes(i)) {
+                    courseElement.classList.add('vertical-divider');
+                }
+                fragment.appendChild(courseElement);
             }
             coursesDiv.appendChild(fragment); // 一次性添加所有元素
 
             // 如果已经过了最后一个linePos，并且有明天的课程，则显示明天的课程
             const extraDiv = document.getElementById('extra');
             if (lastLinePosPassed) {
-            const tomorrowData = new Date();
-            tomorrowData.setDate(now.getDate() + 1);
-            const arr_eng = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const arr2 = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-            const dayOfWeek = tomorrowData.getDay();
-            const tomorrow = arr_eng[dayOfWeek];
-            const tomorrowCourses = data.courseTable[tomorrow];
+                    const tomorrowData = new Date();
+                    tomorrowData.setDate(now.getDate() + 1);
+                    const arr_eng = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                    const arr2 = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+                    const dayOfWeek = tomorrowData.getDay();
+                    const tomorrow = arr_eng[dayOfWeek];
+                    const tomorrowCourses = data.courseTable[tomorrow];
 
-            extraDiv.style.display = tomorrowCourses ? 'flex' : 'none';
+                    extraDiv.style.display = tomorrowCourses ? 'flex' : 'none';
 
-            if (tomorrowCourses) {
-                let courseText = "";
+                    if (tomorrowCourses) {
+                        let courseText = "";
 
-                for (let i = 1; i <= count(data.timeTable); i++) {
-                const period = i.toString();
-                const course = tomorrowCourses[i - 1];
-                courseText += `${course}${data.linePos.includes(i) ? " | " : " "}`;
-                }
-                extraDiv.innerHTML = `<i class="bi bi-calendar-minus"></i>
+                        for (let i = 1; i <= count(data.timeTable); i++) {
+                            const period = i.toString();
+                            const course = tomorrowCourses[i - 1];
+                            courseText += `${course}${data.linePos.includes(i) ? " | " : " "}`;
+                        }
+                        extraDiv.innerHTML = `<i class="bi bi-calendar-minus"></i>
                         &nbsp;&nbsp;${arr2[dayOfWeek]}<span style="flex:1"></span><span id="tomorrowCourses">${courseText}</span>`;
-                startScroll();
-            }
+                        startScroll();
+                    }
             } else {
-            extraDiv.style.display = 'none';
+                extraDiv.style.display = 'none';
             }
         }
 
@@ -377,7 +378,7 @@
                 checkAndDisplayInfoBar(data);
             }, 10000);
         }
-        
+
 
         // 事件区
         window.api.config_onRecive(init);
@@ -402,10 +403,16 @@
         function startScroll() {
             const scrollContainer = document.getElementById('tomorrowCourses');
             const scrollSpeed = 1;
+            const scrollWidth = scrollContainer.scrollWidth;
+            const clientWidth = scrollContainer.clientWidth;
+
+            // 如果不需要滚动则直接返回
+            if (scrollWidth <= clientWidth) {
+                return;
+            }
+
             function scrollText() {
                 const scrollLeft = scrollContainer.scrollLeft;
-                const scrollWidth = scrollContainer.scrollWidth;
-                const clientWidth = scrollContainer.clientWidth;
                 if (scrollLeft + clientWidth >= scrollWidth) {
                     clearInterval(scrollId);
                     setTimeout(() => {
@@ -419,6 +426,14 @@
             clearInterval(scrollId);
             scrollId = setInterval(scrollText, 100);
         }
+
+        function stopScroll() {
+            clearInterval(scrollId);
+        }
+
+        window.addEventListener('beforeunload', () => {
+            stopScroll();
+        });
 
         var schedules = document.getElementById('schedules');
         var infoBar = document.getElementById('infoBar');

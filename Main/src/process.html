@@ -85,6 +85,7 @@
         let endTime = null;
         let intervalId = null;
         let blinkIntervalId = null;
+        let config_processLayer = true;
         let alwaysShowStatusWindow = true; // Global variable to control visibility
 
         function updateStatusWindow(icon, text, show) {
@@ -95,7 +96,7 @@
             statusIcon.className = `bi ${icon}`;
             statusText.innerHTML = text;
 
-            if (alwaysShowStatusWindow) {
+            if (alwaysShowStatusWindow && config_processLayer) {
                 statusWindow.style.display = show ? 'flex' : 'none';
             } else {
                 statusWindow.style.display = 'none';
@@ -143,10 +144,12 @@
                 progressBar.style.display = ""
             }
 
-            if (!(data.statusLayer ?? true)) {
-                updateStatusWindow('', '', false);
-            } else {
+            if ((data.statusLayer ?? true)) {
+                config_processLayer = true;
                 updateStatusWindow('', '', true);
+            } else {
+                config_processLayer = false;
+                updateStatusWindow('', '', false);
             }
 
             if (!(data.statusLayer ?? true) && !(data.processLayer ?? true)) {
@@ -192,11 +195,28 @@
                     const progress = (elapsed / totalDuration) * 100;
                     progressBar.style.width = `${progress.toFixed(2)}%`;
 
-                    if (currentTime - startTime < 10) {
-                        updateStatusWindow('bi-bell', `&nbsp;&nbsp;<span style="flex:1"></span>${shortNameToFullName[currentCourse] ?? currentCourse} 已${currentCourse === '自习' ? '开始' : '上课'} 请保持安静`, true);
-                        setTimeout(() => { updateStatusWindow('bi-bell', `&nbsp;&nbsp;<span style="flex:1"></span>${shortNameToFullName[currentCourse] ?? currentCourse} 已${currentCourse === '自习' ? '开始' : '上课'} 请保持安静`, false); }, 10000);
-                    } else if (endTime - currentTime <= 10) {
-                        updateStatusWindow('bi-bell', `&nbsp;&nbsp;<span style="flex:1"></span>即将下课 请稍安勿躁 下一节课 ${shortNameToFullName[data.courseTable[weekName][parseInt(nextPeriod) - 1]] ?? (data.courseTable[weekName][parseInt(nextPeriod) - 1] ?? '放学')}`, true);
+                    if (currentTime - startTime == 0 && (data.playNotify ?? true)) {
+                        if (!window.audioPlayed) {
+                            const audio = new Audio('./media/start.mp3');
+                            audio.play();
+                            window.audioPlayed = true;
+                            setTimeout(() => {
+                                window.audioPlayed = false;
+                            }, 10000);
+                        }
+                    } else if (endTime - currentTime == 1 && (data.playNotify ?? true)) {
+                        if (!window.audioPlayed) {
+                            const audio = new Audio('./media/end.mp3');
+                            audio.play();
+                            window.audioPlayed = true;
+                            setTimeout(() => {
+                                window.audioPlayed = false;
+                            }, 10000);
+                        }
+                    } else if (currentTime - startTime < 10) {
+                        updateStatusWindow('bi-bell', `&nbsp;&nbsp;<span style="flex:1"></span>${shortNameToFullName[currentCourse] ?? currentCourse} 已${shortNameToFullName[currentCourse] === '自习' ? '开始' : '上课'}`, true);
+                    } else if (endTime - currentTime <= 5) {
+                        updateStatusWindow('bi-bell', `&nbsp;&nbsp;<span style="flex:1"></span>即将下课 下一节课 ${shortNameToFullName[data.courseTable[weekName][parseInt(nextPeriod) - 1]] ?? (data.courseTable[weekName][parseInt(nextPeriod) - 1] ?? '放学')}`, true);
                     } else {
                         const elapsedMinutes = Math.floor((currentTime - startTime) / 60);
                         const elapsedSeconds = (currentTime - startTime) % 60;
@@ -211,8 +231,8 @@
                     const timeToNextClass = nextPeriodStart - currentTime;
                     const minutes = Math.floor(timeToNextClass / 60);
                     const seconds = timeToNextClass % 60;
-                    updateStatusWindow('bi-clock', `&nbsp;&nbsp;<span style="flex:1"></span>距离下节课 ${shortNameToFullName[data.courseTable[weekName][parseInt(nextPeriod) - 1]] ?? data.courseTable[weekName][parseInt(nextPeriod) - 1]} 还有 ${minutes}分${seconds < 10 ? `0${seconds}` : `${seconds}`}秒 课程长度 ${Math.floor((nextPeriodEnd - nextPeriodStart) / 60)} 分钟`, true);
-
+                    updateStatusWindow('bi-clock', `&nbsp;&nbsp;<span style="flex:1"></span>距离下节课 ${shortNameToFullName[data.courseTable[weekName][parseInt(nextPeriod) - 1]] ?? data.courseTable[weekName][parseInt(nextPeriod) - 1]} 还有 ${minutes}分${seconds < 10 ? `0${seconds}` : `${seconds}`}秒 课程长度 ${Math.floor((nextPeriodEnd - nextPeriodStart) / 60)} 分钟`, minutes < 7);
+                    
                     if (timeToNextClass > 5) {
                         statusWindow.style.animation = 'blink 10s infinite';
                     } else {

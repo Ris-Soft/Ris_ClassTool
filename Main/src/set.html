@@ -584,6 +584,12 @@
             <div class="page-title"><i class="bi bi-code-square"></i>&nbsp;自动执行</div>
             <form id="autoQuitSettingsForm">
                 <div class="card">
+                    <label for="playNotify">
+                        <h2>播放上下课提示音</h2>距离上课0秒或下课前1秒播放音频
+                    </label>
+                    <input onchange="saveConfigOnBlur(this)" type="checkbox" id="playNotify">
+                </div>
+                <div class="card">
                     <label for="autoQuit">
                         <h2>课前5分钟准备</h2>课前五分钟时倒计时提示关闭清单内程序
                     </label>
@@ -1253,6 +1259,7 @@
             document.getElementById('cloudUrl').value = config.cloudUrl || '';
             document.getElementById('focusText').value = config.focusText || '';
             document.getElementById('studentActiveName').value = config.studentActiveName || '';
+            document.getElementById('playNotify').value = config.playNotify || true;
             document.getElementById('autoQuit').checked = config.autoQuit ?? true;
             document.getElementById('autoPowerOff').checked = config.autoPowerOff ?? true;
             document.getElementById('autoFocusMode').checked = config.autoFocusMode ?? true;

@@ -296,9 +296,10 @@ function createWindow_Setting(targetPage) {
         return;
     }
 
+    const { width, height } = screen.getPrimaryDisplay().workAreaSize;
     settingsWindow = new BrowserWindow({
-        width: 980,
-        height: 611,
+        width,
+        height,
         frame: true,
         titleBarOverlay: {
             color: "#fff",
@@ -309,13 +310,14 @@ function createWindow_Setting(targetPage) {
         resizable: true,
         movable: true,
         alwaysOnTop: false,
-        type: 'desktop',
+        fullScreen: true,
         skipTaskbar: false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
         }
     });
-
+    
+    settingsWindow.setFullScreen(true);
     settingsWindow_targetPage = targetPage;
 
     if (config.insiderPreview) {

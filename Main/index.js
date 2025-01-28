@@ -383,7 +383,7 @@ function createWindow_DesktopLayer() {
 
     scheduleWindow.setVisibleOnAllWorkspaces(true);
 
-    scheduleWindow.webContents.openDevTools({mode:'detach'})
+    // scheduleWindow.webContents.openDevTools({mode:'detach'})
 }// 桌面层
 function createWindow_TopLayer() {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;

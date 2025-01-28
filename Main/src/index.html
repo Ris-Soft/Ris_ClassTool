@@ -96,7 +96,13 @@
         .widget.edit-mode .widget-menu {
             display: block;
         }
+
+        h1, h2 ,h3, h4, h5, h6, p {
+            margin: 0;
+            padding: 0;
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/puck.js/1.0.0/puck.min.js"></script>
 </head>
 
 <body>
@@ -106,24 +112,27 @@
         const widgets = [
             [
                 {
-                    id: "widget1",
+                    id: "time",
                     style: { width: "128px", backgroundColor: "#000000" },
-                    html: "<p>小组件1</p>",
-                    icon: "https://via.placeholder.com/24",
-                    title: "小组件1",
+                    html: "<p>获取出错</p>",
+                    icon: "clock",
+                    title: "时间",
                     update: (config) => {
                         const date = new Date();
-                        return `<p>${date.toLocaleTimeString()}</p>`;
+                        return `<h1>${date.toLocaleTimeString()}</h1>`;
                     },
                     showBar: true
                 },
                 {
-                    id: "widget2",
+                    id: "date",
                     style: { width: "128px", backgroundColor: "#000000" },
-                    html: "<p>小组件2</p>",
-                    icon: "https://via.placeholder.com/24",
-                    title: "小组件2",
-                    update: (config) => { return "<p>更新内容2</p>"; },
+                    html: "<p>获取出错</p>",
+                    icon: "calendar",
+                    title: "日期",
+                    update: (config) => {
+                        const date = new Date();
+                        return `<h2>${date.getMonth() + 1}月${date.getDate()}日</h2>`;
+                    },
                     showBar: true
                 }
             ],
@@ -158,9 +167,11 @@
                     if (widget.showBar) {
                         const widgetBar = document.createElement("div");
                         widgetBar.classList.add("widget-bar");
-                        const widgetIcon = document.createElement("img");
-                        widgetIcon.src = widget.icon;
+                        const widgetIcon = document.createElement("i");
+                        widgetIcon.className = "bi bi-" + widget.icon;
+                        widgetIcon.classList.add("widget-icon");
                         const widgetTitle = document.createElement("span");
+                        widgetTitle.classList.add("widget-title");
                         widgetTitle.textContent = widget.title;
                         widgetBar.appendChild(widgetIcon);
                         widgetBar.appendChild(widgetTitle);
@@ -218,14 +229,32 @@
                 });
                 widgetContainer.appendChild(rowDiv);
             });
+
+            // Add empty row for new widgets
+            if (isEditMode) {
+                const emptyRowDiv = document.createElement("div");
+                emptyRowDiv.classList.add("widget-row");
+                emptyRowDiv.style.height = "64px";
+                emptyRowDiv.addEventListener("dragover", (e) => {
+                    e.preventDefault();
+                });
+                emptyRowDiv.addEventListener("drop", (e) => {
+                    e.preventDefault();
+                    const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+                    moveWidget(data.rowIndex, data.widgetIndex, widgets.length, 0);
+                });
+                widgetContainer.appendChild(emptyRowDiv);
+            }
         }
 
         async function updateWidgets() {
+            console.log("[RisClassTool][INFO]正在执行数据刷新");
             const config = await window.api.config_Get(true);
             widgets.forEach((row) => {
                 row.forEach((widget) => {
                     if (widget.update) {
                         const widgetDiv = document.getElementById(widget.id);
+                        console.log("[RisClassTool][INFO]正在刷新组件：" + widget.id);
                         if (widgetDiv) {
                             const widgetContent = widgetDiv.querySelector(".widget-content");
                             widgetContent.innerHTML = widget.update(config);
@@ -233,6 +262,7 @@
                     }
                 });
             });
+            console.log("[RisClassTool][INFO]数据刷新完毕");
         }
 
         function deleteWidget(rowIndex, widgetIndex) {
@@ -253,15 +283,11 @@
             renderWidgets();
         }
 
-        // document.getElementById("toggle-edit-mode").addEventListener("click", () => {
-        //     isEditMode = !isEditMode;
-        //     renderWidgets();
-        // });
-
+        isEditMode = true;
         renderWidgets();
         updateWidgets();
-        const IntervalId = setInterval(updateWidgets, 10000);
-        console.log("刷新线程启动成功：" + IntervalId);
+        const IntervalId = setInterval(updateWidgets, 1000);
+        console.log("[RisClassTool][INFO]刷新线程启动成功：" + IntervalId);
     </script>
 </body>
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -97,6 +98,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="widget-container" class="widget-container"></div>
 
@@ -109,8 +111,10 @@
                     html: "<p>小组件1</p>",
                     icon: "https://via.placeholder.com/24",
                     title: "小组件1",
-                    update: () => { return "<p>更新内容1</p>"; },
-                    updateDuration: 5000,
+                    update: (config) => {
+                        const date = new Date();
+                        return `<p>${date.toLocaleTimeString()}</p>`;
+                    },
                     showBar: true
                 },
                 {
@@ -119,8 +123,7 @@
                     html: "<p>小组件2</p>",
                     icon: "https://via.placeholder.com/24",
                     title: "小组件2",
-                    update: () => { return "<p>更新内容2</p>"; },
-                    updateDuration: 5000,
+                    update: (config) => { return "<p>更新内容2</p>"; },
                     showBar: true
                 }
             ],
@@ -131,8 +134,7 @@
                     html: "<p>小组件3</p>",
                     icon: "https://via.placeholder.com/24",
                     title: "小组件3",
-                    update: () => { return "<p>更新内容3</p>"; },
-                    updateDuration: 5000,
+                    update: (config) => { return "<p>更新内容3</p>"; },
                     showBar: true
                 }
             ]
@@ -141,7 +143,7 @@
         const widgetContainer = document.getElementById("widget-container");
         let isEditMode = false;
 
-        function renderWidgets() {
+        async function renderWidgets() {
             widgetContainer.innerHTML = "";
             widgets.forEach((row, rowIndex) => {
                 const rowDiv = document.createElement("div");
@@ -149,7 +151,7 @@
                 row.forEach((widget, widgetIndex) => {
                     const widgetDiv = document.createElement("div");
                     widgetDiv.classList.add("widget");
-                    widgetDiv.id = `widget-${rowIndex}-${widgetIndex}`;
+                    widgetDiv.id = widget.id;
                     widgetDiv.style = `height: 64px; ${Object.entries(widget.style).map(([key, value]) => `${key}: ${value};`).join(" ")}`;
                     widgetDiv.draggable = isEditMode;
 
@@ -218,6 +220,21 @@
             });
         }
 
+        async function updateWidgets() {
+            const config = await window.api.config_Get(true);
+            widgets.forEach((row) => {
+                row.forEach((widget) => {
+                    if (widget.update) {
+                        const widgetDiv = document.getElementById(widget.id);
+                        if (widgetDiv) {
+                            const widgetContent = widgetDiv.querySelector(".widget-content");
+                            widgetContent.innerHTML = widget.update(config);
+                        }
+                    }
+                });
+            });
+        }
+
         function deleteWidget(rowIndex, widgetIndex) {
             widgets[rowIndex].splice(widgetIndex, 1);
             if (widgets[rowIndex].length === 0) {
@@ -242,6 +259,10 @@
         // });
 
         renderWidgets();
+        updateWidgets();
+        const IntervalId = setInterval(updateWidgets, 10000);
+        console.log("刷新线程启动成功：" + IntervalId);
     </script>
 </body>
+
 </html>

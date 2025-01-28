@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>程序设置</title>
+    <title>Ris_ClassTool</title>
     <link rel="stylesheet" href="./icons/bootstrap-icons.css">
     <style>
-        body, html {
-            background-color: rgb(7, 36, 44);
+        body,
+        html {
+            background-color: rgb(30, 30, 30);
             color: white;
             margin: 0;
             padding: 0;
@@ -15,71 +17,136 @@
             height: 100%;
             display: flex;
             flex-direction: column;
+            user-select: none;
         }
+
         .top-section {
             flex: 1;
         }
+
         .bottom-section {
-            background-color: #0e0e0e;
-            height: 20%;
+            background-color: #000000;
+            height: 21%;
             display: flex;
             flex-direction: column;
             border-radius: 10px;
             margin: 10px;
         }
+
         .title-bar {
             display: flex;
             align-items: center;
             padding: 10px;
-            background-color: #101010;
-            border-radius: 10px;
+            background-color: #0e0e0e;
+            border-radius: 10px 10px 0 0;
+            max-height: 22px;
         }
+
         .title-bar button {
             margin-right: 10px;
         }
+
         #title {
             font-weight: 600;
             font-size: 18px;
         }
+
         .button-container {
             display: flex;
             overflow-x: auto;
             padding: 10px;
+            height: 90%;
         }
+
         .button-container::-webkit-scrollbar {
             height: 8px;
         }
+
         .button-container::-webkit-scrollbar-thumb {
             background: #888;
             border-radius: 4px;
         }
+
         .button-container::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
+
         .button {
             font-weight: 300;
             display: flex;
             flex-direction: column;
             align-items: center;
             margin: 0 10px;
+            padding: 5px 10px;
             cursor: pointer;
-            height: 100%;
+            height: auto;
+            transition: background-color 0.3s, transform 0.3s;
+            border-radius: 5px;
         }
-        .button img {
-            width: 15vh;
-            height: 15vh;
+
+        .button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
         }
+
+        .button:active {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(0.95);
+        }
+
+        .clicked {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .button i {
+            font-size: 6vh;
+            color: rgb(180, 180, 180);
+        }
+
         .button span {
             margin-top: 5px;
         }
+
+        .main-button {
+            min-width: 100px;
+        }
+
+        #back-button {
+            background-color: #101010;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        #back-button:hover {
+            background-color: #202020;
+        }
+
+        #back-button i {
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+        }
     </style>
 </head>
+
 <body>
-    <div class="top-section"></div>
+    <div class="top-section">
+        <div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #4d4d4d">
+            组件布局设计区/课表编辑等详细配置编辑区
+        </div>
+    </div>
     <div class="bottom-section">
         <div class="title-bar">
-            <button id="back-button" style="display: none;" onclick="goBack()">返回</button>
-            <span id="title">程序设置</span>
+            <button id="back-button" class="button" style="display: none;" onclick="goBack()"><i
+                    class="bi bi-arrow-left"></i></button>
+            <span id="title">Ris_ClassTool</span>
         </div>
         <div class="button-container" id="button-container"></div>
     </div>
@@ -87,24 +154,92 @@
     <script>
         const buttons = [
             {
-                icon: 'icon1.png',
-                text: '课表＆时间',
-                // onclick: () => alert('按钮1点击'),
+                icon: 'question-circle',
+                text: '使用说明',
                 sub: [
                     {
-                        icon: 'icon1-1.png',
-                        text: '子按钮1-1',
-                        // onclick: () => alert('子按钮1-1点击')
+                        icon: 'info-circle',
+                        text: '关于',
+                        // onclick: () => alert('关于点击')
+                    },
+                    {
+                        icon: 'question-circle',
+                        text: '课表编辑说明',
+                        // onclick: () => alert('使用说明点击')
+                    },
+                    {
+                        icon: 'question-circle',
+                        text: '常见问题',
+                        // onclick: () => alert('常见问题点击')
                     }
                 ]
             },
             {
-                icon: 'icon2.png',
-                text: '按钮2',
-                // onclick: () => alert('按钮2点击')
-            }
-        ];
-
+                icon: 'list-nested',
+                text: '课表＆时间',
+                // onclick: () => alert('按钮1点击'),
+                sub: [
+                    {
+                        icon: 'info-circle',
+                        text: '子按钮1-1',
+                        sub: [
+                            {
+                                icon: 'info-circle',
+                                text: '子按钮1-1-1',
+                                // onclick: () => alert('子按钮1-1-1点击')
+                            },
+                            {
+                                icon: 'info-circle',
+                                text: '子按钮1-1-2',
+                                // onclick: () => alert('子按钮1-1-2点击')
+                            }
+                        ]
+                        // onclick: () => alert('子按钮1-1点击')
+                    },
+                    {
+                        icon: 'info-circle',
+                        text: '子按钮1-2',
+                        sub: [
+                            {
+                                icon: 'info-circle',
+                                text: '子按钮1-2-1',
+                                // onclick: () => alert('子按钮1-2-1点击')
+                            },
+                            {
+                                icon: 'info-circle',
+                                text: '子按钮1-2-2',
+                                // onclick: () => alert('子按钮1-2-2点击')
+                            }
+                        ]
+                        // onclick: () => alert('子按钮1-2点击')
+                    }
+                ]
+            },
+            {
+                icon: 'calendar',
+                text: '日历设置',
+                // onclick: () => alert('日历设置点击')
+            },
+            {
+                icon: 'clock',
+                text: '时间设置',
+                // onclick: () => alert('时间设置点击')
+            },
+            {
+                icon: 'shop',
+                text: '插件市场',
+                // onclick: () => alert('插件市场点击')
+            },
+            {
+                icon: 'palette',
+                text: '外观设定',
+                // onclick: () => alert('外观设定点击')
+            },
+            {
+                icon: 'gear',
+                text: '系统设置',
+                // onclick: () => alert('系统设置点击')
+            }];
         let currentButtons = buttons;
         let history = [];
 
@@ -113,14 +248,21 @@
             container.innerHTML = '';
             buttons.forEach(button => {
                 const btn = document.createElement('div');
-                btn.className = 'button';
-                btn.innerHTML = `<i class="bi bi-${button.icon}"><span>${button.text}</span>`;
+                btn.className = 'button main-button';
+                btn.innerHTML = `<i class="bi bi-${button.icon}"></i><span>${button.text}</span>`;
                 btn.onclick = () => {
                     if (button.sub) {
+                        document.getElementById('title').innerText = button.text;
                         history.push(currentButtons);
                         currentButtons = button.sub;
                         document.getElementById('back-button').style.display = 'inline';
                         loadButtons(button.sub);
+                    } else {
+                        const buttons = document.getElementsByClassName('button main-button');
+                        for (let i = 0; i < buttons.length; i++) {
+                            buttons[i].className = 'button main-button';
+                        }
+                        btn.className = 'button main-button clicked';
                     }
                     if (button.onclick) button.onclick();
                 };
@@ -131,6 +273,7 @@
         function goBack() {
             if (history.length > 0) {
                 currentButtons = history.pop();
+                document.getElementById('title').innerText = history.length > 0 ? history[history.length - 1][0].text : 'Ris_ClassTool';
                 loadButtons(currentButtons);
                 if (history.length === 0) {
                     document.getElementById('back-button').style.display = 'none';
@@ -141,4 +284,5 @@
         loadButtons(buttons);
     </script>
 </body>
+
 </html>

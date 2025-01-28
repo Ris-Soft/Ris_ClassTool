@@ -331,9 +331,16 @@ function createWindow_Setting(targetPage) {
     }
 
     //settingsWindow.loadFile(path.join(__dirname, './src/set.html'));
-
+    scheduleWindow.show();
+    scheduleWindow.setAlwaysOnTop(true, 'screen-saver');
+    scheduleWindow.setIgnoreMouseEvents(false);
+    const defaultSize = screen.getPrimaryDisplay().workAreaSize;
+    scheduleWindow.setContentSize(defaultSize.width ,defaultSize.height * 0.75);
     settingsWindow.on('closed', () => {
         settingsWindow = null;
+        scheduleWindow.setAlwaysOnTop(false);
+        scheduleWindow.setIgnoreMouseEvents(true, { forward: true });
+        scheduleWindow.setContentSize(defaultSize.width, defaultSize.height);
     });
 }// 设置
 function createWindow_DesktopLayer() {
@@ -349,6 +356,7 @@ function createWindow_DesktopLayer() {
         frame: false,
         resizable: false,
         movable: false,
+        focusable: false,
         skipTaskbar: true,
         transparent: true,
         webPreferences: {

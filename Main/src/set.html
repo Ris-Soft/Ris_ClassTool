@@ -101,7 +101,7 @@
 
         .button i {
             font-size: 6vh;
-            color: rgb(180, 180, 180);
+            color: rgb(239, 239, 239);
         }
 
         .button span {
@@ -110,6 +110,8 @@
 
         .main-button {
             min-width: 100px;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
         }
 
         #back-button {
@@ -132,6 +134,18 @@
             font-size: 20px;
             font-weight: 600;
             color: white;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+            }
         }
     </style>
 </head>
@@ -246,10 +260,11 @@
         function loadButtons(buttons) {
             const container = document.getElementById('button-container');
             container.innerHTML = '';
-            buttons.forEach(button => {
+            buttons.forEach((button, index) => {
                 const btn = document.createElement('div');
                 btn.className = 'button main-button';
                 btn.innerHTML = `<i class="bi bi-${button.icon}"></i><span>${button.text}</span>`;
+                btn.style.animationDelay = `${index * 0.1}s`;
                 btn.onclick = () => {
                     if (button.sub) {
                         document.getElementById('title').innerText = button.text;

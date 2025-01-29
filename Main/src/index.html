@@ -125,10 +125,10 @@
                     html: "<p>获取出错</p>",
                     icon: "clock",
                     title: "时间",
-                    update: (config) => {
+                    update: `(config) => {
                         const date = new Date();
-                        return `<h1>${date.toLocaleTimeString()}</h1>`;
-                    },
+                        return "<h1>" + date.toLocaleTimeString() + "<h1>";}
+                            `,
                     showBar: true
                 },
                 {
@@ -137,10 +137,10 @@
                     html: "<p>获取出错</p>",
                     icon: "calendar",
                     title: "日期",
-                    update: (config) => {
+                    update: `(config) => {
                         const date = new Date();
-                        return `<h2>${date.getMonth() + 1}月${date.getDate()}日</h2>`;
-                    },
+                        return "<h2>" + (date.getMonth() + 1) + "月" + date.getDate() + "日</h2>";
+                    }`,
                     showBar: true
                 }
             ],
@@ -279,7 +279,7 @@
                         const widgetDiv = document.getElementById(widget.id);
                         if (widgetDiv) {
                             const widgetContent = widgetDiv.querySelector(".widget-content");
-                            const newContent = widget.update(config);
+                            const newContent = excuteFunc(widget.update, config);
                             if (widgetContent.innerHTML !== newContent) {
                                 console.log("[RisClassTool][INFO]刷新组件：" + widget.id);
                                 widgetContent.innerHTML = newContent;
@@ -306,6 +306,41 @@
                 widgets.splice(toRowIndex, 0, [widget]);
             }
             renderWidgets();
+        }
+
+        function excuteFunc(funcOrString, ...args) {
+            if (typeof funcOrString === 'function') {
+                return funcOrString(...args);
+            }
+            if (typeof funcOrString !== 'string') {
+                throw new Error('The first argument must be a string or a function.');
+            }
+            funcOrString = funcOrString.trim();
+            const isArrowFunction = funcOrString.startsWith('(') || funcOrString.startsWith('function');
+            if (!isArrowFunction) {
+                throw new Error('Invalid function string. It must be in the form of "(args) => { ... }" or "function(args) => { ... }".');
+            }
+            let params = '';
+            let body = '';
+            if (funcOrString.startsWith('function')) {
+                const match = funcOrString.match(/function\s*\(([^)]*)\)\s*=>\s*({[^}]*})/);
+                if (match) {
+                    params = match[1];
+                    body = match[2];
+                } else {
+                    throw new Error('Invalid function format. Expected "function(args) => { ... }".');
+                }
+            } else {
+                const match = funcOrString.match(/\(([^)]*)\)\s*=>\s*({[^}]*})/);
+                if (match) {
+                    params = match[1];
+                    body = match[2];
+                } else {
+                    throw new Error('Invalid function format. Expected "(args) => { ... }".');
+                }
+            }
+            const func = new Function(params, body);
+            return func(...args);
         }
 
         isEditMode = true;

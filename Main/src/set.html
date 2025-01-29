@@ -136,6 +136,15 @@
             color: white;
         }
 
+        #webview-section {
+            display: none;
+            height: calc(100% - 10px);
+            border-radius: 10px;
+            margin: 10px;
+            background-color: #000000;
+            box-sizing: border-box;
+        }
+
         @keyframes fadeIn {
             to {
                 opacity: 1;
@@ -151,9 +160,24 @@
 </head>
 
 <body>
-    <div class="top-section">
-        <div style="display: flex; justify-content: center; align-items: center; height: 60%; color: #4d4d4d">
+    <div class="top-section" id="top-section">
+        <div id="editor-section"
+            style="display: flex; justify-content: center; align-items: center; height: 60%; color: #4d4d4d">
             拖动组件可改变组件位置
+        </div>
+        <div id="webview-section">
+            <div class="title-bar">
+                <span id="webview-title"></span>
+            </div>
+            <webview src="" style="width: 100%; height: calc(100% - 22px); border: none; color: white;"></webview>
+            <script>
+                const webview = document.querySelector('webview');
+                webview.addEventListener('did-finish-load', () => {
+                    webview.executeJavaScript('document.title').then(title => {
+                        document.getElementById('webview-title').innerText = title || 'Loaded';
+                    });
+                });
+            </script>
         </div>
     </div>
     <div class="bottom-section">
@@ -171,7 +195,14 @@
         const buttons = [
             {
                 icon: 'question-circle',
-                text: '使用说明'            },
+                text: '使用说明',
+                sub: [
+                    {
+                        type: 'cloudGet',
+                        url: 'https://classtool.3r60.top/api/help/helpMenu.json',
+                    }
+                ],
+            },
             {
                 icon: 'list-nested',
                 text: '时间与课程',
@@ -293,9 +324,9 @@
             {
                 icon: 'box-arrow-right',
                 text: '退出设置',
-                onclick: () => {
+                onclick: `() => {
                     window.close();
-                }
+                }`
             }
         ];
         let currentButtons = buttons;
@@ -304,7 +335,7 @@
 
         async function fetchButtonsFromCloud(url) {
             try {
-                const response = await fetch(url);
+                const response = await fetch(`${url}?timestamp=${new Date().getTime()}`);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
@@ -314,27 +345,36 @@
                 return [
                     {
                         icon: 'exclamation-triangle',
-                        text: '获取帮助失败'
+                        text: '获取失败'
                     }
                 ];
             }
         }
 
-        function loadButtons(buttons) {
+        async function loadButtons(buttons) {
             const container = document.getElementById('button-container');
             container.innerHTML = '';
-            buttons.forEach((button, index) => {
+            for (const [index, button] of buttons.entries()) {
                 const btn = document.createElement('div');
                 btn.className = 'button main-button';
                 btn.innerHTML = `<i class="bi bi-${button.icon}"></i><span>${button.text}</span>`;
                 btn.style.animationDelay = `${index * 0.1}s`;
-                btn.onclick = () => {
+                btn.onclick = async () => {
                     if (button.sub) {
-                        document.getElementById('title').innerText = button.text;
-                        history.push(currentButtons);
-                        currentButtons = button.sub;
-                        document.getElementById('back-button').style.display = 'inline';
-                        loadButtons(button.sub);
+                        if (button.sub[0].type === 'cloudGet') {
+                            const cloudButtons = await fetchButtonsFromCloud(button.sub[0].url);
+                            document.getElementById('title').innerText = button.text;
+                            history.push(currentButtons);
+                            currentButtons = cloudButtons;
+                            document.getElementById('back-button').style.display = 'inline';
+                            loadButtons(cloudButtons);
+                        } else {
+                            document.getElementById('title').innerText = button.text;
+                            history.push(currentButtons);
+                            currentButtons = button.sub;
+                            document.getElementById('back-button').style.display = 'inline';
+                            loadButtons(button.sub);
+                        }
                     } else {
                         const buttons = document.getElementsByClassName('button main-button');
                         for (let i = 0; i < buttons.length; i++) {
@@ -342,13 +382,14 @@
                         }
                         btn.className = 'button main-button clicked';
                     }
-                    if (button.onclick) button.onclick();
+                    if (button.onclick) excuteFunc(button.onclick);
                 };
                 container.appendChild(btn);
-            });
+            }
         }
 
         function goBack() {
+            toggleTopSection('editor');
             if (history.length > 0) {
                 currentButtons = history.pop();
                 document.getElementById('title').innerText = history.length > 0 ? history[history.length - 1][0].text : 'Ris_ClassTool';
@@ -360,6 +401,61 @@
         }
 
         loadButtons(buttons);
+
+        // 处理文本函数
+        function excuteFunc(funcOrString, ...args) {
+            if (typeof funcOrString === 'function') {
+                return funcOrString(...args);
+            }
+            if (typeof funcOrString !== 'string') {
+                throw new Error('The first argument must be a string or a function.');
+            }
+            funcOrString = funcOrString.trim();
+            const isArrowFunction = funcOrString.startsWith('(') || funcOrString.startsWith('function');
+            if (!isArrowFunction) {
+                throw new Error('Invalid function string. It must be in the form of "(args) => { ... }" or "function(args) => { ... }".');
+            }
+            let params = '';
+            let body = '';
+            if (funcOrString.startsWith('function')) {
+                const match = funcOrString.match(/function\s*\(([^)]*)\)\s*=>\s*({[^}]*})/);
+                if (match) {
+                    params = match[1];
+                    body = match[2];
+                } else {
+                    throw new Error('Invalid function format. Expected "function(args) => { ... }".');
+                }
+            } else {
+                const match = funcOrString.match(/\(([^)]*)\)\s*=>\s*({[^}]*})/);
+                if (match) {
+                    params = match[1];
+                    body = match[2];
+                } else {
+                    throw new Error('Invalid function format. Expected "(args) => { ... }".');
+                }
+            }
+            const func = new Function(params, body);
+            return func(...args);
+        }
+
+        function toggleTopSection(mode) {
+            const editorSection = document.getElementById('editor-section');
+            const webviewSection = document.getElementById('webview-section');
+            const webview = webviewSection.querySelector('webview');
+
+            if (mode === 'editor') {
+                editorSection.style.display = 'flex';
+                webviewSection.style.display = 'none';
+                window.api.config_settingPage("show");
+            } else if (mode.startsWith('https://')) {
+                window.api.config_settingPage("hide");
+                editorSection.style.display = 'none';
+                webviewSection.style.display = 'block';
+                webview.src = mode;
+            } else {
+                console.error('Invalid mode provided to toggleTopSection');
+            }
+        }
     </script>
 </body>
 

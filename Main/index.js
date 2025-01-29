@@ -311,7 +311,8 @@ function createWindow_Setting(targetPage) {
         fullScreen: true,
         skipTaskbar: false,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js')
+            preload: path.join(__dirname, 'preload.js'),
+            webviewTag: true
         }
     });
     
@@ -332,7 +333,7 @@ function createWindow_Setting(targetPage) {
     if (scheduleWindow) {
         scheduleWindow.show();
         scheduleWindow.setAlwaysOnTop(true, 'screen-saver');
-        scheduleWindow.setIgnoreMouseEvents(false);
+        // scheduleWindow.setIgnoreMouseEvents(false);
         const defaultSize = screen.getPrimaryDisplay().workAreaSize;
         scheduleWindow.setContentSize(defaultSize.width ,Math.round(defaultSize.height * 0.55));
         scheduleWindow.setPosition(0, Math.round(defaultSize.height * 0.25));
@@ -344,6 +345,8 @@ function createWindow_Setting(targetPage) {
             scheduleWindow.setPosition(0, 0);
         });
     }
+
+    settingsWindow.webContents.openDevTools({mode:'detach'})
 }// 设置
 function createWindow_DesktopLayer() {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -1184,8 +1187,12 @@ ipcMain.handle('getConfig', (event, process) => { // 主动获取配置
 ipcMain.handle('temp_autoAction', (event) => { // 主动获取配置
     return autoAction;
 }); // 自动任务配置获取
-ipcMain.handle('settingPage', (event) => { // 主动获取配置
-    return settingsWindow_targetPage;
+ipcMain.on('settingPage', (e,status) => { // 主动获取配置
+    if (status === "show") {
+        scheduleWindow.show();
+    } else {
+        scheduleWindow.hide();
+    }
 }); // 设置默认页面设定
 ipcMain.on('function_Keydown', (event, functionName, args1, args2) => { // 执行ahk->exe脚本
     internalFunction("keydown", functionName, args1, args2);

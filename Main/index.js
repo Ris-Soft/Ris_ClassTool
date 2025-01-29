@@ -9,8 +9,6 @@ const http = require('http'); // HTTP模块
 const https = require('https'); // HTTPS模块
 const { windowManager } = require('node-window-manager');
 const unzipper = require('unzipper');
-const { TIMEOUT } = require('dns');
-const { timeStamp } = require('console');
 
 // 常量定义
 const host = "https://app.3r60.top/webProject/Ris_ClassTool/"; // 带有/结尾
@@ -331,17 +329,21 @@ function createWindow_Setting(targetPage) {
     }
 
     //settingsWindow.loadFile(path.join(__dirname, './src/set.html'));
-    scheduleWindow.show();
-    scheduleWindow.setAlwaysOnTop(true, 'screen-saver');
-    scheduleWindow.setIgnoreMouseEvents(false);
-    const defaultSize = screen.getPrimaryDisplay().workAreaSize;
-    scheduleWindow.setContentSize(defaultSize.width ,defaultSize.height * 0.75);
-    settingsWindow.on('closed', () => {
-        settingsWindow = null;
-        scheduleWindow.setAlwaysOnTop(false);
-        scheduleWindow.setIgnoreMouseEvents(true, { forward: true });
-        scheduleWindow.setContentSize(defaultSize.width, defaultSize.height);
-    });
+    if (scheduleWindow) {
+        scheduleWindow.show();
+        scheduleWindow.setAlwaysOnTop(true, 'screen-saver');
+        scheduleWindow.setIgnoreMouseEvents(false);
+        const defaultSize = screen.getPrimaryDisplay().workAreaSize;
+        scheduleWindow.setContentSize(defaultSize.width ,Math.round(defaultSize.height * 0.55));
+        scheduleWindow.setPosition(0, Math.round(defaultSize.height * 0.25));
+        settingsWindow.on('closed', () => {
+            settingsWindow = null;
+            scheduleWindow.setAlwaysOnTop(false);
+            scheduleWindow.setIgnoreMouseEvents(true, { forward: true });
+            scheduleWindow.setContentSize(defaultSize.width, defaultSize.height);
+            scheduleWindow.setPosition(0, 0);
+        });
+    }
 }// 设置
 function createWindow_DesktopLayer() {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;

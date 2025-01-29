@@ -23,19 +23,22 @@
             padding: 20px;
             background-color: transparent;
             color: white;
+            overflow: hidden;
         }
 
         .widget-container {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 10px;
             width: 100%;
             align-items: center;
         }
 
         .widget-row {
             display: flex;
-            gap: 16px;
+            gap: 10px;
+            width: 100vw;
+            justify-content: center;
         }
 
         .widget {
@@ -97,12 +100,17 @@
             display: block;
         }
 
-        h1, h2 ,h3, h4, h5, h6, p {
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p {
             margin: 0;
             padding: 0;
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/puck.js/1.0.0/puck.min.js"></script>
 </head>
 
 <body>
@@ -150,87 +158,103 @@
         ];
 
         const widgetContainer = document.getElementById("widget-container");
-        let isEditMode = false;
+        let isEditMode = true;
 
-        async function renderWidgets() {
-            widgetContainer.innerHTML = "";
-            widgets.forEach((row, rowIndex) => {
-                const rowDiv = document.createElement("div");
-                rowDiv.classList.add("widget-row");
-                row.forEach((widget, widgetIndex) => {
-                    const widgetDiv = document.createElement("div");
-                    widgetDiv.classList.add("widget");
-                    widgetDiv.id = widget.id;
-                    widgetDiv.style = `height: 64px; ${Object.entries(widget.style).map(([key, value]) => `${key}: ${value};`).join(" ")}`;
-                    widgetDiv.draggable = isEditMode;
+        function createWidgetDiv(widget, rowIndex, widgetIndex) {
+            const widgetDiv = document.createElement("div");
+            widgetDiv.classList.add("widget");
+            widgetDiv.id = widget.id;
+            widgetDiv.style = `height: 64px; ${Object.entries(widget.style).map(([key, value]) => `${key}: ${value};`).join(" ")}`;
+            widgetDiv.draggable = isEditMode;
 
-                    if (widget.showBar) {
-                        const widgetBar = document.createElement("div");
-                        widgetBar.classList.add("widget-bar");
-                        const widgetIcon = document.createElement("i");
-                        widgetIcon.className = "bi bi-" + widget.icon;
-                        widgetIcon.classList.add("widget-icon");
-                        const widgetTitle = document.createElement("span");
-                        widgetTitle.classList.add("widget-title");
-                        widgetTitle.textContent = widget.title;
-                        widgetBar.appendChild(widgetIcon);
-                        widgetBar.appendChild(widgetTitle);
-                        widgetDiv.appendChild(widgetBar);
-                    }
+            if (widget.showBar) {
+                const widgetBar = document.createElement("div");
+                widgetBar.classList.add("widget-bar");
+                const widgetIcon = document.createElement("i");
+                widgetIcon.className = "bi bi-" + widget.icon;
+                widgetIcon.classList.add("widget-icon");
+                const widgetTitle = document.createElement("span");
+                widgetTitle.classList.add("widget-title");
+                widgetTitle.textContent = widget.title;
+                widgetBar.appendChild(widgetIcon);
+                widgetBar.appendChild(widgetTitle);
+                widgetDiv.appendChild(widgetBar);
+            }
 
-                    const widgetContent = document.createElement("div");
-                    widgetContent.classList.add("widget-content");
-                    widgetContent.innerHTML = widget.html;
-                    widgetDiv.appendChild(widgetContent);
+            const widgetContent = document.createElement("div");
+            widgetContent.classList.add("widget-content");
+            widgetContent.innerHTML = widget.html;
+            widgetDiv.appendChild(widgetContent);
 
-                    if (isEditMode) {
-                        const widgetMenu = document.createElement("div");
-                        widgetMenu.classList.add("widget-menu");
-                        const editButton = document.createElement("button");
-                        editButton.textContent = "编辑样式";
-                        editButton.addEventListener("click", () => {
-                            alert("编辑样式功能暂未实现");
-                        });
-                        widgetMenu.appendChild(editButton);
-
-                        const deleteButton = document.createElement("button");
-                        deleteButton.textContent = "删除组件";
-                        deleteButton.addEventListener("click", () => {
-                            deleteWidget(rowIndex, widgetIndex);
-                        });
-                        widgetMenu.appendChild(deleteButton);
-
-                        const autoUpdateButton = document.createElement("button");
-                        autoUpdateButton.textContent = "开启/关闭自动更新";
-                        autoUpdateButton.addEventListener("click", () => {
-                            alert("自动更新功能暂未实现");
-                        });
-                        widgetMenu.appendChild(autoUpdateButton);
-
-                        widgetDiv.appendChild(widgetMenu);
-                    }
-
-                    widgetDiv.addEventListener("dragstart", (e) => {
-                        e.dataTransfer.setData("text/plain", JSON.stringify({ rowIndex, widgetIndex }));
-                    });
-
-                    widgetDiv.addEventListener("dragover", (e) => {
-                        e.preventDefault();
-                    });
-
-                    widgetDiv.addEventListener("drop", (e) => {
-                        e.preventDefault();
-                        const data = JSON.parse(e.dataTransfer.getData("text/plain"));
-                        if (data.rowIndex === rowIndex && data.widgetIndex === widgetIndex) return;
-                        moveWidget(data.rowIndex, data.widgetIndex, rowIndex, widgetIndex);
-                    });
-
-                    rowDiv.appendChild(widgetDiv);
+            if (isEditMode) {
+                const widgetMenu = document.createElement("div");
+                widgetMenu.classList.add("widget-menu");
+                const editButton = document.createElement("button");
+                editButton.textContent = "编辑样式";
+                editButton.addEventListener("click", () => {
+                    alert("编辑样式功能暂未实现");
                 });
-                widgetContainer.appendChild(rowDiv);
+                widgetMenu.appendChild(editButton);
+
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "删除组件";
+                deleteButton.addEventListener("click", () => {
+                    deleteWidget(rowIndex, widgetIndex);
+                });
+                widgetMenu.appendChild(deleteButton);
+
+                const autoUpdateButton = document.createElement("button");
+                autoUpdateButton.textContent = "开启/关闭自动更新";
+                autoUpdateButton.addEventListener("click", () => {
+                    alert("自动更新功能暂未实现");
+                });
+                widgetMenu.appendChild(autoUpdateButton);
+
+                widgetDiv.appendChild(widgetMenu);
+            }
+
+            widgetDiv.addEventListener("dragstart", (e) => {
+                e.dataTransfer.setData("text/plain", JSON.stringify({ rowIndex, widgetIndex }));
             });
 
-            // Add empty row for new widgets
+            widgetDiv.addEventListener("dragover", (e) => {
+                e.preventDefault();
+            });
+
+            widgetDiv.addEventListener("drop", (e) => {
+                e.preventDefault();
+                const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+                if (data.rowIndex === rowIndex && data.widgetIndex === widgetIndex) return;
+                moveWidget(data.rowIndex, data.widgetIndex, rowIndex, widgetIndex);
+            });
+
+            return widgetDiv;
+        }
+
+        async function renderWidgets() {
+            widgetContainer.innerHTML = "";;
+            widgets.forEach((row, rowIndex) => {
+                if (row.length > 0) {
+                    const rowDiv = document.createElement("div");
+                    rowDiv.classList.add("widget-row");
+
+                    const flexStart = document.createElement("div");
+                    flexStart.style.flex = "1";
+                    rowDiv.appendChild(flexStart);
+
+                    row.forEach((widget, widgetIndex) => {
+                        const widgetDiv = createWidgetDiv(widget, rowIndex, widgetIndex);
+                        rowDiv.appendChild(widgetDiv);
+                    });
+
+                    const flexEnd = document.createElement("div");
+                    flexEnd.style.flex = "1";
+                    rowDiv.appendChild(flexEnd);
+
+                    widgetContainer.appendChild(rowDiv);
+                }
+            });
+
             if (isEditMode) {
                 const emptyRowDiv = document.createElement("div");
                 emptyRowDiv.classList.add("widget-row");
@@ -248,21 +272,22 @@
         }
 
         async function updateWidgets() {
-            console.log("[RisClassTool][INFO]正在执行数据刷新");
             const config = await window.api.config_Get(true);
             widgets.forEach((row) => {
                 row.forEach((widget) => {
                     if (widget.update) {
                         const widgetDiv = document.getElementById(widget.id);
-                        console.log("[RisClassTool][INFO]正在刷新组件：" + widget.id);
                         if (widgetDiv) {
                             const widgetContent = widgetDiv.querySelector(".widget-content");
-                            widgetContent.innerHTML = widget.update(config);
+                            const newContent = widget.update(config);
+                            if (widgetContent.innerHTML !== newContent) {
+                                console.log("[RisClassTool][INFO]刷新组件：" + widget.id);
+                                widgetContent.innerHTML = newContent;
+                            }
                         }
                     }
                 });
             });
-            console.log("[RisClassTool][INFO]数据刷新完毕");
         }
 
         function deleteWidget(rowIndex, widgetIndex) {

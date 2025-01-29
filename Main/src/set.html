@@ -152,8 +152,8 @@
 
 <body>
     <div class="top-section">
-        <div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #4d4d4d">
-            组件布局设计区/课表编辑等详细配置编辑区
+        <div style="display: flex; justify-content: center; align-items: center; height: 60%; color: #4d4d4d">
+            拖动组件可改变组件位置
         </div>
     </div>
     <div class="bottom-section">
@@ -166,96 +166,159 @@
     </div>
 
     <script>
+        // const { icpMain, ipcRenderer } = nodeRequire('electron');
+
         const buttons = [
             {
                 icon: 'question-circle',
-                text: '使用说明',
-                sub: [
-                    {
-                        icon: 'info-circle',
-                        text: '关于',
-                        // onclick: () => alert('关于点击')
-                    },
-                    {
-                        icon: 'question-circle',
-                        text: '课表编辑说明',
-                        // onclick: () => alert('使用说明点击')
-                    },
-                    {
-                        icon: 'question-circle',
-                        text: '常见问题',
-                        // onclick: () => alert('常见问题点击')
-                    }
-                ]
-            },
+                text: '使用说明'            },
             {
                 icon: 'list-nested',
-                text: '课表＆时间',
-                // onclick: () => alert('按钮1点击'),
+                text: '时间与课程',
                 sub: [
                     {
-                        icon: 'info-circle',
-                        text: '子按钮1-1',
+                        icon: 'calendar-event',
+                        text: '临时调课',
                         sub: [
                             {
-                                icon: 'info-circle',
-                                text: '子按钮1-1-1',
-                                // onclick: () => alert('子按钮1-1-1点击')
+                                icon: 'calendar-day',
+                                text: '周一'
                             },
                             {
-                                icon: 'info-circle',
-                                text: '子按钮1-1-2',
-                                // onclick: () => alert('子按钮1-1-2点击')
+                                icon: 'calendar-day',
+                                text: '周二'
+                            },
+                            {
+                                icon: 'calendar-day',
+                                text: '周三'
+                            },
+                            {
+                                icon: 'calendar-day',
+                                text: '周四'
+                            },
+                            {
+                                icon: 'calendar-day',
+                                text: '周五'
+                            },
+                            {
+                                icon: 'calendar-day',
+                                text: '周六'
+                            },
+                            {
+                                icon: 'calendar-day',
+                                text: '周日'
                             }
                         ]
-                        // onclick: () => alert('子按钮1-1点击')
                     },
                     {
-                        icon: 'info-circle',
-                        text: '子按钮1-2',
+                        icon: 'clock',
+                        text: '时间表',
                         sub: [
                             {
-                                icon: 'info-circle',
-                                text: '子按钮1-2-1',
-                                // onclick: () => alert('子按钮1-2-1点击')
+                                icon: 'sun',
+                                text: '夏季(当前)'
                             },
                             {
-                                icon: 'info-circle',
-                                text: '子按钮1-2-2',
-                                // onclick: () => alert('子按钮1-2-2点击')
+                                icon: 'cloud',
+                                text: '秋季'
+                            },
+                            {
+                                icon: 'plus-circle',
+                                text: '附加'
+                            },
+                            {
+                                icon: 'pencil',
+                                text: '编辑时间表'
                             }
                         ]
-                        // onclick: () => alert('子按钮1-2点击')
+                    },
+                    {
+                        icon: 'table',
+                        text: '课程表',
+                        sub: [
+                            {
+                                icon: 'arrows-move',
+                                text: '模式:单双周'
+                            },
+                            {
+                                icon: 'pencil-square',
+                                text: '打开编辑器'
+                            }
+                        ]
+                    },
+                    {
+                        icon: 'file-earmark-arrow-up',
+                        text: '导入与导出',
+                        sub: [
+                            {
+                                icon: 'file-earmark-excel',
+                                text: '导入Excel'
+                            },
+                            {
+                                icon: 'file-earmark-arrow-up',
+                                text: '导入UCSF'
+                            },
+                            {
+                                icon: 'file-earmark-excel',
+                                text: '导出Excel'
+                            },
+                            {
+                                icon: 'file-earmark-arrow-down',
+                                text: '导出UCSF'
+                            }
+                        ]
                     }
                 ]
             },
             {
                 icon: 'calendar',
-                text: '日历设置',
-                // onclick: () => alert('日历设置点击')
-            },
-            {
-                icon: 'clock',
-                text: '时间设置',
-                // onclick: () => alert('时间设置点击')
+                text: '日期与时间'
             },
             {
                 icon: 'shop',
-                text: '插件市场',
-                // onclick: () => alert('插件市场点击')
+                text: '组件市场'
             },
             {
                 icon: 'palette',
-                text: '外观设定',
-                // onclick: () => alert('外观设定点击')
+                text: '外观设定'
             },
             {
-                icon: 'gear',
-                text: '系统设置',
-                // onclick: () => alert('系统设置点击')
-            }];
+                icon: 'info-circle',
+                text: '关于软件'
+            },
+            {
+                icon: 'sliders',
+                text: '侧边栏设定'
+            },
+            {
+                icon: 'box-arrow-right',
+                text: '退出设置',
+                onclick: () => {
+                    window.close();
+                }
+            }
+        ];
         let currentButtons = buttons;
         let history = [];
+        let CommonentLayer = true;
+
+        async function fetchButtonsFromCloud(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                return [
+                    {
+                        icon: 'exclamation-triangle',
+                        text: '获取帮助失败'
+                    }
+                ];
+            }
+        }
 
         function loadButtons(buttons) {
             const container = document.getElementById('button-container');

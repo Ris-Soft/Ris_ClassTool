@@ -30,8 +30,10 @@ contextBridge.exposeInMainWorld('api', {
     },
 
     // 设置界面
-    config_settingPage: (status) => {
-        ipcRenderer.send('settingPage', status);
+    config_settingPage: () => {
+        return new Promise((resolve, reject) => {
+            ipcRenderer.invoke('settingPage').then(resolve).catch(reject);
+        });
     },
     config_save: (config) => {
         ipcRenderer.send('config_save', config);

@@ -9,6 +9,8 @@ const http = require('http'); // HTTP模块
 const https = require('https'); // HTTPS模块
 const { windowManager } = require('node-window-manager');
 const unzipper = require('unzipper');
+const { TIMEOUT } = require('dns');
+const { timeStamp } = require('console');
 
 // 常量定义
 const host = "https://app.3r60.top/webProject/Ris_ClassTool/"; // 带有/结尾
@@ -294,10 +296,9 @@ function createWindow_Setting(targetPage) {
         return;
     }
 
-    const { width, height } = screen.getPrimaryDisplay().workAreaSize;
     settingsWindow = new BrowserWindow({
-        width,
-        height,
+        width: 980,
+        height: 611,
         frame: true,
         titleBarOverlay: {
             color: "#fff",
@@ -308,15 +309,13 @@ function createWindow_Setting(targetPage) {
         resizable: true,
         movable: true,
         alwaysOnTop: false,
-        fullScreen: true,
+        type: 'desktop',
         skipTaskbar: false,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
-            webviewTag: true
+            preload: path.join(__dirname, 'preload.js')
         }
     });
-    
-    settingsWindow.setFullScreen(true);
+
     settingsWindow_targetPage = targetPage;
 
     if (config.insiderPreview) {
@@ -330,23 +329,10 @@ function createWindow_Setting(targetPage) {
     }
 
     //settingsWindow.loadFile(path.join(__dirname, './src/set.html'));
-    if (scheduleWindow) {
-        scheduleWindow.show();
-        scheduleWindow.setAlwaysOnTop(true, 'screen-saver');
-        // scheduleWindow.setIgnoreMouseEvents(false);
-        const defaultSize = screen.getPrimaryDisplay().workAreaSize;
-        scheduleWindow.setContentSize(defaultSize.width ,Math.round(defaultSize.height * 0.55));
-        scheduleWindow.setPosition(0, Math.round(defaultSize.height * 0.25));
-        settingsWindow.on('closed', () => {
-            settingsWindow = null;
-            scheduleWindow.setAlwaysOnTop(false);
-            scheduleWindow.setIgnoreMouseEvents(true, { forward: true });
-            scheduleWindow.setContentSize(defaultSize.width, defaultSize.height);
-            scheduleWindow.setPosition(0, 0);
-        });
-    }
 
-    settingsWindow.webContents.openDevTools({mode:'detach'})
+    settingsWindow.on('closed', () => {
+        settingsWindow = null;
+    });
 }// 设置
 function createWindow_DesktopLayer() {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -361,7 +347,6 @@ function createWindow_DesktopLayer() {
         frame: false,
         resizable: false,
         movable: false,
-        focusable: false,
         skipTaskbar: true,
         transparent: true,
         webPreferences: {
@@ -1187,12 +1172,8 @@ ipcMain.handle('getConfig', (event, process) => { // 主动获取配置
 ipcMain.handle('temp_autoAction', (event) => { // 主动获取配置
     return autoAction;
 }); // 自动任务配置获取
-ipcMain.on('settingPage', (e,status) => { // 主动获取配置
-    if (status === "show") {
-        scheduleWindow.show();
-    } else {
-        scheduleWindow.hide();
-    }
+ipcMain.handle('settingPage', (event) => { // 主动获取配置
+    return settingsWindow_targetPage;
 }); // 设置默认页面设定
 ipcMain.on('function_Keydown', (event, functionName, args1, args2) => { // 执行ahk->exe脚本
     internalFunction("keydown", functionName, args1, args2);

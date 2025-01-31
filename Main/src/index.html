@@ -1,353 +1,495 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小组件页面</title>
+    <title>桌面层</title>
     <link rel="stylesheet" href="./icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="./qweather-icons/font/qweather-icons.css">
     <style>
         :root {
-            --background-color: #191919;
-            --border-radius: 8px;
-            --padding: 10px;
-            --border-color: #2e2e2e;
+            --font-size: 1em;
+            --font-size2: 1em;
         }
 
+        html,
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 16px;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
+            padding-top: 0.2%;
             background-color: transparent;
             color: white;
-            overflow: hidden;
+            overflow-y: hidden;
+            font-family: Arial, sans-serif;
         }
 
-        .widget-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-            align-items: center;
+        .today {
+            margin-left: 10px;
+            margin-right: 20px;
+            margin-top: 0px;
+            vertical-align: middle;
         }
 
-        .widget-row {
-            display: flex;
-            gap: 10px;
-            width: 100vw;
-            justify-content: center;
-        }
-
-        .widget {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            width: 128px;
-            height: 64px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: var(--padding);
-            background-color: var(--background-color);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        .schedule {
+            margin: 0;
+            padding: 0;
+            margin-left: 5px;
+            margin-right: 5px;
+            margin-top: auto;
+            margin-bottom: auto;
+            vertical-align: middle;
+            display: inline-block;
             position: relative;
         }
 
-        .widget .widget-bar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .current {
+            color: #1E9FFF;
+            margin-top: -0.25em;
+            margin-bottom: -0.2em;
         }
 
-        .widget .widget-bar img {
-            width: 24px;
-            height: 24px;
+        .past {
+            color: rgba(177, 177, 177, 0.705);
         }
 
-        .widget .widget-content {
-            flex: 1;
+        .future {
+            color: rgba(255, 255, 255, 0.801);
         }
 
-        .widget-menu {
-            display: none;
+        .small {
+            font-size: calc(0.60 * var(--font-size));
+        }
+
+        #schedules {
+            font-size: calc(1.5 * var(--font-size));
+            display: block;
+            margin-top: 5px;
+            margin-bottom: auto;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0;
+            padding-left: 10px;
+            padding-right: 15px;
+            height: auto;
+            width: fit-content;
+            background-color: rgba(35, 35, 35, .9);
+            position: relative;
+            border-radius: 5px;
+            padding-bottom: 7px;
+            padding-top: 5px;
+            box-shadow: 0px 0px 15px 0px #080808;
+        }
+
+        .vertical-divider {
+            margin-right: 15px;
+        }
+
+        .vertical-divider::after {
             position: absolute;
             top: 0;
-            right: 0;
-            background-color: white;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            padding: 8px;
+            bottom: 0;
+            right: calc(-0.225 * var(--font-size));
+            color: rgba(190, 190, 190, 0.5);
+            font-size: calc(0.55 * var(--font-size));
         }
 
-        .widget-menu button {
-            display: block;
-            margin: 4px 0;
-            padding: 4px 8px;
-            border: none;
-            background-color: #e0e0e0;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .widget-menu button:hover {
-            background-color: #d0d0d0;
-        }
-
-        .widget.edit-mode .widget-menu {
-            display: block;
-        }
-
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6,
-        p {
+        #infoBar {
+            font-size: calc(0.90 * var(--font-size2));
+            background-color: rgba(0, 0, 0, 0.3);
+            width: fit-content;
             margin: 0;
-            padding: 0;
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: 500;
+            padding: 5px1.4em;
+            background-color: rgba(45, 45, 45, .9);
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+            padding: 1px;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+
+        #infoBar div {
+            margin: 10px 15px;
+            display: flex;
+            align-items: flex-end;
+            padding: 0px 8px;
+        }
+
+        #infoBar div:not(:last-child) {
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, .1);
+            padding-bottom: 10px;
+        }
+
+        #infoBar div:first-child {
+            padding-top: 0;
+            margin-top: 10px;
+        }
+
+        #infoBar div:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        #infoBar span {
+            display: block;
+        }
+
+        .weather,
+        .activity,
+        .countdown {
+            margin-top: 10px;
+        }
+
+        #tomorrowCourses {
+            white-space: nowrap;
+            overflow-x: clip;
+            overflow-y: hidden;
+            box-sizing: border-box;
+            max-width: 75%;
         }
     </style>
 </head>
 
 <body>
-    <div id="widget-container" class="widget-container"></div>
-
+    <h2 id="schedules">加载中...</h2>
+    <div class="info-bar" id="infoBar"></div>
     <script>
-        const widgets = [
-            [
-                {
-                    id: "time",
-                    style: { width: "128px", backgroundColor: "#000000" },
-                    html: "<p>获取出错</p>",
-                    icon: "clock",
-                    title: "时间",
-                    update: `(config) => {
-                        const date = new Date();
-                        return "<h1>" + date.toLocaleTimeString() + "<h1>";}
-                            `,
-                    showBar: true
-                },
-                {
-                    id: "date",
-                    style: { width: "128px", backgroundColor: "#000000" },
-                    html: "<p>获取出错</p>",
-                    icon: "calendar",
-                    title: "日期",
-                    update: `(config) => {
-                        const date = new Date();
-                        return "<h2>" + (date.getMonth() + 1) + "月" + date.getDate() + "日</h2>";
-                    }`,
-                    showBar: true
+        let intervalId = null;
+        let lastWeatherUpdate = 0;
+        let lastWeather = '';
+        let scrollId = null;
+        let toplayerInfo = null;
+        let lastLinePosPassed = false;
+        let tomorrowCoursesContent = '';
+
+        function count(o) {
+            var t = typeof o;
+            if (t == 'string') {
+                return o.length;
+            } else if (t == 'object') {
+                var n = 0;
+                for (var i in o) {
+                    n++;
                 }
-            ],
-            [
-                {
-                    id: "widget3",
-                    style: { width: "128px", backgroundColor: "#000000" },
-                    html: "<p>小组件3</p>",
-                    icon: "https://via.placeholder.com/24",
-                    title: "小组件3",
-                    update: (config) => { return "<p>更新内容3</p>"; },
-                    showBar: true
-                }
-            ]
-        ];
-
-        const widgetContainer = document.getElementById("widget-container");
-        let isEditMode = true;
-
-        function createWidgetDiv(widget, rowIndex, widgetIndex) {
-            const widgetDiv = document.createElement("div");
-            widgetDiv.classList.add("widget");
-            widgetDiv.id = widget.id;
-            widgetDiv.style = `height: 64px; ${Object.entries(widget.style).map(([key, value]) => `${key}: ${value};`).join(" ")}`;
-            widgetDiv.draggable = isEditMode;
-
-            if (widget.showBar) {
-                const widgetBar = document.createElement("div");
-                widgetBar.classList.add("widget-bar");
-                const widgetIcon = document.createElement("i");
-                widgetIcon.className = "bi bi-" + widget.icon;
-                widgetIcon.classList.add("widget-icon");
-                const widgetTitle = document.createElement("span");
-                widgetTitle.classList.add("widget-title");
-                widgetTitle.textContent = widget.title;
-                widgetBar.appendChild(widgetIcon);
-                widgetBar.appendChild(widgetTitle);
-                widgetDiv.appendChild(widgetBar);
+                return n;
             }
-
-            const widgetContent = document.createElement("div");
-            widgetContent.classList.add("widget-content");
-            widgetContent.innerHTML = widget.html;
-            widgetDiv.appendChild(widgetContent);
-
-            if (isEditMode) {
-                const widgetMenu = document.createElement("div");
-                widgetMenu.classList.add("widget-menu");
-                const editButton = document.createElement("button");
-                editButton.textContent = "编辑样式";
-                editButton.addEventListener("click", () => {
-                    alert("编辑样式功能暂未实现");
-                });
-                widgetMenu.appendChild(editButton);
-
-                const deleteButton = document.createElement("button");
-                deleteButton.textContent = "删除组件";
-                deleteButton.addEventListener("click", () => {
-                    deleteWidget(rowIndex, widgetIndex);
-                });
-                widgetMenu.appendChild(deleteButton);
-
-                const autoUpdateButton = document.createElement("button");
-                autoUpdateButton.textContent = "开启/关闭自动更新";
-                autoUpdateButton.addEventListener("click", () => {
-                    alert("自动更新功能暂未实现");
-                });
-                widgetMenu.appendChild(autoUpdateButton);
-
-                widgetDiv.appendChild(widgetMenu);
-            }
-
-            widgetDiv.addEventListener("dragstart", (e) => {
-                e.dataTransfer.setData("text/plain", JSON.stringify({ rowIndex, widgetIndex }));
-            });
-
-            widgetDiv.addEventListener("dragover", (e) => {
-                e.preventDefault();
-            });
-
-            widgetDiv.addEventListener("drop", (e) => {
-                e.preventDefault();
-                const data = JSON.parse(e.dataTransfer.getData("text/plain"));
-                if (data.rowIndex === rowIndex && data.widgetIndex === widgetIndex) return;
-                moveWidget(data.rowIndex, data.widgetIndex, rowIndex, widgetIndex);
-            });
-
-            return widgetDiv;
+            return false;
         }
 
-        async function renderWidgets() {
-            widgetContainer.innerHTML = "";;
-            widgets.forEach((row, rowIndex) => {
-                if (row.length > 0) {
-                    const rowDiv = document.createElement("div");
-                    rowDiv.classList.add("widget-row");
-
-                    const flexStart = document.createElement("div");
-                    flexStart.style.flex = "1";
-                    rowDiv.appendChild(flexStart);
-
-                    row.forEach((widget, widgetIndex) => {
-                        const widgetDiv = createWidgetDiv(widget, rowIndex, widgetIndex);
-                        rowDiv.appendChild(widgetDiv);
-                    });
-
-                    const flexEnd = document.createElement("div");
-                    flexEnd.style.flex = "1";
-                    rowDiv.appendChild(flexEnd);
-
-                    widgetContainer.appendChild(rowDiv);
-                }
+        // 课程表更新函数
+        function updateSchedules(data) {
+            const coursesDiv = document.getElementById('schedules');
+            coursesDiv.innerHTML = '';
+            const today2 = new Date();
+            const month = today2.getMonth() + 1;
+            const day = today2.getDate();
+            const weekday = today2.toLocaleDateString('zh-CN', {
+                weekday: 'long'
             });
-
-            if (isEditMode) {
-                const emptyRowDiv = document.createElement("div");
-                emptyRowDiv.classList.add("widget-row");
-                emptyRowDiv.style.height = "64px";
-                emptyRowDiv.addEventListener("dragover", (e) => {
-                    e.preventDefault();
-                });
-                emptyRowDiv.addEventListener("drop", (e) => {
-                    e.preventDefault();
-                    const data = JSON.parse(e.dataTransfer.getData("text/plain"));
-                    moveWidget(data.rowIndex, data.widgetIndex, widgets.length, 0);
-                });
-                widgetContainer.appendChild(emptyRowDiv);
-            }
-        }
-
-        async function updateWidgets() {
-            const config = await window.api.config_Get(true);
-            widgets.forEach((row) => {
-                row.forEach((widget) => {
-                    if (widget.update) {
-                        const widgetDiv = document.getElementById(widget.id);
-                        if (widgetDiv) {
-                            const widgetContent = widgetDiv.querySelector(".widget-content");
-                            const newContent = excuteFunc(widget.update, config);
-                            if (widgetContent.innerHTML !== newContent) {
-                                console.log("[RisClassTool][INFO]刷新组件：" + widget.id);
-                                widgetContent.innerHTML = newContent;
-                            }
-                        }
+            const cycleElement = document.createElement('span');
+            cycleElement.textContent = `${weekday}`;
+            cycleElement.className = 'today';
+            coursesDiv.appendChild(cycleElement);
+            const today = today2.toLocaleDateString('en-US', {
+                weekday: 'long'
+            }).charAt(0).toUpperCase() + today2.toLocaleDateString('en-US', {
+                weekday: 'long'
+            }).slice(1).toLowerCase();
+            const dailyCourses = data.courseTable[today];
+            const timeTable = data.timeTable;
+            const timeOffset = data.timeOffset || 0;
+            const now = new Date();
+            const currentTime = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + timeOffset; // 加入偏移量
+            const fragment = document.createDocumentFragment(); // 使用文档片段优化性能
+            // 显示今天的课程
+            for (let i = 1; i <= count(data.timeTable); i++) {
+                const period = i.toString();
+                const course = dailyCourses[i - 1];
+                const time = timeTable[period];
+                const [startStr, endStr] = time.split('-');
+                const start = parseInt(startStr.split(':')[0]) * 3600 + parseInt(startStr.split(':')[1]) * 60;
+                const end = parseInt(endStr.split(':')[0]) * 3600 + parseInt(endStr.split(':')[1]) * 60;
+                const courseElement = document.createElement('span');
+                courseElement.className = 'schedule';
+                if (currentTime >= start && currentTime < end) {
+                    courseElement.classList.add('current');
+                    if (i > data.linePos[data.linePos.length - 1]) {
+                        lastLinePosPassed = true;
                     }
+                } else if (currentTime < start) {
+                    courseElement.classList.add('future');
+                } else {
+                    courseElement.classList.add('past');
+                }
+                courseElement.textContent = `${course}`;
+
+                if (data.linePos.includes(i)) {
+                    courseElement.classList.add('vertical-divider');
+                }
+                fragment.appendChild(courseElement);
+            }
+            coursesDiv.appendChild(fragment); // 一次性添加所有元素
+
+            // 如果已经过了最后一个linePos，并且有明天的课程，则显示明天的课程
+            const extraDiv = document.getElementById('extra');
+            if (lastLinePosPassed) {
+                    const tomorrowData = new Date();
+                    tomorrowData.setDate(now.getDate() + 1);
+                    const arr_eng = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                    const arr2 = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+                    const dayOfWeek = tomorrowData.getDay();
+                    const tomorrow = arr_eng[dayOfWeek];
+                    const tomorrowCourses = data.courseTable[tomorrow];
+
+                    extraDiv.style.display = tomorrowCourses ? 'flex' : 'none';
+
+                    if (tomorrowCourses) {
+                        let courseText = "";
+
+                        for (let i = 1; i <= count(data.timeTable); i++) {
+                            const period = i.toString();
+                            const course = tomorrowCourses[i - 1];
+                            courseText += `${course}${data.linePos.includes(i) ? " | " : " "}`;
+                        }
+                        extraDiv.innerHTML = `<i class="bi bi-calendar-minus"></i>
+                        &nbsp;&nbsp;${arr2[dayOfWeek]}<span style="flex:1"></span><span id="tomorrowCourses">${courseText}</span>`;
+                        startScroll();
+                    }
+            } else {
+                extraDiv.style.display = 'none';
+            }
+        }
+
+        function updateWeatherElement(data) {
+            const infoBar = document.getElementById('infoBar');
+            let weatherElement = infoBar.querySelector('.weather') || document.createElement('div');
+            weatherElement.innerHTML = '<i class="bi bi-stars"></i>&nbsp;&nbsp;天气信息<span style="flex:1"></span>正在获取...';
+            weatherElement.className = 'weather';
+            infoBar.appendChild(weatherElement);
+            if (data.posName && Date.now() - lastWeatherUpdate > 600000) {
+                lastWeatherUpdate = Date.now();
+                fetchWeatherData(data.posName, weatherElement);
+            } else {
+                weatherElement.innerHTML = lastWeather;
+            }
+        }
+        function fetchWeatherData(posName, weatherElement) {
+            fetch(`https://api.3r60.top/v2/project/weather/?pos=${posName ?? '北京'}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    weatherElement.innerHTML = `<i class="qi-${data.icon}"></i>
+                                    &nbsp;&nbsp;天气信息<span style="flex:1"></span>
+                                    ${data.text}
+                                    ${data.temp}℃ &nbsp;
+                                    ${data.windDir}${data.windScale}级`;
+                    lastWeather = weatherElement.innerHTML;
+                })
+                .catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                    weatherElement.innerHTML = '<i class="bi bi-exclamation-triangle"></i>&nbsp;&nbsp;天气信息获取失败';
                 });
+        }
+
+        function checkAndDisplayInfoBar(data) {
+            const today = new Date();
+            const month = today.getMonth() + 1;
+            const day = today.getDate();
+            const weekday = today.toLocaleDateString('zh-CN', {
+                weekday: 'long'
             });
-        }
+            const todaysDate = `${month}.${day}`;
+            const infoBar = document.getElementById('infoBar');
+            const students = data.students;
+            const studentsWithActiveDate = students.filter(student => student.activeDate === todaysDate);
+            infoBar.innerHTML = '';
 
-        function deleteWidget(rowIndex, widgetIndex) {
-            widgets[rowIndex].splice(widgetIndex, 1);
-            if (widgets[rowIndex].length === 0) {
-                widgets.splice(rowIndex, 1);
-            }
-            renderWidgets();
-        }
-
-        function moveWidget(fromRowIndex, fromWidgetIndex, toRowIndex, toWidgetIndex) {
-            const widget = widgets[fromRowIndex].splice(fromWidgetIndex, 1)[0];
-            if (widgets[toRowIndex]) {
-                widgets[toRowIndex].splice(toWidgetIndex, 0, widget);
+            const toplayerInfoElement = document.createElement('div');
+            toplayerInfoElement.id = "toplayerInfoElement";
+            if (toplayerInfo) {
+                toplayerInfoElement.innerHTML = `<i class="${toplayerInfo.info.icon}"></i>&nbsp;&nbsp;当前状态${toplayerInfo.info.text}`;
             } else {
-                widgets.splice(toRowIndex, 0, [widget]);
+                toplayerInfoElement.style.display = 'none';
             }
-            renderWidgets();
+            infoBar.appendChild(toplayerInfoElement);
+            const timeElement = document.createElement('div');
+            timeElement.innerHTML = `<i class="bi bi-calendar-check"></i>&nbsp;&nbsp;今天<span style="flex:1"></span>${month}月${day}日 ${weekday}`;
+            infoBar.appendChild(timeElement);
+            const extraElement = document.createElement('div');
+            extraElement.id = 'extra';
+            infoBar.appendChild(extraElement);
+            updateSchedules(data);
+            if (studentsWithActiveDate.length > 0) {
+                let nameList = '';
+                studentsWithActiveDate.forEach(student => {
+                    if (nameList !== "") {
+                        nameList += ",";
+                    }
+                    nameList += student.name;
+                });
+                const eventNameText = document.createElement('div');
+                eventNameText.innerHTML = `<i class="bi bi-check2-circle"></i>&nbsp;&nbsp;${data.studentActiveName}<span style="flex:1"></span>${nameList}`;
+                infoBar.appendChild(eventNameText);
+            }
+            if (data.countTime) {
+                const countdownElement = createCountdownElement(data.countTime, data.countText);
+                infoBar.appendChild(countdownElement);
+            }
+            updateWeatherElement(data);
         }
 
-        function excuteFunc(funcOrString, ...args) {
-            if (typeof funcOrString === 'function') {
-                return funcOrString(...args);
+        function createCountdownElement(countTime, countText) {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const targetDate = new Date(currentYear, parseInt(countTime.split('.')[0] ?? 6) - 1, parseInt(countTime.split('.')[1] ?? 7), 0, 0, 0);
+            if (today > targetDate) {
+                targetDate.setFullYear(targetDate.getFullYear() + 1);
             }
-            if (typeof funcOrString !== 'string') {
-                throw new Error('The first argument must be a string or a function.');
+            const oneDay = 24 * 60 * 60 * 1000;
+            const diffDays = Math.round(Math.abs((targetDate - today) / oneDay));
+            const countdownTitle = countText ? "距离 " + countText : '倒计时';
+            const countdownElement = document.createElement('div');
+            countdownElement.innerHTML = `<i class="bi bi-hourglass-split"></i>&nbsp;&nbsp;${countdownTitle}<span style="flex:1"></span>${diffDays} 天`;
+            countdownElement.className = 'countdown';
+            return countdownElement;
+        }
+
+        // 载入函数
+        function init(data) {
+            checkAndDisplayInfoBar(data);
+            document.documentElement.style.setProperty('--font-size', `${data.scheduleFontSize || '1'}em`);
+            document.documentElement.style.setProperty('--font-size2', `${data.infoFontSize || (data.scheduleFontSize || '1')}em`);
+            if (intervalId) {
+                clearInterval(intervalId);
             }
-            funcOrString = funcOrString.trim();
-            const isArrowFunction = funcOrString.startsWith('(') || funcOrString.startsWith('function');
-            if (!isArrowFunction) {
-                throw new Error('Invalid function string. It must be in the form of "(args) => { ... }" or "function(args) => { ... }".');
-            }
-            let params = '';
-            let body = '';
-            if (funcOrString.startsWith('function')) {
-                const match = funcOrString.match(/function\s*\(([^)]*)\)\s*=>\s*({[^}]*})/);
-                if (match) {
-                    params = match[1];
-                    body = match[2];
-                } else {
-                    throw new Error('Invalid function format. Expected "function(args) => { ... }".');
+            intervalId = setInterval(() => {
+                checkAndDisplayInfoBar(data);
+            }, 10000);
+        }
+
+
+        // 事件区
+        window.api.config_onRecive(init);
+        window.addEventListener('beforeunload', () => {
+            clearInterval(intervalId);
+            clearInterval(scrollId);
+            resizeObserver.disconnect();
+        });
+        window.onload = async () => {
+            init(await window.api.config_Get(true));
+        };
+        const resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                if (entry.target === document.getElementById('schedules')) {
+                    document.getElementById('infoBar').style.width = `${entry.contentRect.width}px`;
                 }
+            }
+        });
+        resizeObserver.observe(document.getElementById('schedules'));
+
+        // 滚动函数
+        function startScroll() {
+            const scrollContainer = document.getElementById('tomorrowCourses');
+            const scrollSpeed = 1;
+            const scrollWidth = scrollContainer.scrollWidth;
+            const clientWidth = scrollContainer.clientWidth;
+
+            // 如果不需要滚动则直接返回
+            if (scrollWidth <= clientWidth) {
+                return;
+            }
+
+            function scrollText() {
+                const scrollLeft = scrollContainer.scrollLeft;
+                if (scrollLeft + clientWidth >= scrollWidth) {
+                    clearInterval(scrollId);
+                    setTimeout(() => {
+                        scrollContainer.scrollLeft = 0;
+                        scrollId = setInterval(scrollText, 100);
+                    }, 1000);
+                } else {
+                    scrollContainer.scrollLeft += scrollSpeed;
+                }
+            }
+            clearInterval(scrollId);
+            scrollId = setInterval(scrollText, 100);
+        }
+
+        function stopScroll() {
+            clearInterval(scrollId);
+        }
+
+        window.addEventListener('beforeunload', () => {
+            stopScroll();
+        });
+
+        var schedules = document.getElementById('schedules');
+        var infoBar = document.getElementById('infoBar');
+        var toggleTaskId = null;
+
+        function handleToggle() {
+            if (toggleTaskId) {
+                clearTimeout(toggleTaskId);
+            }
+            schedules.style.color = 'rgba(255, 255, 255, .6)';
+            infoBar.style.color = 'rgba(255, 255, 255, .6)';
+            schedules.style.backgroundColor = 'rgba(35, 35, 35, .2)';
+            infoBar.style.backgroundColor = 'rgba(35, 35, 35, .2)';
+            toggleTaskId = setTimeout(() => {
+                schedules.style.color = 'white';
+                infoBar.style.color = 'white';
+                schedules.style.backgroundColor = 'rgba(35, 35, 35, .9)';
+                infoBar.style.backgroundColor = 'rgba(35, 35, 35, .9)';
+            }, 2000);
+        }
+
+        schedules.onmouseenter = function () {
+            handleToggle();
+        };
+        infoBar.onmouseenter = function () {
+            handleToggle();
+        };
+
+        let visibility = true;
+
+        function reportVisibility() {
+            window.api.reportVisibility(!document.hidden);
+        }
+
+        document.addEventListener("visibilitychange", (event) => {
+            if (document.hidden) {
+                window.api.reportVisibility(false);
+                visibility = false;
             } else {
-                const match = funcOrString.match(/\(([^)]*)\)\s*=>\s*({[^}]*})/);
-                if (match) {
-                    params = match[1];
-                    body = match[2];
-                } else {
-                    throw new Error('Invalid function format. Expected "(args) => { ... }".');
-                }
+                window.api.reportVisibility(true);
+                visibility = true;
             }
-            const func = new Function(params, body);
-            return func(...args);
-        }
+        });
 
-        isEditMode = true;
-        renderWidgets();
-        updateWidgets();
-        const IntervalId = setInterval(updateWidgets, 1000);
-        console.log("[RisClassTool][INFO]刷新线程启动成功：" + IntervalId);
+        window.api.get_toplayerInfo((info) => {
+            const toplayerInfoElement = document.getElementById('toplayerInfoElement');
+            toplayerInfoElement.innerHTML = `<i class="${info.info.icon}"></i>&nbsp;&nbsp;当前状态${info.info.text}`;
+            toplayerInfoElement.style.display = 'flex';
+            toplayerInfo = info;
+        });
+        const visibilityIntervalId = setInterval(reportVisibility, 5000);
+        window.addEventListener('beforeunload', () => {
+            clearInterval(visibilityIntervalId);
+        });
+        clearInterval(visibilityIntervalId);
+        setInterval(reportVisibility, 5000);
     </script>
 </body>
 

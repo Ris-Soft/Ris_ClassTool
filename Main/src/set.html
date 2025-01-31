@@ -1,481 +1,1352 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+<!--<div style="position: fixed; right: 0; bottom: 0; padding: 20px; font-family: Arial, sans-serif; color: #666;z-index:1000">
+    <b>RisClassTool</b><br>Insider Preview
+</div>-->
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ris_ClassTool</title>
+    <title>设置</title>
     <link rel="stylesheet" href="./icons/bootstrap-icons.css">
+    <!--<link rel="stylesheet" href="https://assets.3r60.top/icons/bootstrap-icons.css">-->
+    <script src="./js/xlsx.js"></script>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body,
         html {
-            background-color: rgb(30, 30, 30);
-            color: white;
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            display: flex;
-            flex-direction: column;
+            background-color: #f9f9f9;
+            font-family: Arial, sans-serif;
+            color: #333;
             user-select: none;
+            -webkit-app-region: drag;
         }
 
-        .top-section {
-            flex: 1;
-        }
-
-        .bottom-section {
-            background-color: #000000;
-            height: 21%;
-            display: flex;
-            flex-direction: column;
-            border-radius: 10px;
-            margin: 10px;
-        }
-
-        .title-bar {
+        #header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
             display: flex;
             align-items: center;
-            padding: 10px;
-            background-color: #0e0e0e;
-            border-radius: 10px 10px 0 0;
-            max-height: 22px;
+            justify-content: space-between;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+            z-index: 1000;
+            -webkit-app-region: drag;
         }
 
-        .title-bar button {
-            margin-right: 10px;
-        }
-
-        #title {
-            font-weight: 600;
+        #header .title {
+            padding-left: 15px;
             font-size: 18px;
+            font-weight: bold;
         }
 
-        .button-container {
+        #header .controls {
             display: flex;
-            overflow-x: auto;
-            padding: 10px;
-            height: 90%;
+            padding-right: 15px;
         }
 
-        .button-container::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .button-container::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-
-        .button-container::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        .button {
-            font-weight: 300;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0 10px;
-            padding: 5px 10px;
+        #header .controls button {
+            background: transparent;
+            border: none;
             cursor: pointer;
-            height: auto;
-            transition: background-color 0.3s, transform 0.3s;
+            font-size: 16px;
+            padding: 0 10px;
+            color: #555;
+        }
+
+        #header .controls button:hover {
+            color: #ff4d4d;
+        }
+
+        #sidebar {
+            position: absolute;
+            top: 40px;
+            bottom: 0;
+            left: 0;
+            width: 200px;
+            background-color: #fff;
+            border-right: 1px solid #e0e0e0;
+            -webkit-app-region: no-drag;
+            padding-top: 5px;
+        }
+
+        .sidebar-item {
+            display: block;
+            padding: 10px 15px;
+            margin: 5px;
+            margin-left: 8px;
+            margin-right: 8px;
             border-radius: 5px;
+            text-align: left;
+            cursor: pointer;
         }
 
-        .button:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            transform: scale(1.05);
+        .sidebar-item:hover {
+            background-color: #f1f1f1;
         }
 
-        .button:active {
-            background-color: rgba(255, 255, 255, 0.2);
-            transform: scale(0.95);
+        .sidebar-item.active {
+            background-image: linear-gradient(to right, #0097fb 0%, #1e71f5 100%);
+            color: white;
         }
 
-        .clicked {
-            background-color: rgba(255, 255, 255, 0.1);
-            transform: scale(1.05);
+        #main-content {
+            position: absolute;
+            top: 40px;
+            left: 200px;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            -webkit-app-region: no-drag;
+            background-color: #f9f9f9;
         }
 
-        .button i {
-            font-size: 6vh;
-            color: rgb(239, 239, 239);
+        .content-page {
+            display: none;
+            padding: 20px;
+            transition: opacity 0.3s ease;
         }
 
-        .button span {
-            margin-top: 5px;
+        .content-page.active {
+            display: block;
+            opacity: 1;
         }
 
-        .main-button {
-            min-width: 100px;
-            opacity: 0;
-            animation: fadeIn 0.5s forwards;
+        @media (max-width: 768px) {
+            #sidebar {
+                display: none;
+            }
+
+            #main-content {
+                left: 0;
+            }
         }
 
-        #back-button {
-            background-color: #101010;
+        input,
+        textarea,
+        select {
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            box-sizing: border-box;
+            border-radius: 5px;
+            background-color: transparent;
+            padding: 8px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        select {
+            width: 180px;
+        }
+
+        input:focus,
+        textarea:focus,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus {
+            border: 1px solid #0097fb;
+            outline: none;
+        }
+
+        label {
+            font-size: 12px;
+            display: block;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* 表格样式 */
+        table {
+            width: auto;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        table th {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: 100;
+        }
+
+        table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        table td[contenteditable="true"] {
+            background-color: #fff;
+            padding: 5px;
+            min-width: 80px;
+        }
+
+        table td[contenteditable="true"]:focus-visible {
+            border: 2px solid #0097fb;
+            outline: none;
+        }
+
+        table td[contenteditable="true"]:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* 操作按钮样式 */
+        table .deleteRowButton,
+        .redBtn {
+            background-color: #dc3545;
             color: white;
             border: none;
             padding: 5px 10px;
-            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.3s;
-            margin-top: 0;
-            margin-bottom: 0;
+            border-radius: 4px;
         }
 
-        #back-button:hover {
-            background-color: #202020;
+        table .deleteRowButton:hover,
+        .redBtn:hover {
+            background-color: #c82333;
         }
 
-        #back-button i {
-            font-size: 20px;
-            font-weight: 600;
+        table tr:first-child th:first-child {
+            border-top-left-radius: 5px;
+            /* 设置table左上圆角 */
+        }
+
+        table tr:first-child th:last-child {
+            border-top-right-radius: 5px;
+            /* 设置table右上圆角 */
+        }
+
+        table tr:last-child td:first-child {
+            border-bottom-left-radius: 5px;
+            /* 设置table左下圆角 */
+        }
+
+        table tr:last-child td:last-child {
+            border-bottom-right-radius: 5px;
+            /* 设置table右下圆角 */
+        }
+
+        /* 新增行按钮样式 */
+        #addRowButton,
+        .greenBtn {
+            background-color: #28a745;
             color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
         }
 
-        #webview-section {
-            display: none;
-            height: calc(100% - 10px);
-            border-radius: 10px;
-            margin: 10px;
-            background-color: #000000;
+        #addRowButton:hover,
+        .greenBtn:hover {
+            background-color: #218838;
+        }
+
+        /* 保存按钮样式 */
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
+        }
+
+        button:hover {
+            opacity: 0.7;
+            background-color: #0069d9;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            border-radius: 5px;
+            color: black;
+            padding: 10px;
             box-sizing: border-box;
-            opacity: 0;
-            animation: fadeIn 0.5s forwards;
+            margin-bottom: 10px;
         }
 
-        @keyframes fadeIn {
-            to {
-                opacity: 1;
-            }
+        .card>label {
+            flex: 1;
+            color: rgb(82, 82, 82);
         }
 
-        @keyframes fadeOut {
-            to {
-                opacity: 0;
-            }
+        .card>label>h2 {
+            margin: 0;
+            font-weight: 500;
+            font-size: 16px;
+            color: black;
+        }
+
+        .card>input {
+            width: 180px;
+            height: 35px;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+        input[type="checkbox"] {
+            display: inline-block;
+            vertical-align: middle;
+            height: 20px;
+            padding: 20px;
+            width: 50px;
+        }
+
+        .content-page#about {
+            padding: 20px;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+
+        .about-container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .about-container h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .about-container h3 {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .about-list {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+
+        .about-list li {
+            padding: 5px 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .about-list li strong {
+            color: #000;
+        }
+
+        .about-footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #888;
+            text-align: center;
         }
     </style>
 </head>
 
 <body>
-    <div class="top-section" id="top-section">
-        <div id="editor-section"
-            style="display: flex; justify-content: center; align-items: center; height: 60%; color: #4d4d4d">
-            拖动组件可改变组件位置
-        </div>
-        <div id="webview-section">
-            <div class="title-bar">
-                <span id="webview-title"></span>
+    <div id="header">
+        <div class="title"><i class="bi bi-gear"></i>&nbsp;程序设置</div>
+    </div>
+    <div id="sidebar">
+        <div class="sidebar-item active" data-target="#control"><i class="bi bi-toggle2-off"></i>&nbsp;功能开关</div>
+        <div class="sidebar-item" data-target="#data"><i class="bi bi-database"></i>&nbsp;数据管理</div>
+        <div class="sidebar-item" data-target="#basic"><i class="bi bi-gear"></i>&nbsp;通用选项</div>
+        <div class="sidebar-item" data-target="#schedule"><i class="bi bi-calendar2-day"></i>&nbsp;课程设定</div>
+        <div class="sidebar-item" data-target="#students"><i class="bi bi-people"></i>&nbsp;学生管理</div>
+        <div class="sidebar-item" data-target="#switch"><i class="bi bi-toggles"></i>&nbsp;调休换课</div>
+        <div class="sidebar-item" data-target="#autoQuit"><i class="bi bi-code-square"></i>&nbsp;自动退出</div>
+        <div class="sidebar-item" data-target="#appearance"><i class="bi bi-palette"></i>&nbsp;外观设置</div>
+        <div class="sidebar-item" data-target="#countdown"><i class="bi bi-clock"></i>&nbsp;倒计时与天气</div>
+        <div class="sidebar-item" data-target="#sidebarSettings"><i class="bi bi-layout-sidebar"></i>&nbsp;侧边栏设置</div>
+        <div class="sidebar-item" data-target="#about"><i class="bi bi-info-circle"></i>&nbsp;关于程序</div>
+        <a id="createLink"
+            style="position: fixed;left: 0;bottom: 0;padding: 15px;font-family: Arial, sans-serif;color: #007bff;z-index:1000;font-size: 12px;text-decoration: underline;cursor: pointer;">
+            <b>创建当前快捷方式</b><br>在桌面生成此页的快捷方式
+        </a>
+    </div>
+    </div>
+    <div id="main-content">
+        <!--功能开关页面-->
+        <div class="content-page active" id="control">
+            <div class="page-title"><i class="bi bi-gear"></i>&nbsp;功能开关</div>
+            <div class="card">
+                <label for="desktopLayer">
+                    <h2>桌面组件</h2>桌面显示课程表与信息窗
+                </label>
+                <input onchange="saveConfigOnBlur(this)" type="checkbox" id="desktopLayer"><br>
             </div>
-            <webview src="" style="width: 100%; height: calc(100% - 22px); border: none; color: white;"></webview>
-            <script>
-                const webview = document.querySelector('webview');
-                webview.addEventListener('did-finish-load', () => {
-                    webview.executeJavaScript('document.title').then(title => {
-                        document.getElementById('webview-title').innerText = title || 'Loaded';
-                    });
-                });
-            </script>
+            <div class="card">
+                <label for="statusLayer">
+                    <h2>状态窗口</h2>右上角显示的状态窗口
+                </label>
+                <input onchange="saveConfigOnBlur(this)" type="checkbox" id="statusLayer"><br>
+            </div>
+            <div class="card">
+                <label for="processLayer">
+                    <h2>顶部进度条</h2>顶部显示的课程进度条
+                </label>
+                <input onchange="saveConfigOnBlur(this)" type="checkbox" id="processLayer"><br>
+            </div>
+            <div class="card">
+                <label for="sideBarShow">
+                    <h2>右侧边栏</h2>请在“侧边栏设定”中更改
+                </label>
+            </div>
+            <div class="card">
+                <label for="pptHelper">
+                    <h2>PPT助手</h2>PPT播放时显示的辅助控件
+                </label>
+                <input onchange="saveConfigOnBlur(this)" type="checkbox" id="pptHelper"><br>
+            </div>
         </div>
-    </div>
-    <div class="bottom-section">
-        <div class="title-bar">
-            <button id="back-button" class="button" style="display: none;" onclick="goBack()"><i
-                    class="bi bi-arrow-left"></i></button>
-            <span id="title">Ris_ClassTool</span>
+        <!--数据管理页面-->
+        <div class="content-page" id="data">
+            <div class="page-title"><i class="bi bi-database"></i>&nbsp;数据管理</div>
+            <div class="card" style="display: block;">
+                <label style="margin-bottom: 5px;">
+                    <h2>数据导出</h2>导出课程数据或应用程序配置
+                </label>
+                <button type="button" onclick="exportSchedules()">导出课程与时间为表格</button>
+                <button type="button" onclick="exportStudents()">导出学生列表为表格</button>
+                <button type="button" onclick="exportAll()">导出应用程序配置</button>
+            </div>
+            <div class="card" style="display: block;">
+                <label style="margin-bottom: 5px;">
+                    <h2>导入时间表</h2>通过导入课程表Excel文件来快速设置课程表的时间部分
+                </label>
+                时间数据开始行：<input class="doNotSave" id="T_startX" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始行,从1开始" value="1" /><br>
+                时间数据开始列：<input class="doNotSave" id="T_startY" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始列,从1开始" value="1" /><br>
+                选择时间的文件：<input class="doNotSave" type="file" id="T_importTime" style="margin-bottom: 5px;"
+                    accept=".xls,.xlsx"><br>
+                <button type="button" onclick="importTime()">导入时间表</button>
+            </div>
+            <div class="card" style="display: block;">
+                <label style="margin-bottom: 5px;">
+                    <h2>导入课程表</h2>通过导入课程表Excel文件来快速设置课程表
+                </label>
+                课表数据开始行：<input class="doNotSave" id="S_startX" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始行,从1开始" value="2" /><br>
+                课表数据开始列：<input class="doNotSave" id="S_startY" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始列,从1开始" value="2" /><br>
+                选择课表的文件：<input class="doNotSave" type="file" id="S_importSchedule" style="margin-bottom: 5px;"
+                    accept=".xls,.xlsx"><br>
+                是否取首个汉字：<input class="doNotSave" type="checkbox" id="S_Tidy" style="width: 20px;" checked><br>
+                <button type="button" onclick="importSchedule()">导入课程表</button>
+            </div>
+            <div class="card" style="display: block;">
+                <label style="margin-bottom: 5px;">
+                    <h2>导入学生列表</h2>通过导入Excel文件来快速设置学生
+                </label>
+                学生数据开始行：<input class="doNotSave" id="ST_startX" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始行,从1开始" value="2" /><br>
+                学生数据开始列：<input class="doNotSave" id="ST_startY" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始列,从1开始" value="1" /><br>
+                选择课表的文件：<input class="doNotSave" type="file" id="ST_importStudents" style="margin-bottom: 5px;"
+                    accept=".xls,.xlsx"><br>
+                是否包含活动日：<input class="doNotSave" type="checkbox" id="ST_includeDate" style="width: 20px;" checked><br>
+                <button type="button" onclick="importStudents()">导入学生列表</button>
+            </div>
+            <div class="card" style="display: block;">
+                <label style="margin-bottom: 5px;">
+                    <h2>全量导入</h2>直接导入JSON配置并应用
+                </label>
+                <button type="button" onclick="importAll()">全量导入</button>
+            </div>
         </div>
-        <div class="button-container" id="button-container"></div>
+        <!-- 外观设置页面 -->
+        <div class="content-page" id="appearance">
+            <div class="page-title"><i class="bi bi-palette"></i>&nbsp;外观设置</div>
+            <div class="card">
+                <label for="progressColor">
+                    <h2>主题颜色</h2>进度条与课程表的突出主题色
+                </label>
+                <input type="text" id="progressColor" placeholder="默认值：#1E9FFF"><br><br>
+            </div>
+            <div class="card">
+                <label for="scheduleFontSize">
+                    <h2>桌面课程字体设定</h2>课程表相对字体大小等级[推荐值：1]
+                </label>
+                <input type="text" id="scheduleFontSize" placeholder="推荐值：1"><br><br>
+            </div>
+            <div class="card">
+                <label for="infoFontSize">
+                    <h2>桌面信息窗字体设定</h2>桌面信息窗相对字体大小等级，不填写默认跟随课程表字体大小
+                </label>
+                <input type="text" id="infoFontSize" placeholder="推荐值：1"><br><br>
+            </div>
+            <div class="card">
+                <label for="progressHeight">
+                    <h2>进度条高度</h2>顶部进度条的显示高度，最大值为100px
+                </label>
+                <input type="text" id="progressHeight" placeholder="默认值：2px"><br><br>
+            </div>
+            <div class="card" style="display: block;">
+                <label style="margin-bottom: 5px;">
+                    <h2>桌面学科课程图标</h2>在桌面创建文件夹并更改为精美图标，已创建的文件夹不影响内容
+                </label>
+                <button type="button" onclick="window.api.function_desktopIcon()">立即创建</button>
+            </div>
+        </div>
+        <!-- 倒计时与提醒页面 -->
+        <div class="content-page" id="countdown">
+            <div class="page-title"><i class="bi bi-clock"></i>&nbsp;倒计时与提醒</div>
+            <div class="card">
+                <label for="countTime">
+                    <h2>到数目标</h2>倒数日的目标日期，启用倒数日时生效
+                </label>
+                <input type="text" id="countTime" placeholder="格式：月.日"><br><br>
+            </div>
+            <div class="card">
+                <label for="countText">
+                    <h2>到数文本</h2>倒数日前显示的文本，启用倒数日时生效
+                </label>
+                <input type="text" id="countText" placeholder="默认为空"><br><br>
+            </div>
+            <div class="card">
+                <label for="posName">
+                    <h2>地理位置</h2>用于获取天气信息，关闭倒数日时生效
+                </label>
+                <input type="text" id="posName" placeholder="位置名称"><br><br>
+            </div>
+        </div>
+        <!-- 侧边栏设置页面 -->
+        <div class="content-page" id="sidebarSettings">
+            <div class="page-title"><i class="bi bi-layout-sidebar"></i>&nbsp;侧边栏设置</div>
+            <div class="card">
+                <label for="sideBarShow">
+                    <h2>启用侧边栏</h2>实时生效，关闭后则不再创建侧边栏窗口
+                </label>
+                <input onchange="saveConfigOnBlur(this)" type="checkbox" id="sideBarShow"><br>
+            </div>
+            <div class="card">
+                <label for="sideBarBottom">
+                    <h2>侧边栏位置</h2>侧边栏按钮与底部距离，重启后生效
+                </label>
+                <input type="text" id="sideBarBottom" placeholder="默认值：200"><br><br>
+            </div>
+        </div>
+        <!-- 基本设置页面 -->
+        <div class="content-page" id="basic">
+            <div class="page-title"><i class="bi bi-gear"></i>&nbsp;通用设定</div>
+            <form id="basicSettingsForm">
+                <div class="card" style="display: none;">
+                    <label for="insiderPreview">
+                        <h2>预览体验成员</h2>开启后可视化页面将交给瑞思软件的服务器接管（服务器连接失败时使用本地连接）[重启软件后生效]
+                    </label>
+                    <input onchange="saveConfigOnBlur(this)" type="checkbox" id="insiderPreview"><br>
+                </div>
+                <div class="card">
+                    <label for="cloudUrl">
+                        <h2>云配置地址</h2>设置后每次启动将尝试用链接中的文本替代配置
+                    </label>
+                    <input type="text" id="cloudUrl" placeholder="云配置地址"><br><br>
+                </div>
+                <div class="card">
+                    <label for="timeOffset">
+                        <h2>时间偏移</h2>程序内时间偏移，以秒为单位例如：+10或-10
+                    </label>
+                    <input type="text" id="timeOffset" placeholder="时间偏移，默认0"><br><br>
+                </div>
+                <div class="card">
+                    <label for="focusText">
+                        <h2>专注模式默认文本</h2>专注模式默认文本，留空则不显示，处于专注模式时可单击文字暂时修改
+                    </label>
+                    <input type="text" id="focusText" placeholder="专注模式默认文本"><br><br>
+                </div>
+                <!-- <div class="card">
+                <button type="button" id="saveAutoQuitConfigButton" onclick="saveBasicConfigButton()">保存</button>
+            </div> -->
+            </form>
+        </div>
+        <!--自动任务配置页面-->
+        <div class="content-page" id="autoQuit">
+            <div class="page-title"><i class="bi bi-code-square"></i>&nbsp;自动执行</div>
+            <form id="autoQuitSettingsForm">
+                <div class="card">
+                    <label for="playNotify">
+                        <h2>播放上下课提示音</h2>距离上课0秒或下课前1秒播放音频
+                    </label>
+                    <input onchange="saveConfigOnBlur(this)" type="checkbox" id="playNotify">
+                </div>
+                <div class="card">
+                    <label for="autoQuit">
+                        <h2>课前5分钟准备</h2>课前五分钟时倒计时提示关闭清单内程序
+                    </label>
+                    <input onchange="saveConfigOnBlur(this)" type="checkbox" id="autoQuit">
+                </div>
+                <div class="card">
+                    <label for="autoOpenFolder">
+                        <h2>上课时自动打开相应学科文件夹</h2>仅支持文件夹在桌面时
+                    </label>
+                    <input onchange="saveConfigOnBlur(this)" type="checkbox" id="autoOpenFolder">
+                </div>
+                <div class="card">
+                    <label for="autoFocusMode">
+                        <h2>自习课自动进入专注模式</h2>当课程为“自”时，会自动进入专注模式
+                    </label>
+                    <input onchange="saveConfigOnBlur(this)" type="checkbox" id="autoFocusMode">
+                </div>
+                <div class="card">
+                    <label for="autoFocusMode_PE">
+                        <h2>体育课自动进入专注模式</h2>当课程为“体”时，会自动进入专注模式
+                    </label>
+                    <input onchange="saveConfigOnBlur(this)" type="checkbox" id="autoFocusMode_PE">
+                </div>
+                <div class="card">
+                    <label for="autoPowerOffB">
+                        <h2>空白课程关机</h2>当课程为“-”时，会提示并倒计时自动工具
+                    </label>
+                    <input onchange="saveConfigOnBlur(this)" type="checkbox" id="autoPowerOffB">
+                </div>
+                <div class="card">
+                    <label for="autoPowerOff">
+                        <h2>放学自动关机</h2>当天最后一节课结束后倒计时关闭计算机
+                    </label>
+                    <input onchange="saveConfigOnBlur(this)" type="checkbox" id="autoPowerOff">
+                </div>
+                <!-- <div class="card">
+                <button type="button" id="saveBasicConfigButton" onclick="saveAutoQuitConfigButton()">保存</button>
+            </div> -->
+            </form>
+        </div>
+        <!--课表编辑页面-->
+        <div class="content-page" id="schedule">
+            <div class="page-title">
+                <i class="bi bi-calendar2-day"></i>&nbsp;课程设定<label
+                    style="display: unset;">&nbsp;提示：页面底部有保存按钮，编辑后请不要忘记保存</label>
+            </div>
+            <div class="card">
+                <label for="linePos">
+                    <h2>分割线位置</h2>格式如下：[1,4]（在第一节和第四节后加入分隔符）
+                </label>
+                <input type="text" id="linePos" placeholder="分割位置"><br><br>
+            </div>
+            <div id="scheduleEditor">
+                <table id="scheduleTable">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>周一</th>
+                            <th>周二</th>
+                            <th>周三</th>
+                            <th>周四</th>
+                            <th>周五</th>
+                            <th>周六</th>
+                            <th>周日</th>
+                            <th>行操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <div class="card">
+                    <button type="button" id="addRowButton" style="margin-left: 0;">新增行</button><button type="button"
+                        id="saveScheduleConfigButton">
+                        保存课表
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!--学生管理页面-->
+        <div class="content-page" id="students">
+            <div class="page-title"><i class="bi bi-people"></i>&nbsp;学生管理</div>
+            <div class="card">
+                <label for="studentActiveName">
+                    <h2>特殊活动名称</h2>指定日期在桌面信息栏中显示学生名称（例如：擦黑板）
+                </label>
+                <input type="text" id="studentActiveName" placeholder="特殊活动名称"><br><br>
+            </div>
+            <div class="card" style="display:block">
+                <span style="display:flex;">
+                    <i class="bi bi-list" style="font-size: 26px;margin: 10px;"></i>
+                    <button type="button" class="greenBtn" id="addStudentButton"><i
+                            class="bi bi-plus-circle"></i>&nbsp;新增</button><button type="button"
+                        id="saveStudentsConfigButton">
+                        <i class="bi bi-archive"></i>&nbsp;保存
+                    </button>
+                </span><br>
+                <table id="studentsTable">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>活动日期</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!--调休换课页面-->
+        <div class="content-page" id="switch">
+            <div class="page-title"><i class="bi bi-toggles"></i>&nbsp;调休换课</div>
+            <table id="plansTable">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>课程数组</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div class="card">
+                <input type="text" placeholder="目标日期" id="planDate" style="width: 72px;">
+                <button type="button" class="greenBtn" id="addPlanButton">新增规则</button><button type="button"
+                    id="savePlansConfigButton">
+                    保存
+                </button>
+            </div>
+        </div>
+        <!--关于页面-->
+        <div class="content-page" id="about">
+            <div class="about-container">
+                <h1><i class="bi bi-info-circle"></i> RisClassTool <span id="version"></span></h1>
+                <h3><i class="bi bi-gear"></i> 瑞思课堂工具 - 教室桌面得力助手</h3>
+                <ul class="about-list">
+                    <li><strong>使用提示：</strong></li>
+                    <li><i class="bi bi-exclamation-triangle"></i> 请不要使用管理员权限运行本程序</li>
+                    <li><i class="bi bi-circle"></i> 本程序启动时会自动尝试设置开机自启动，无需自行操作</li>
+                    <li><i class="bi bi-geo-alt"></i> 在通用设置中填写位置名称时，请提供详细地址，以避免因重名地点导致获取信息出错</li>
+                    <li><i class="bi bi-folder"></i> 配置文件存储于 D:/Ris_ClassToolConfig.json，请在删除文件时注意备份</li>
+                    <li><i class="bi bi-clock"></i> 数据刷新间隔：进度条每1秒刷新一次；课程表每10秒刷新一次；天气信息每10分钟更新一次</li>
+                    <li><i class="bi bi-telegram"></i> 如遇更多问题，请加入官方群组：939571490</li>
+                </ul>
+                <div class="about-footer">
+                    <p>&copy; 2024 瑞思课堂工具</p>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <script src="./js/pinyin-pro.js"></script>
     <script>
-        // const { icpMain, ipcRenderer } = nodeRequire('electron');
+        var Config;
+        const { pinyin } = pinyinPro;
 
-        const buttons = [
-            {
-                icon: 'question-circle',
-                text: '使用说明',
-                sub: [
-                    {
-                        type: 'cloudGet',
-                        url: 'https://classtool.3r60.top/api/help/helpMenu.json',
-                    }
-                ],
-            },
-            {
-                icon: 'list-nested',
-                text: '时间与课程',
-                sub: [
-                    {
-                        icon: 'calendar-event',
-                        text: '临时调课',
-                        sub: [
-                            {
-                                icon: 'calendar-day',
-                                text: '周一'
-                            },
-                            {
-                                icon: 'calendar-day',
-                                text: '周二'
-                            },
-                            {
-                                icon: 'calendar-day',
-                                text: '周三'
-                            },
-                            {
-                                icon: 'calendar-day',
-                                text: '周四'
-                            },
-                            {
-                                icon: 'calendar-day',
-                                text: '周五'
-                            },
-                            {
-                                icon: 'calendar-day',
-                                text: '周六'
-                            },
-                            {
-                                icon: 'calendar-day',
-                                text: '周日'
-                            }
-                        ]
-                    },
-                    {
-                        icon: 'clock',
-                        text: '时间表',
-                        sub: [
-                            {
-                                icon: 'sun',
-                                text: '夏季(当前)'
-                            },
-                            {
-                                icon: 'cloud',
-                                text: '秋季'
-                            },
-                            {
-                                icon: 'plus-circle',
-                                text: '附加'
-                            },
-                            {
-                                icon: 'pencil',
-                                text: '编辑时间表'
-                            }
-                        ]
-                    },
-                    {
-                        icon: 'table',
-                        text: '课程表',
-                        sub: [
-                            {
-                                icon: 'arrows-move',
-                                text: '模式:单双周'
-                            },
-                            {
-                                icon: 'pencil-square',
-                                text: '打开编辑器'
-                            }
-                        ]
-                    },
-                    {
-                        icon: 'file-earmark-arrow-up',
-                        text: '导入与导出',
-                        sub: [
-                            {
-                                icon: 'file-earmark-excel',
-                                text: '导入Excel'
-                            },
-                            {
-                                icon: 'file-earmark-arrow-up',
-                                text: '导入UCSF'
-                            },
-                            {
-                                icon: 'file-earmark-excel',
-                                text: '导出Excel'
-                            },
-                            {
-                                icon: 'file-earmark-arrow-down',
-                                text: '导出UCSF'
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                icon: 'calendar',
-                text: '日期与时间'
-            },
-            {
-                icon: 'shop',
-                text: '组件市场',
-                sub: [
-                    {
-                        text: "课表组件",
-                        icon: "table"
-                    },
-                    {
-                        text: "天气日期",
-                        icon: "cloud-sun"
-                    },
-                    {
-                        text: "活动值日",
-                        icon: "calendar-check"
-                    },
-                    {
-                        text: "娱乐功能",
-                        icon: "controller"
-                    }
-                ]
-            },
-            {
-                icon: 'palette',
-                text: '外观设定'
-            },
-            {
-                icon: 'info-circle',
-                text: '关于软件'
-            },
-            {
-                icon: 'sliders',
-                text: '侧边栏设定'
-            },
-            {
-                icon: 'box-arrow-right',
-                text: '退出设置',
-                onclick: `() => {
-                    window.close();
-                }`
-            }
-        ];
-        let currentButtons = buttons;
-        let history = [];
-        let CommonentLayer = true;
+        // 数据管理
+        function exportSchedules() {
+            const courseTable = Config.courseTable || {};
+            const timeTable = Config.timeTable || {};
+            const maxRows = Math.max(
+                Object.keys(timeTable).length,
+                Object.keys(courseTable.Monday || {}).length
+            );
 
-        async function fetchButtonsFromCloud(url) {
-            try {
-                const response = await fetch(`${url}?timestamp=${new Date().getTime()}`);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                return [
-                    {
-                        icon: 'exclamation-triangle',
-                        text: '获取失败'
-                    }
-                ];
+            const sheetData = [['时间', '周一', '周二', '周三', '周四', '周五', '周六', '周日']];
+
+            for (let i = 1; i <= maxRows; i++) {
+                sheetData.push([
+                    timeTable[i] || '00:00-00:00',
+                    courseTable.Monday ? courseTable.Monday[i - 1] || '' : '',
+                    courseTable.Tuesday ? courseTable.Tuesday[i - 1] || '' : '',
+                    courseTable.Wednesday ? courseTable.Wednesday[i - 1] || '' : '',
+                    courseTable.Thursday ? courseTable.Thursday[i - 1] || '' : '',
+                    courseTable.Friday ? courseTable.Friday[i - 1] || '' : '',
+                    courseTable.Saturday ? courseTable.Saturday[i - 1] || '' : '',
+                    courseTable.Sunday ? courseTable.Sunday[i - 1] || '' : ''
+                ]);
             }
+
+            const workbook = XLSX.utils.book_new();
+            const sheet = XLSX.utils.aoa_to_sheet(sheetData);
+            XLSX.utils.book_append_sheet(workbook, sheet, '课程表');
+            XLSX.writeFile(workbook, '课程表.xlsx');
         }
+        function exportStudents() {
+            const students = Config.students || [];
+            const sheetData = [['姓名', '活动日期']];
 
-        async function loadButtons(buttons) {
-            const container = document.getElementById('button-container');
-            container.innerHTML = '';
-            for (const [index, button] of buttons.entries()) {
-                const btn = document.createElement('div');
-                btn.className = 'button main-button';
-                btn.innerHTML = `<i class="bi bi-${button.icon}"></i><span>${button.text}</span>`;
-                btn.style.animationDelay = `${index * 0.1}s`;
-                btn.onclick = async () => {
-                    if (button.sub) {
-                        if (button.sub[0].type === 'cloudGet') {
-                            const cloudButtons = await fetchButtonsFromCloud(button.sub[0].url);
-                            document.getElementById('title').innerText = button.text;
-                            history.push(currentButtons);
-                            currentButtons = cloudButtons;
-                            document.getElementById('back-button').style.display = 'inline';
-                            loadButtons(cloudButtons);
-                        } else {
-                            document.getElementById('title').innerText = button.text;
-                            history.push(currentButtons);
-                            currentButtons = button.sub;
-                            document.getElementById('back-button').style.display = 'inline';
-                            loadButtons(button.sub);
-                        }
-                    } else {
-                        const buttons = document.getElementsByClassName('button main-button');
-                        for (let i = 0; i < buttons.length; i++) {
-                            buttons[i].className = 'button main-button';
-                        }
-                        btn.className = 'button main-button clicked';
-                    }
-                    if (button.onclick) excuteFunc(button.onclick);
+            students.forEach(student => {
+                sheetData.push([student.name, student.activeDate || '']);
+            });
+
+            const workbook = XLSX.utils.book_new();
+            const sheet = XLSX.utils.aoa_to_sheet(sheetData);
+            XLSX.utils.book_append_sheet(workbook, sheet, '学生列表');
+            XLSX.writeFile(workbook, '学生列表.xlsx');
+        }
+        function exportAll() {
+            const configData = JSON.stringify(Config, null, 2);
+            const blob = new Blob([configData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Ris_ClassToolConfig.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        function importSchedule() {
+            if (!confirm('此操作将清除现有课程数据，是否继续？')) {
+                return;
+            }
+            const file = document.getElementById('S_importSchedule').files[0];
+            const tidy = document.getElementById('S_Tidy').checked;
+            const startX = parseInt(document.getElementById('S_startX').value) || 2;
+            const startY = parseInt(document.getElementById('S_startY').value) || 2;
+            if (!file) {
+                alert('请先选择文件');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                const courseTable = {
+                    Monday: [],
+                    Tuesday: [],
+                    Wednesday: [],
+                    Thursday: [],
+                    Friday: [],
+                    Saturday: [],
+                    Sunday: []
                 };
-                container.appendChild(btn);
+
+                for (let i = startX - 1; i < sheetData.length; i++) {
+                    const row = sheetData[i];
+                    for (let j = startY - 1; j < row.length; j++) {
+                        let cell = row[j];
+                        if (tidy) {
+                            cell = cell.match(/[\u4e00-\u9fa5]/)?.[0] || cell;
+                        }
+                        switch (j - startY + 1) {
+                            case 0:
+                                courseTable.Monday.push(cell);
+                                break;
+                            case 1:
+                                courseTable.Tuesday.push(cell);
+                                break;
+                            case 2:
+                                courseTable.Wednesday.push(cell);
+                                break;
+                            case 3:
+                                courseTable.Thursday.push(cell);
+                                break;
+                            case 4:
+                                courseTable.Friday.push(cell);
+                                break;
+                            case 5:
+                                courseTable.Saturday.push(cell);
+                                break;
+                            case 6:
+                                courseTable.Sunday.push(cell);
+                                break;
+                        }
+                    }
+                }
+
+                // 获取当前配置的时间表
+                const timeTable = Config.timeTable || {};
+                const timeTableKeys = Object.keys(timeTable).map(Number);
+                const maxTimeKey = Math.max(...timeTableKeys);
+                let lastTimeValue = timeTable[maxTimeKey].toString() || '00:00-00:00';
+                lastTimeValue = lastTimeValue.indexOf("-") === -1 ? '00:00-00:00' : lastTimeValue;
+                if (lastTimeValue.indexOf("-") === -1) alert('您的时间表格式有误，将自动使用默认数据补全');
+
+                // 如果原配置的时间节次小于导入的课程表，则补充时间表
+                if (timeTableKeys.length < sheetData.length - startX + 1) {
+                    alert('您的节次（时间表行数）小于导入课程表的最大行数，将自动补齐相同时间');
+                    for (let i = timeTableKeys.length + 1; i <= sheetData.length - startX + 1; i++) {
+                        const lastTimeParts = lastTimeValue.split('-');
+                        const lastStartTime = lastTimeParts[0].split(':');
+                        const lastEndTime = lastTimeParts[1].split(':');
+                        const newStartTime = new Date();
+                        const newEndTime = new Date();
+
+                        newStartTime.setHours(parseInt(lastEndTime[0]));
+                        newStartTime.setMinutes(parseInt(lastEndTime[1]) + 1);
+                        newEndTime.setHours(parseInt(lastEndTime[0]));
+                        newEndTime.setMinutes(parseInt(lastEndTime[1]) + 2);
+
+                        const newTimeValue = `${newStartTime.getHours()}:${newStartTime.getMinutes()}-${newEndTime.getHours()}:${newEndTime.getMinutes()}`;
+                        timeTable[i] = newTimeValue;
+                    }
+                    // 保存更新后的时间表
+                    window.api.config_save({ timeTable });
+                }
+
+                // 保存课程表
+                window.api.config_save({ courseTable });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        function importTime() {
+            if (!confirm('此操作将覆盖现有时间数据，是否继续？')) {
+                return;
             }
+            const file = document.getElementById('T_importTime').files[0];
+            const startX = parseInt(document.getElementById('T_startX').value) || 2;
+            const startY = parseInt(document.getElementById('T_startY').value) || 2;
+            if (!file) {
+                alert('请先选择文件');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                const timeTable = {};
+
+                for (let i = startX - 1; i < sheetData.length; i++) {
+                    const row = sheetData[i];
+                    const timeValue = row[startY - 1];
+                    if (timeValue) {
+                        timeTable[i - startX + 2] = timeValue;
+                    }
+                }
+
+                window.api.config_save({ timeTable });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        function importStudents() {
+            if (!confirm('此操作将覆盖现有学生数据，是否继续？')) {
+                return;
+            }
+            const file = document.getElementById('ST_importStudents').files[0];
+            const startX = parseInt(document.getElementById('ST_startX').value) || 2;
+            const startY = parseInt(document.getElementById('ST_startY').value) || 1;
+            const includeDate = document.getElementById('ST_includeDate').checked;
+            if (!file) {
+                alert('请先选择文件');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                const students = [];
+
+                for (let i = startX - 1; i < sheetData.length; i++) {
+                    const row = sheetData[i];
+                    const student = {
+                        name: row[startY - 1],
+                        activeDate: includeDate ? row[startY] : ''
+                    };
+                    students.push(student);
+                }
+
+                window.api.config_save({ students });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        function importAll() {
+            const file = document.createElement('input');
+            file.type = 'file';
+            file.accept = '.json';
+            file.onchange = (event) => {
+                const selectedFile = event.target.files[0];
+                if (!selectedFile) {
+                    alert('请先选择文件');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        const importedConfig = JSON.parse(e.target.result);
+                        window.api.config_save(importedConfig);
+                        alert('配置导入成功');
+                    } catch (error) {
+                        alert('导入失败，请检查文件格式');
+                    }
+                };
+                reader.readAsText(selectedFile);
+            };
+            file.click();
         }
 
-        function goBack() {
-            toggleTopSection('editor');
-            if (history.length > 0) {
-                currentButtons = history.pop();
-                document.getElementById('title').innerText = history.length > 0 ? history[history.length - 1][0].text : 'Ris_ClassTool';
-                loadButtons(currentButtons);
-                if (history.length === 0) {
-                    document.getElementById('back-button').style.display = 'none';
-                }
+        // ================================================================
+        // 动态载入
+        function loadSchedule(config) {
+            const tbody = document.querySelector('#scheduleTable tbody');
+            tbody.innerHTML = ''; // 清空旧的数据
+            const timeTable = config.timeTable || {};
+            const courseTable = config.courseTable || {};
+
+            for (let key in timeTable) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                        <td contenteditable="true">${timeTable[key]}</td>
+                        <td contenteditable="true">${courseTable.Monday ? courseTable.Monday[key - 1] : ''}</td>
+                        <td contenteditable="true">${courseTable.Tuesday ? courseTable.Tuesday[key - 1] : ''}</td>
+                        <td contenteditable="true">${courseTable.Wednesday ? courseTable.Wednesday[key - 1] : ''}</td>
+                        <td contenteditable="true">${courseTable.Thursday ? courseTable.Thursday[key - 1] : ''}</td>
+                        <td contenteditable="true">${courseTable.Friday ? courseTable.Friday[key - 1] : ''}</td>
+                        <td contenteditable="true">${courseTable.Saturday ? courseTable.Saturday[key - 1] : ''}</td>
+                        <td contenteditable="true">${courseTable.Sunday ? courseTable.Sunday[key - 1] : ''}</td>
+                        <td><button class="deleteRowButton" data-key="${key}">删除</button></td>
+                    `;
+                tbody.appendChild(row);
             }
         }
-
-        loadButtons(buttons);
-
-        // 处理文本函数
-        function excuteFunc(funcOrString, ...args) {
-            if (typeof funcOrString === 'function') {
-                return funcOrString(...args);
+        // 添加新行
+        document.getElementById('addRowButton').addEventListener('click', () => {
+            const tbody = document.querySelector('#scheduleTable tbody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                    <td contenteditable="true"></td>
+                    <td contenteditable="true"></td>
+                    <td contenteditable="true"></td>
+                    <td contenteditable="true"></td>
+                    <td contenteditable="true"></td>
+                    <td contenteditable="true"></td>
+                    <td contenteditable="true"></td>
+                    <td contenteditable="true"></td>
+                    <td><button class="deleteRowButton">删除</button></td>
+                `;
+            tbody.appendChild(newRow);
+        });
+        // 删除行
+        document.querySelector('#scheduleTable').addEventListener('click', (event) => {
+            if (event.target.classList.contains('deleteRowButton')) {
+                event.target.closest('tr').remove();
             }
-            if (typeof funcOrString !== 'string') {
-                throw new Error('The first argument must be a string or a function.');
-            }
-            funcOrString = funcOrString.trim();
-            const isArrowFunction = funcOrString.startsWith('(') || funcOrString.startsWith('function');
-            if (!isArrowFunction) {
-                throw new Error('Invalid function string. It must be in the form of "(args) => { ... }" or "function(args) => { ... }".');
-            }
-            let params = '';
-            let body = '';
-            if (funcOrString.startsWith('function')) {
-                const match = funcOrString.match(/function\s*\(([^)]*)\)\s*=>\s*({[^}]*})/);
-                if (match) {
-                    params = match[1];
-                    body = match[2];
-                } else {
-                    throw new Error('Invalid function format. Expected "function(args) => { ... }".');
+        });
+        // 保存课程设定
+        document.getElementById('saveScheduleConfigButton').addEventListener('click', () => {
+            const newConfig = {
+                timeTable: {},
+                courseTable: {
+                    Monday: [],
+                    Tuesday: [],
+                    Wednesday: [],
+                    Thursday: [],
+                    Friday: [],
+                    Saturday: [],
+                    Sunday: []
                 }
+            };
+
+            const rows = document.querySelectorAll('#scheduleTable tbody tr');
+            let valid = true;
+
+            rows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                const timeValue = cells[0].textContent.trim();
+
+                if (!timeValue.includes('-')) {
+                    alert(`时间格式错误: ${timeValue}，请确保时间包含“-”`);
+                    valid = false;
+                    return;
+                }
+
+                newConfig.timeTable[index + 1] = timeValue; // 获取时间列的内容
+                newConfig.courseTable.Monday.push(cells[1].textContent.trim());
+                newConfig.courseTable.Tuesday.push(cells[2].textContent.trim());
+                newConfig.courseTable.Wednesday.push(cells[3].textContent.trim());
+                newConfig.courseTable.Thursday.push(cells[4].textContent.trim());
+                newConfig.courseTable.Friday.push(cells[5].textContent.trim());
+                newConfig.courseTable.Saturday.push(cells[6].textContent.trim());
+                newConfig.courseTable.Sunday.push(cells[7].textContent.trim());
+            });
+
+            if (valid) {
+                window.api.config_save(newConfig);
+            }
+        });
+        // --------------------------
+
+
+        // ================================================================
+        // 学生列表
+        // 动态加载并按拼音首字母排序
+        function loadStudents(config) {
+            const tbody = document.querySelector('#studentsTable tbody');
+            tbody.innerHTML = '';
+            const students = config.students || [];
+
+            // 按拼音首字母排序
+            students.sort((a, b) => {
+                // 获取拼音首字母
+                const firstLetterA = pinyin(a.name, {
+                    style: pinyin.STYLE_FIRST_LETTER
+                })[0][0];
+                const firstLetterB = pinyin(b.name, {
+                    style: pinyin.STYLE_FIRST_LETTER
+                })[0][0];
+
+                if (firstLetterA < firstLetterB) {
+                    return -1;
+                }
+                if (firstLetterA > firstLetterB) {
+                    return 1;
+                }
+                return 0;
+            });
+
+            students.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                                <td contenteditable="true">${student.name}</td>
+                                <td contenteditable="true">${student.activeDate || ''}</td>
+                                <td><button class="deleteStudentButton redBtn">删除</button></td>
+                            `;
+                tbody.appendChild(row);
+            });
+        }
+        // 添加新行
+        document.getElementById('addStudentButton').addEventListener('click', () => {
+            const tbody = document.querySelector('#studentsTable tbody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                    <td contenteditable="true"></td>
+                    <td contenteditable="true"></td>
+                    <td><button class="deleteStudentButton redBtn">删除</button></td>
+                `;
+            tbody.appendChild(newRow);
+        });
+        // 删除行
+        document.querySelector('#studentsTable').addEventListener('click', (event) => {
+            if (event.target.classList.contains('deleteStudentButton')) {
+                event.target.closest('tr').remove();
+            }
+        });
+        // 保存学生配置
+        document.getElementById('saveStudentsConfigButton').addEventListener('click', () => {
+            const newConfig = {
+                students: [],
+            };
+
+            const rows = document.querySelectorAll('#studentsTable tbody tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                newConfig.students.push({
+                    name: cells[0].textContent.trim(),
+                    activeDate: cells[1].textContent.trim()
+                });
+            });
+
+            window.api.config_save(newConfig);
+        });
+        // --------------------------
+
+
+
+
+        // =============================================================================
+        // 调休换课
+        // 动态载入
+        function loadPlans(config) {
+            const tbody = document.querySelector('#plansTable tbody');
+            tbody.innerHTML = ''; // 清空旧的数据
+            const plans = config.plans || [];
+
+            plans.forEach(plan => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                        <td contenteditable="true">${plan.date}</td>
+                        <td contenteditable="true">${JSON.stringify(plan.courses)}</td>
+                        <td><button class="deletePlanButton redBtn">删除</button></td>
+                    `;
+                tbody.appendChild(row);
+            });
+        }
+        // 新增规则
+        document.getElementById('addPlanButton').addEventListener('click', () => {
+            const dateInput = document.getElementById('planDate').value;
+            const date = parseDate(dateInput) || new Date();
+            const weekday = getWeekday(date);
+            const courses = getOriginalCourses(date, weekday);
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                    <td contenteditable="true">${dateInput || formatDate(date)}</td>
+                    <td contenteditable="true">${JSON.stringify(courses)}</td>
+                    <td><button class="deletePlanButton redBtn">删除</button></td>
+                `;
+            document.querySelector('#plansTable tbody').appendChild(newRow);
+        });
+        // 删除规则
+        document.querySelector('#plansTable').addEventListener('click', (event) => {
+            if (event.target.classList.contains('deletePlanButton')) {
+                event.target.closest('tr').remove();
+            }
+        });
+        // 保存调休换课配置
+        document.getElementById('savePlansConfigButton').addEventListener('click', () => {
+            const newConfig = {
+                plans: []
+            };
+
+            const rows = document.querySelectorAll('#plansTable tbody tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const plan = {
+                    date: cells[0].textContent.trim(),
+                    courses: JSON.parse(cells[1].textContent.trim())
+                };
+                newConfig.plans.push(plan);
+            });
+
+            window.api.config_save(newConfig);
+        });
+
+
+
+        // ====================================================================
+        // 辅助函数
+        function formatDate(date) {
+            return `${date.getMonth() + 1}.${date.getDate()}`;
+        }
+        function parseDate(dateStr) {
+            const [month, day] = dateStr.split('.').map(Number);
+            if (isNaN(month) || isNaN(day)) return null;
+            const date = new Date();
+            date.setMonth(month - 1);
+            date.setDate(day);
+            return date;
+        }
+        function getWeekday(date) {
+            return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][date.getDay()];
+        }
+        function getOriginalCourses(date, weekday) {
+            const courseTable = Config.courseTable || {};
+            return courseTable[weekday] || [];
+        }
+        async function getConfig() {
+            Config = await window.api.config_Get(false);
+        }
+
+
+        // ===============================================================
+        // 主函数
+
+
+        function init(config) {
+            console.log('接收到课程表数据:', config);
+            document.getElementById('version').innerHTML = config.version;
+            document.getElementById('posName').value = config.posName || '';
+            document.getElementById('countTime').value = config.countTime || '';
+            document.getElementById('countText').value = config.countText || '';
+            document.getElementById('linePos').value = JSON.stringify(config.linePos) || '[0]';
+            document.getElementById('progressColor').value = config.progressColor || '';
+            document.getElementById('sideBarShow').checked = config.sideBarShow ?? true;
+            document.getElementById('sideBarBottom').value = config.sideBarBottom || '';
+            document.getElementById('scheduleFontSize').value = config.scheduleFontSize || '';
+            document.getElementById('infoFontSize').value = config.infoFontSize || '';
+            document.getElementById('progressHeight').value = config.progressHeight || '';
+            document.getElementById('timeOffset').value = config.timeOffset || '';
+            document.getElementById('cloudUrl').value = config.cloudUrl || '';
+            document.getElementById('focusText').value = config.focusText || '';
+            document.getElementById('studentActiveName').value = config.studentActiveName || '';
+            document.getElementById('playNotify').value = config.playNotify || true;
+            document.getElementById('autoQuit').checked = config.autoQuit ?? true;
+            document.getElementById('autoPowerOff').checked = config.autoPowerOff ?? true;
+            document.getElementById('autoFocusMode').checked = config.autoFocusMode ?? true;
+            document.getElementById('autoFocusMode_PE').checked = config.autoFocusMode_PE ?? true;
+            document.getElementById('insiderPreview').checked = config.insiderPreview ?? false;
+            document.getElementById('autoPowerOffB').checked = config.autoPowerOffB ?? false;
+            document.getElementById('pptHelper').checked = config.pptHelper ?? true;
+            document.getElementById('desktopLayer').checked = config.desktopLayer ?? true;
+            document.getElementById('statusLayer').checked = config.statusLayer ?? true;
+            document.getElementById('processLayer').checked = config.processLayer ?? true;
+            document.getElementById('autoOpenFolder').checked = config.autoOpenFolder ?? false;
+
+            if (config.cloudUrl) {
+                alert('云配置已接管所有设置，若不更改云配置设置下次启动时会被云配置覆盖！');
+            }
+
+            loadSchedule(config);
+            loadStudents(config);
+            loadPlans(config);
+
+            Config = config;
+        }
+
+        window.api.config_onRecive(init);
+
+        // 保存配置
+        function saveConfigOnBlur(element) {
+            const newConfig = {};
+
+            if (element.classList.contains('doNotSave')) return;
+
+            // 根据元素类型处理值
+            if (element.type === 'checkbox' || element.type === 'radio') {
+                newConfig[element.id] = element.checked;
+            } else if (element.tagName === 'SELECT') {
+                newConfig[element.id] = element.value !== '';
+            } else if (element.id === 'linePos') {
+                newConfig[element.id] = JSON.parse(element.value) ?? null;
+            } else if (element.id === 'timeOffset') {
+                newConfig[element.id] = parseInt(element.value) || 0;
             } else {
-                const match = funcOrString.match(/\(([^)]*)\)\s*=>\s*({[^}]*})/);
-                if (match) {
-                    params = match[1];
-                    body = match[2];
-                } else {
-                    throw new Error('Invalid function format. Expected "(args) => { ... }".');
-                }
+                newConfig[element.id] = element.value;
             }
-            const func = new Function(params, body);
-            return func(...args);
+
+            // 调用API保存配置
+            window.api.config_save(newConfig);
         }
 
-        function toggleTopSection(mode) {
-            const editorSection = document.getElementById('editor-section');
-            const webviewSection = document.getElementById('webview-section');
-            const webview = webviewSection.querySelector('webview');
+        document.querySelectorAll('input, select, textarea').forEach(element => {
+            element.addEventListener('blur', function () {
+                saveConfigOnBlur(this);
+            });
+        });
 
-            if (mode === 'editor') {
-                editorSection.style.display = 'flex';
-                webviewSection.style.display = 'none';
-                window.api.config_settingPage("show");
-            } else if (mode.startsWith('https://')) {
-                window.api.config_settingPage("hide");
-                editorSection.style.display = 'none';
-                webviewSection.style.display = 'block';
-                webview.src = mode;
-            } else {
-                console.error('Invalid mode provided to toggleTopSection');
+        // 切换主内容区
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', function (e) {
+                const targetId = this.getAttribute('data-target');
+                document.querySelectorAll('.content-page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.querySelector(targetId).classList.add('active');
+                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        window.onload = async () => {
+            init(await window.api.config_Get(false));
+            const targetPage = await window.api.config_settingPage();
+            if (targetPage) {
+                const targetId = targetPage;
+                document.querySelectorAll('.content-page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.querySelector(targetId).classList.add('active');
+                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
             }
-        }
+        };
+
+        document.getElementById('createLink').addEventListener('click', () => {
+            const data = document.querySelector('.sidebar-item.active').getAttribute('data-target');
+            navigator.clipboard.writeText('setting ' + data.substr(1));
+            alert('参数已复制目标至剪切板，请手动粘创建');
+            // window.api.createLink(data);
+        });
     </script>
 </body>
 

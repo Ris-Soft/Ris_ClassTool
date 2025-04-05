@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!--<div style="position: fixed; right: 0; bottom: 0; padding: 20px; font-family: Arial, sans-serif; color: #666;z-index:1000">
+    <b>RisClassTool</b><br>Insider Preview
+</div>-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>档案编辑</title>
+    <link rel="stylesheet" href="./icons/bootstrap-icons.css">
+    <!--<link rel="stylesheet" href="https://assets.3r60.top/icons/bootstrap-icons.css">-->
+    <script src="./js/xlsx.js"></script>
+    <link rel="stylesheet" href="./styles/set.css">
+</head>
+
+<body>
+    <div id="header">
+        <div class="title"><i class="bi bi-archive"></i>&nbsp;档案编辑</div>
+    </div>
+    <div id="sidebar">
+        <div class="sidebar-item" data-target="#schedule"><i class="bi bi-calendar2-day"></i>&nbsp;课表编辑</div>
+        <div class="sidebar-item" data-target="#timeTable"><i class="bi bi-clock"></i>&nbsp;时间表编辑</div>
+        <div class="sidebar-item" data-target="#courseTable"><i class="bi bi-journal"></i>&nbsp;科目编辑</div>
+        <div class="sidebar-item" data-target="#switch"><i class="bi bi-toggles"></i>&nbsp;调休换课</div>
+        <div class="sidebar-item" data-target="#students"><i class="bi bi-people"></i>&nbsp;学生管理</div>
+        <div class="sidebar-item" data-target="#data"><i class="bi bi-database"></i>&nbsp;数据管理</div>
+    </div>
+    </div>
+    <div id="main-content">
+        <!-- 时间表编辑页面 -->
+        <div class="content-page" id="timeTable">
+            <div class="page-title"><i class="bi bi-clock"></i>&nbsp;时间表编辑</div>
+            <div style="display: flex;">
+            <!-- 左侧时间表列表 -->
+            <div style="width: 250px; border-right: 1px solid #ccc; padding: 10px;">
+                <ul id="timeTableList" style="list-style: none; padding: 0;">
+                <!-- 动态加载时间表列表 -->
+                </ul>
+                <button type="button" class="greenBtn" id="addTimeTableButton">新建时间表</button>
+            </div>
+            <!-- 右侧时间表编辑内容 -->
+            <div style="flex: 1; padding: 10px;">
+                <div class="card">
+                <label for="timeTableName">
+                    <h2>时间表名称</h2>编辑当前时间表的名称
+                </label>
+                <input type="text" id="timeTableName" placeholder="时间表名称"><br><br>
+                </div>
+                <div class="card">
+                <label for="linePos">
+                    <h2>分割线位置</h2>示例如下：[1,4]（在第一节和第四节后加入分隔符）
+                </label>
+                <input type="text" id="linePos" placeholder="分割位置"><br><br>
+                </div>
+                <table id="timeTableEditor">
+                <thead>
+                    <tr>
+                    <th>开始时间</th>
+                    <th>结束时间</th>
+                    <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+                </table>
+                <div class="card">
+                <button type="button" class="greenBtn" id="addTimeRowButton">新增时间段</button>
+                <button type="button" id="saveTimeTableButton">保存时间表</button>
+                </div>
+            </div>
+            </div>
+        </div>
+
+
+        <!-- 科目编辑页面 -->
+        <div class="content-page" id="courseTable">
+            <div class="page-title"><i class="bi bi-journal"></i>&nbsp;科目编辑</div>
+            <table id="courseTableEditor">
+                <thead>
+                    <tr>
+                        <th>课程简称</th>
+                        <th>课程全称</th>
+                        <th>任课教师</th>
+                        <th>户外课程</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div class="card">
+                <button type="button" class="greenBtn" id="addCourseRowButton">新增科目</button>
+                <button type="button" id="saveCourseTableButton">保存科目</button>
+            </div>
+        </div>
+        <!--课表编辑页面-->
+        <div class="content-page" id="schedule">
+            <div class="page-title">
+                <i class="bi bi-calendar2-day"></i>&nbsp;课程设定<label
+                    style="display: unset;">&nbsp;提示：页面底部有保存按钮，编辑后请不要忘记保存</label>
+            </div>
+            <div class="card">
+                <label for="enableDay">
+                    <h2>启用星期</h2>选择该课程表启用的星期
+                </label>
+                <select id="enableDay" class="doNotSave">
+                    <option value="1">星期一</option>
+                    <option value="2">星期二</option>
+                    <option value="3">星期三</option>
+                    <option value="4">星期四</option>
+                    <option value="5">星期五</option>
+                    <option value="6">星期六</option>
+                    <option value="7">星期日</option>
+                </select><br><br>
+            </div>
+            <div class="card">
+                <label for="repeatMode">
+                    <h2>循环模式</h2>选择单双周循环模式
+                </label>
+                <select id="repeatMode" class="doNotSave">
+                    <option value="2">通用</option>
+                    <option value="0">单周</option>
+                    <option value="1">双周</option>
+                </select><br><br>
+            </div>
+            <br>
+            <div class="card">
+                <label for="enableTimeTable">
+                    <h2>启用的时间表</h2>选择启用的时间表
+                </label>
+                <select id="enableTimeTable" class="doNotSave">
+                    <!-- 根据配置载入 -->
+                </select><br><br>
+            </div>
+            <div id="scheduleEditor">
+                <table id="scheduleTable">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>课程名称</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <div class="card">
+                    <button type="button" id="saveScheduleConfigButton">
+                        保存课表
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!--学生管理页面-->
+        <div class="content-page" id="students">
+            <div class="page-title"><i class="bi bi-people"></i>&nbsp;学生管理</div>
+            <div class="card">
+                <label for="studentActiveName">
+                    <h2>特殊活动名称</h2>指定日期在桌面信息栏中显示学生名称（例如：擦黑板）
+                </label>
+                <input type="text" id="studentActiveName" placeholder="特殊活动名称"><br><br>
+            </div>
+            <div class="card" style="display:block">
+                <span style="display:flex;">
+                    <i class="bi bi-list" style="font-size: 26px;margin: 10px;"></i>
+                    <button type="button" class="greenBtn" id="addStudentButton"><i
+                            class="bi bi-plus-circle"></i>&nbsp;新增</button><button type="button"
+                        id="saveStudentsConfigButton">
+                        <i class="bi bi-archive"></i>&nbsp;保存
+                    </button>
+                </span><br>
+                <table id="studentsTable">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>活动日期</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!--调休换课页面-->
+        <div class="content-page" id="switch">
+            <div class="page-title"><i class="bi bi-toggles"></i>&nbsp;调休换课</div>
+            <table id="plansTable">
+                <thead>
+                    <tr>
+                        <th>时间</th>
+                        <th>周一</th>
+                        <th>周二</th>
+                        <th>周三</th>
+                        <th>周四</th>
+                        <th>周五</th>
+                        <th>周六</th>
+                        <th>周日</th>
+                        <th>行操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div class="card">
+                单击一个课程以继续
+            </div>
+        </div>
+        <!--数据管理页面-->
+        <div class="content-page" id="data">
+            <div class="page-title"><i class="bi bi-database"></i>&nbsp;数据管理</div>
+            <div class="card" style="display: block;">
+                <label style="margin-bottom: 5px;">
+                    <h2>数据导出</h2>导出课程数据或应用程序配置
+                </label>
+                <button type="button" onclick="exportSchedules()">导出课程与时间为表格</button>
+                <button type="button" onclick="exportStudents()">导出学生列表为表格</button>
+                <button type="button" onclick="exportAll()">导出应用程序配置</button>
+            </div>
+            <div class="card" style="display: block;">
+                <label style="margin-bottom: 5px;">
+                    <h2>导入时间表</h2>通过导入课程表Excel文件来快速设置课程表的时间部分
+                </label>
+                时间数据开始行：<input class="doNotSave" id="T_startX" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始行,从1开始" value="1" /><br>
+                时间数据开始列：<input class="doNotSave" id="T_startY" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始列,从1开始" value="1" /><br>
+                选择时间的文件：<input class="doNotSave" type="file" id="T_importTime" style="margin-bottom: 5px;"
+                    accept=".xls,.xlsx"><br>
+                <button type="button" onclick="importTime()">导入时间表</button>
+            </div>
+            <div class="card" style="display: block;">
+                <label style="margin-bottom: 5px;">
+                    <h2>导入课程表</h2>通过导入课程表Excel文件来快速设置课程表
+                </label>
+                课表数据开始行：<input class="doNotSave" id="S_startX" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始行,从1开始" value="2" /><br>
+                课表数据开始列：<input class="doNotSave" id="S_startY" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始列,从1开始" value="2" /><br>
+                选择课表的文件：<input class="doNotSave" type="file" id="S_importSchedule" style="margin-bottom: 5px;"
+                    accept=".xls,.xlsx"><br>
+                是否取首个汉字：<input class="doNotSave" type="checkbox" id="S_Tidy" style="width: 20px;" checked><br>
+                <button type="button" onclick="importSchedule()">导入课程表</button>
+            </div>
+            <div class="card" style="display: block;">
+                <label style="margin-bottom: 5px;">
+                    <h2>导入学生列表</h2>通过导入Excel文件来快速设置学生
+                </label>
+                学生数据开始行：<input class="doNotSave" id="ST_startX" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始行,从1开始" value="2" /><br>
+                学生数据开始列：<input class="doNotSave" id="ST_startY" type="text" style="margin-bottom: 5px;"
+                    placeholder="起始列,从1开始" value="1" /><br>
+                选择课表的文件：<input class="doNotSave" type="file" id="ST_importStudents" style="margin-bottom: 5px;"
+                    accept=".xls,.xlsx"><br>
+                是否包含活动日：<input class="doNotSave" type="checkbox" id="ST_includeDate" style="width: 20px;" checked><br>
+                <button type="button" onclick="importStudents()">导入学生列表</button>
+            </div>
+            <div class="card" style="display: block;">
+                <label style="margin-bottom: 5px;">
+                    <h2>全量导入</h2>直接导入JSON配置并应用
+                </label>
+                <button type="button" onclick="importAll()">全量导入</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/pinyin-pro.js"></script>
+    <script>
+        var Config;
+
+        function init(config) {
+            console.log('配置传入:', config);
+            // document.getElementById('version').innerHTML = config.version;
+            document.getElementById('linePos').value = JSON.stringify(config.linePos) || '[0]';
+            document.getElementById('studentActiveName').value = config.studentActiveName || '';
+
+            if (config.cloudUrl) {
+                alert('云配置已接管所有设置，若不更改云配置设置下次启动时会被云配置覆盖！');
+            }
+
+            Config = config;
+
+            loadPlans(config);
+            // loadSchedule(config);
+            loadTimeTableList(config);
+            loadStudents(config);
+        }
+
+        window.api.config_onRecive(init);
+
+        document.querySelectorAll('input, select, textarea').forEach(element => {
+            if (element.classList.contains('doNotSave')) return;
+            element.addEventListener('blur', function () {
+                saveConfigOnBlur(this);
+            });
+        });
+
+        window.onload = async () => {
+            init(await window.api.config_Get(false));
+            const targetPage = await window.api.config_settingPage();
+            if (targetPage) {
+                const targetId = targetPage;
+                document.querySelectorAll('.content-page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.querySelector(targetId).classList.add('active');
+                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            }
+        };
+
+        // 新增功能开关切换逻辑
+        function toggleFeature(featureId) {
+            const card = document.getElementById(`${featureId}Card`);
+            const isActive = card.classList.toggle('active');
+            const config = {};
+            config[featureId] = isActive;
+            window.api.config_save(config);
+        }
+    </script>
+    <script src="./js/settings/data.js"></script>
+    <script src="./js/settings/schedule.js"></script>
+    <script src="./js/settings/students.js"></script>
+    <script src="./js/settings/tools.js"></script>
+    <script src="./js/settings/ui.js"></script>
+</body>
+
+</html>

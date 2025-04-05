@@ -10,7 +10,7 @@
   "author": "PYLXU",
   "license": "LGPL-3.0-or-later",
   "devDependencies": {
-    "electron": "^33.2.1",
+    "electron": "^33.4.8",
     "electron-builder": "^25.1.7",
     "eslint": "^9.15.0"
   },

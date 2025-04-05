@@ -115,7 +115,11 @@ const contextMenu = Menu.buildFromTemplate([
         }
     },
     { label: '在线工具', click: () => createWindow('https\:\/\/edu.3r60.top/?id=tools', false) },
+    { type: "separator" },
     { label: '程序设置', click: () => createWindow_Setting() },
+    { label: '档案编辑', click: () => createWindow_Profile() },
+    { type: "separator" },
+    { label: '重新启动', click: () => { app.relaunch(); app.quit(); } },
     { label: '退出应用', click: () => { app.quit(); } }
 ]);
 
@@ -237,7 +241,7 @@ function handleCommand(commandLine) {
 let settingsWindow_targetPage;
 let bottomBar, leftBar, rightBar, colorPicker;
 let bottomBarLeft, bottomBarRight;
-let processWindow, scheduleWindow, settingsWindow, targetWindow;
+let processWindow, scheduleWindow, settingsWindow, targetWindow, sidebarWindow , profileWindow;
 let sidebarWindow_isExpanded, bottombarOpened = true;
 
 function createWindow(url, local, fullScreen = false, StMode = false) {
@@ -297,7 +301,7 @@ function createWindow_Setting(targetPage) {
     }
 
     settingsWindow = new BrowserWindow({
-        width: 980,
+        width: 1200,
         height: 611,
         frame: true,
         titleBarOverlay: {
@@ -334,6 +338,42 @@ function createWindow_Setting(targetPage) {
         settingsWindow = null;
     });
 }// 设置
+
+function createWindow_Profile() {
+    if (profileWindow && !profileWindow.isDestroyed()) {
+        profileWindow.focus();
+        return;
+    }
+
+    profileWindow = new BrowserWindow({
+        width: 1200,
+        height: 611,
+        frame: true,
+        titleBarOverlay: {
+            color: "#fff",
+            symbolColor: "black"
+        },
+        useContentSize: true,
+        titleBarStyle: 'hidden',
+        resizable: true,
+        movable: true,
+        alwaysOnTop: false,
+        skipTaskbar: false,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js')
+        }
+    });
+
+    profileWindow.loadFile(path.join(__dirname, './src/profile.html'));
+
+
+    //settingsWindow.loadFile(path.join(__dirname, './src/set.html'));
+
+    profileWindow.on('closed', () => {
+        profileWindow = null;
+    });
+}// 档案编辑
+
 function createWindow_DesktopLayer() {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
     const winHeight = height;
@@ -806,7 +846,7 @@ function saveConfig(event, newConfig) { // 配置保存
                 }
             }
 
-            if (!sidebarWindow.isDestroyed()) {
+            if (sidebarWindow && !sidebarWindow.isDestroyed()) {
                 if (config.sideBarShow ?? true) {
                     sidebarWindow.show();
                 } else {
@@ -889,6 +929,8 @@ function autoAction_Advance() {
     let inClass = false;
     let nextPeriodStart = null;
     let nextPeriod = 0;
+
+    return;
 
     for (let period in config.timeTable) {
         const [startStr, endStr] = config.timeTable[period].split('-');

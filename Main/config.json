@@ -1,1 +1,245 @@
-{"posName":"北京","countShow":false,"countTime":"6.7","timeTable":{"1":"06:40-07:45","2":"08:00-08:45","3":"08:55-09:40","4":"10:10-10:55","5":"11:05-11:50","6":"14:00-14:45","7":"14:55-15:40","8":"15:55-16:40","9":"16:50-17:30","10":"18:40-19:50","11":"20:00-20:50","12":"21:00-21:40"},"courseTable":{"Monday":["数","英","物","化","生","历","地","体","音","美","信","通"],"Tuesday":["语","数","英","物","化","生","历","地","体","音","美","信"],"Wednesday":["数","英","物","化","生","历","地","体","音","美","信","通"],"Thursday":["语","数","英","物","化","生","历","地","体","音","美","信"],"Friday":["数","英","物","化","生","历","地","体","音","美","信","通"],"Saturday":["数","英","物","化","生","历","地","体","音","美","信","通"],"Sunday":["自","自","自","自","自","自","自","自","自","自","自","自"]},"linePos":[1,4,9]}
+{
+    "posName": "北京",
+    "timeTable": {
+        "default": [
+            { "start": "06:40", "end": "07:45" },
+            { "start": "08:00", "end": "08:45" },
+            { "start": "08:55", "end": "09:40" },
+            { "start": "10:10", "end": "10:55" },
+            { "start": "11:05", "end": "11:50" },
+            { "start": "14:00", "end": "14:45" },
+            { "start": "14:55", "end": "15:40" },
+            { "start": "15:55", "end": "16:40" },
+            { "start": "16:50", "end": "17:30" },
+            { "start": "18:40", "end": "19:50" },
+            { "start": "20:00", "end": "20:50" },
+            { "start": "21:00", "end": "21:40" }
+        ]
+    },
+    "subjectTable": {
+        "语": {
+            "name": "语文",
+            "teacher": "",
+            "outside": false,
+            "icon": "book"
+        },
+        "数": {
+            "name": "数学",
+            "teacher": "",
+            "outside": false,
+            "icon": "calculator"
+        },
+        "英": {
+            "name": "英语",
+            "teacher": "",
+            "outside": false,
+            "icon": "globe"
+        },
+        "物": {
+            "name": "物理",
+            "teacher": "",
+            "outside": false,
+            "icon": "atom"
+        },
+        "化": {
+            "name": "化学",
+            "teacher": "",
+            "outside": false,
+            "icon": "flask"
+        },
+        "生": {
+            "name": "生物",
+            "teacher": "",
+            "outside": false,
+            "icon": "leaf"
+        },
+        "历": {
+            "name": "历史",
+            "teacher": "",
+            "outside": false,
+            "icon": "history"
+        },
+        "地": {
+            "name": "地理",
+            "teacher": "",
+            "outside": false,
+            "icon": "globe"
+        },
+        "体": {
+            "name": "体育",
+            "teacher": "",
+            "outside": true,
+            "icon": "soccer-ball-o"
+        },
+        "音": {
+            "name": "音乐",
+            "teacher": "",
+            "outside": false,
+            "icon": "music"
+        },
+        "美": {
+            "name": "美术",
+            "teacher": "",
+            "outside": false,
+            "icon": "paint-brush"
+        },
+        "信": {
+            "name": "信息",
+            "teacher": "",
+            "outside": false,
+            "icon": "laptop"
+        },
+        "通": {
+            "name": "通用",
+            "teacher": "",
+            "outside": false,
+            "icon": "cogs"
+        },
+        "自": {
+            "name": "自习",
+            "teacher": "",
+            "outside": false,
+            "icon": "book"
+        }
+    },
+    "courseTable": {
+        "Monday": {
+            "enableDay": 1,
+            "repeatMode": 0,
+            "timeTable": "default",
+            "course": [
+                "语",
+                "数",
+                "英",
+                "物",
+                "化",
+                "生",
+                "历",
+                "地",
+                "体",
+                "音",
+                "美",
+                "信"
+            ]
+        },
+        "Tuesday": {
+            "enableDay": 2,
+            "repeatMode": 0,
+            "timeTable": "default",
+            "course": [
+                "语",
+                "数",
+                "英",
+                "物",
+                "化",
+                "生",
+                "历",
+                "地",
+                "体",
+                "音",
+                "美",
+                "信"
+            ]
+        },
+        "Wednesday": {
+            "enableDay": 3,
+            "repeatMode": 0,
+            "timeTable": "default",
+            "course": [
+                "数",
+                "英",
+                "物",
+                "化",
+                "生",
+                "历",
+                "地",
+                "体",
+                "音",
+                "美",
+                "信",
+                "通"
+            ]
+        },
+        "Thursday": {
+            "enableDay": 4,
+            "repeatMode": 0,
+            "timeTable": "default",
+            "course": [
+                "语",
+                "数",
+                "英",
+                "物",
+                "化",
+                "生",
+                "历",
+                "地",
+                "体",
+                "音",
+                "美",
+                "信"
+            ]
+        },
+        "Friday": {
+            "enableDay": 5,
+            "repeatMode": 0,
+            "timeTable": "default",
+            "course": [
+                "数",
+                "英",
+                "物",
+                "化",
+                "生",
+                "历",
+                "地",
+                "体",
+                "音",
+                "美",
+                "信",
+                "通"
+            ]
+        },
+        "Saturday": {
+            "enableDay": 6,
+            "repeatMode": 0,
+            "timeTable": "default",
+            "course": [
+                "数",
+                "英",
+                "物",
+                "化",
+                "生",
+                "历",
+                "地",
+                "体",
+                "音",
+                "美",
+                "信",
+                "通"
+            ]
+        },
+        "Sunday": {
+            "enableDay": 7,
+            "repeatMode": 0,
+            "timeTable": "default",
+            "course": [
+                "自",
+                "自",
+                "自",
+                "自",
+                "自",
+                "自",
+                "自",
+                "自",
+                "自",
+                "自",
+                "自",
+                "自"
+            ]
+        }
+    },
+    "linePos": [
+        1,
+        4,
+        9
+    ]
+}

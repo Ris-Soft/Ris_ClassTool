@@ -1,0 +1,432 @@
+* {
+    box-sizing: border-box;
+}
+
+body,
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+    color: #333;
+    user-select: none;
+    -webkit-app-region: drag;
+}
+
+#header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    z-index: 1000;
+    -webkit-app-region: drag;
+}
+
+#header .title {
+    padding-left: 15px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#header .controls {
+    display: flex;
+    padding-right: 15px;
+}
+
+#header .controls button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 10px;
+    color: #555;
+}
+
+#header .controls button:hover {
+    color: #ff4d4d;
+}
+
+#sidebar {
+    position: absolute;
+    top: 40px;
+    bottom: 0;
+    left: 0;
+    width: 200px;
+    background-color: #fff;
+    border-right: 1px solid #e0e0e0;
+    -webkit-app-region: no-drag;
+    padding-top: 5px;
+}
+
+.sidebar-item {
+    display: block;
+    padding: 10px 15px;
+    margin: 5px;
+    margin-left: 8px;
+    margin-right: 8px;
+    border-radius: 5px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.sidebar-item:hover {
+    background-color: #f1f1f1;
+}
+
+.sidebar-item.active {
+    background-image: linear-gradient(to right, #0097fb 0%, #1e71f5 100%);
+    color: white;
+}
+
+#main-content {
+    position: absolute;
+    top: 40px;
+    left: 200px;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    -webkit-app-region: no-drag;
+    background-color: #f9f9f9;
+}
+
+.content-page {
+    display: none;
+    padding: 20px;
+    transition: opacity 0.3s ease;
+}
+
+.content-page.active {
+    display: block;
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        display: none;
+    }
+
+    #main-content {
+        left: 0;
+    }
+}
+
+input,
+textarea,
+select {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    border-radius: 5px;
+    background-color: transparent;
+    padding: 8px;
+    width: 100%;
+    max-width: 600px;
+}
+
+select {
+    width: 180px;
+    height: 35px;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+input:focus,
+textarea:focus,
+input:focus-visible,
+textarea:focus-visible,
+select:focus {
+    border: 1px solid #0097fb;
+    outline: none;
+}
+
+label {
+    font-size: 12px;
+    display: block;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* 表格样式 */
+table {
+    width: auto;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+table th {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-weight: 100;
+}
+
+table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+table td[contenteditable="true"] {
+    background-color: #fff;
+    padding: 5px;
+    min-width: 80px;
+}
+
+table td[contenteditable="true"]:focus-visible {
+    border: 2px solid #0097fb;
+    outline: none;
+}
+
+table td[contenteditable="true"]:hover {
+    background-color: #f0f0f0;
+}
+
+/* 操作按钮样式 */
+table .deleteRowButton,
+.redBtn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+table .deleteRowButton:hover,
+.redBtn:hover {
+    background-color: #c82333;
+}
+
+table tr:first-child th:first-child {
+    border-top-left-radius: 5px;
+    /* 设置table左上圆角 */
+}
+
+table tr:first-child th:last-child {
+    border-top-right-radius: 5px;
+    /* 设置table右上圆角 */
+}
+
+table tr:last-child td:first-child {
+    border-bottom-left-radius: 5px;
+    /* 设置table左下圆角 */
+}
+
+table tr:last-child td:last-child {
+    border-bottom-right-radius: 5px;
+    /* 设置table右下圆角 */
+}
+
+/* 新增行按钮样式 */
+#addRowButton,
+.greenBtn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+#addRowButton:hover,
+.greenBtn:hover {
+    background-color: #218838;
+}
+
+/* 保存按钮样式 */
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 5px;
+}
+
+button:hover {
+    opacity: 0.7;
+    background-color: #0069d9;
+}
+
+.card {
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    border-radius: 5px;
+    color: black;
+    padding: 10px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+
+.card>label {
+    flex: 1;
+    color: rgb(82, 82, 82);
+}
+
+.card>label>h2 {
+    margin: 0;
+    font-weight: 500;
+    font-size: 16px;
+    color: black;
+}
+
+.card>input {
+    width: 180px;
+    height: 35px;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+input[type="checkbox"] {
+    display: inline-block;
+    vertical-align: middle;
+    height: 20px;
+    padding: 20px;
+    width: 50px;
+}
+
+.content-page#about {
+    padding: 20px;
+    background-color: #f9f9f9;
+    text-align: center;
+}
+
+.about-container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.about-container h1 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.about-container h3 {
+    color: #666;
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.about-list {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+}
+
+.about-list li {
+    padding: 5px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.about-list li strong {
+    color: #000;
+}
+
+.about-footer {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #888;
+    text-align: center;
+}
+
+/* 新增样式 */
+.card-toggle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 200px;
+    height: 120px;
+    margin: 10px;
+    border-radius: 8px;
+    background-color: #f1f1f1;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.card-toggle.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.card-toggle .icon {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    width: 100%;
+}
+
+.card-toggle .divider {
+    width: 90%;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.card-toggle.active .divider {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.card-toggle .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 5px 10px;
+}
+
+.card-toggle .footer .title {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.card-toggle .footer .settings {
+    font-size: 18px;
+    cursor: pointer;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+ul li {
+    padding: 10px 15px;
+    margin: 5px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+ul li:hover {
+    background-color: #f1f1f1;
+}
+
+ul li.active {
+    background-image: linear-gradient(to right, #0097fb 0%, #1e71f5 100%);
+    color: white;
+}

@@ -57,5 +57,12 @@
   "dependencies": {
     "node-window-manager": "^2.2.4",
     "unzipper": "^0.12.3"
+  },
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "electron",
+      "extract-file-icon",
+      "node-window-manager"
+    ]
   }
 }

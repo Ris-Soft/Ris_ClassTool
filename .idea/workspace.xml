@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="38240fb4-01c4-4c3c-9a3a-23fbef38c54c" name="更改" comment="重新创建Vue+Vite+Router+Vuetify项目，准备开始书写代码">
+      <change afterPath="$PROJECT_DIR$/.editorconfig" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/prettier.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.npmrc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.prettierignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.prettierrc.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.vscode/extensions.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.vscode/launch.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.vscode/settings.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/entitlements.mac.plist" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/icon.icns" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/icon.ico" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dev-app-update.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/electron-builder.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/electron.vite.config.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eslint.config.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/index.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/preload/index.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/renderer/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/renderer/src/App.vue" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/renderer/src/assets/base.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/renderer/src/assets/electron.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/renderer/src/assets/main.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/renderer/src/assets/wavy-lines.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/renderer/src/components/Versions.vue" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/renderer/src/main.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/renderer/src/router/index.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/renderer/src/views/About.vue" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/renderer/src/views/Home.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;PYLXU&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Ris-Soft/Ris_ClassTool/&quot;,
+    &quot;accountId&quot;: &quot;5e408657-8bdc-408d-8861-68048763ea0d&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="31ADNHPpgUgOozADk8PzuANZoTN" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "RisClassTool__V1",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.standard": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.standard": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "pnpm",
+    "settings.editor.selected.configurable": "settings.javascript.prettier",
+    "ts.external.directory.path": "D:\\WebStorm 2025.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-e03c56caf84a-JavaScript-WS-252.23892.411" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="38240fb4-01c4-4c3c-9a3a-23fbef38c54c" name="更改" comment="" />
+      <created>1754957942306</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1754957942306</updated>
+      <workItem from="1754957944254" duration="2431000" />
+    </task>
+    <task id="LOCAL-00001" summary="重构项目">
+      <option name="closed" value="true" />
+      <created>1754967339869</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1754967339869</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="重构项目" />
+    <MESSAGE value="重新创建Vue+Vite+Router+Vuetify项目，准备开始书写代码" />
+    <option name="LAST_COMMIT_MESSAGE" value="重新创建Vue+Vite+Router+Vuetify项目，准备开始书写代码" />
+  </component>
+</project>

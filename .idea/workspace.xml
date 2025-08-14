@@ -5,41 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="38240fb4-01c4-4c3c-9a3a-23fbef38c54c" name="更改" comment="重新创建Vue+Vite+Router+Vuetify项目，准备开始书写代码">
-      <change afterPath="$PROJECT_DIR$/.editorconfig" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/prettier.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.npmrc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.prettierignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.prettierrc.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.vscode/extensions.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.vscode/launch.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.vscode/settings.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/entitlements.mac.plist" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/icon.icns" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/icon.ico" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/icon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dev-app-update.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/electron-builder.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/electron.vite.config.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/eslint.config.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/icon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/index.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/preload/index.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/renderer/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/renderer/src/App.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/renderer/src/assets/base.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/renderer/src/assets/electron.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/renderer/src/assets/main.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/renderer/src/assets/wavy-lines.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/renderer/src/components/Versions.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/renderer/src/main.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/renderer/src/router/index.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/renderer/src/views/About.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/renderer/src/views/Home.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/renderer/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/renderer/src/App.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/renderer/src/router/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/renderer/src/router/index.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,6 +37,9 @@
     &quot;accountId&quot;: &quot;5e408657-8bdc-408d-8861-68048763ea0d&quot;
   }
 }</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4
 }</component>
@@ -79,27 +51,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "RisClassTool__V1",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.standard": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.standard": "",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "pnpm",
-    "settings.editor.selected.configurable": "settings.javascript.prettier",
-    "ts.external.directory.path": "D:\\WebStorm 2025.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Node.js.index.js.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;RisClassTool__V1&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.standard&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.standard&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;pnpm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.javascript.prettier&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;D:\\WebStorm 2025.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -114,7 +87,11 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1754957942306</updated>
-      <workItem from="1754957944254" duration="2431000" />
+      <workItem from="1754957944254" duration="2466000" />
+      <workItem from="1755043010755" duration="641000" />
+      <workItem from="1755051686208" duration="1376000" />
+      <workItem from="1755081217485" duration="3014000" />
+      <workItem from="1755157440338" duration="315000" />
     </task>
     <task id="LOCAL-00001" summary="重构项目">
       <option name="closed" value="true" />
@@ -124,7 +101,15 @@
       <option name="project" value="LOCAL" />
       <updated>1754967339869</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="重新创建Vue+Vite+Router+Vuetify项目，准备开始书写代码">
+      <option name="closed" value="true" />
+      <created>1754969055036</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1754969055036</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

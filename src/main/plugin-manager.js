@@ -2,15 +2,19 @@ const fs = require('fs-extra');
 const path = require('path');
 const { app } = require('electron');
 const semver = require('semver');
+const AdmZip = require('adm-zip');
 
 class PluginManager {
   constructor(store) {
     this.store = store;
-    this.pluginsDir = path.join(app.getPath('userData'), 'plugins');
+    // 改为运行目录下的plugins文件夹
+    this.pluginsDir = path.join(process.cwd(), 'plugins');
     this.loadedPlugins = new Map();
     this.pluginProjects = new Map();
     this.eventHandlers = new Map();
     this.windowManager = null;
+    this.showMainWindow = null;
+    this.shortcutManager = null;
     
     this.ensurePluginsDirectory();
     this.loadPlugins();
@@ -58,7 +62,53 @@ class PluginManager {
 
   async installPlugin(pluginPath) {
     try {
-      const manifestPath = path.join(pluginPath, 'manifest.json');
+      let tempDir = null;
+      let sourcePath = pluginPath;
+
+      // 检查是否为zip文件
+      if (path.extname(pluginPath).toLowerCase() === '.zip') {
+        tempDir = path.join(require('os').tmpdir(), `plugin-${Date.now()}`);
+        await fs.ensureDir(tempDir);
+        
+        try {
+          const zip = new AdmZip(pluginPath);
+          zip.extractAllTo(tempDir, true);
+          
+          // 查找manifest.json文件
+          const entries = zip.getEntries();
+          let manifestEntry = null;
+          
+          for (const entry of entries) {
+            if (entry.entryName.endsWith('manifest.json') && !entry.entryName.includes('/')) {
+              manifestEntry = entry;
+              break;
+            }
+          }
+          
+          if (!manifestEntry) {
+            // 检查是否在子文件夹中
+            for (const entry of entries) {
+              if (entry.entryName.endsWith('manifest.json')) {
+                const parts = entry.entryName.split('/');
+                if (parts.length === 2) {
+                  sourcePath = path.join(tempDir, parts[0]);
+                  break;
+                }
+              }
+            }
+            
+            if (!await fs.pathExists(path.join(sourcePath, 'manifest.json'))) {
+              throw new Error('zip文件中未找到有效的插件清单文件');
+            }
+          } else {
+            sourcePath = tempDir;
+          }
+        } catch (zipError) {
+          throw new Error(`解压zip文件失败: ${zipError.message}`);
+        }
+      }
+
+      const manifestPath = path.join(sourcePath, 'manifest.json');
       if (!await fs.pathExists(manifestPath)) {
         throw new Error('插件清单文件不存在');
       }
@@ -90,7 +140,12 @@ class PluginManager {
         await fs.move(targetPath, backupPath);
       }
 
-      await fs.copy(pluginPath, targetPath);
+      await fs.copy(sourcePath, targetPath);
+      
+      // 清理临时目录
+      if (tempDir) {
+        await fs.remove(tempDir);
+      }
       
       this.loadedPlugins.set(manifest.id, {
         manifest,
@@ -222,20 +277,33 @@ class PluginManager {
   }
 
   createPluginContext(plugin) {
-    return {
+    const context = {
       pluginPath: plugin.path,
       dataPath: path.join(app.getPath('userData'), 'plugins-data', plugin.manifest.id),
       permissions: plugin.manifest.permissions || [],
       getPlugin: (id) => this.loadedPlugins.get(id),
       executeAction: (pluginId, action, params) => this.executePluginAction(pluginId, action, params),
-      createWindow: (options) => this.windowManager ? this.windowManager.createWindow({
-        ...options,
-        pluginId: plugin.manifest.id
-      }) : null,
+      createWindow: (options) => {
+        if (!this.windowManager) {
+          console.error('WindowManager 未设置');
+          return null;
+        }
+        console.log(`插件 ${plugin.manifest.id} 创建窗口:`, options);
+        return this.windowManager.createWindow({
+          ...options,
+          pluginId: plugin.manifest.id
+        });
+      },
       on: (event, handler) => this.registerEventHandler(plugin.manifest.id, event, handler),
       emit: (event, data) => this.broadcastEvent(event, data),
-      showMainWindow: (page) => this.showMainWindow && this.showMainWindow(page)
+      showMainWindow: (page) => this.showMainWindow && this.showMainWindow(page),
+      createShortcut: (options) => this.shortcutManager && this.shortcutManager.create(options),
+      removeShortcut: (name) => this.shortcutManager && this.shortcutManager.remove(name),
+      listShortcuts: () => this.shortcutManager && this.shortcutManager.list()
     };
+    
+    console.log(`为插件 ${plugin.manifest.id} 创建上下文，WindowManager 可用:`, !!this.windowManager);
+    return context;
   }
 
   setWindowManager(windowManager) {
@@ -244,6 +312,10 @@ class PluginManager {
 
   setShowMainWindow(showMainWindow) {
     this.showMainWindow = showMainWindow;
+  }
+
+  setShortcutManager(shortcutManager) {
+    this.shortcutManager = shortcutManager;
   }
 
   initializePlugins() {

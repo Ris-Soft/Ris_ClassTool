@@ -23,6 +23,7 @@ export interface ElectronAPI {
   plugin: {
     list: () => Promise<Plugin[]>;
     install: (pluginPath: string) => Promise<{success: boolean; plugin?: any; error?: string}>;
+    installFromBuffer: (buffer: Uint8Array, filename: string) => Promise<{success: boolean; plugin?: any; error?: string}>;
     uninstall: (pluginId: string) => Promise<{success: boolean; error?: string}>;
     enable: (pluginId: string) => Promise<{success: boolean; error?: string}>;
     disable: (pluginId: string) => Promise<{success: boolean; error?: string}>;
@@ -39,6 +40,18 @@ export interface ElectronAPI {
   };
   system: {
     openExternal: (url: string) => Promise<void>;
+    openDataFolder: () => Promise<void>;
+  };
+  shortcut: {
+    create: (options: {
+      name: string;
+      pluginId: string;
+      action: string;
+      params?: any;
+      icon?: string;
+    }) => Promise<{success: boolean; path?: string; error?: string}>;
+    remove: (name: string) => Promise<{success: boolean; error?: string}>;
+    list: () => Promise<{success: boolean; shortcuts?: Array<{name: string; path: string; created: Date}>; error?: string}>;
   };
   on: (channel: string, callback: (...args: any[]) => void) => void;
   removeListener: (channel: string, callback: (...args: any[]) => void) => void;

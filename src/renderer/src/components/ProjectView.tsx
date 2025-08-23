@@ -15,9 +15,36 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBack }) => {
   const [error, setError] = useState<string | null>(null);
   const [content, setContent] = useState<any>(null);
 
+  // 定义插件操作处理函数
+  const handlePluginAction = async (action: string, params = {}) => {
+    try {
+      return await window.electronAPI.plugin.executeAction(
+        project.pluginId,
+        action,
+        params
+      );
+    } catch (error: any) {
+      console.error(`执行插件操作 ${action} 失败:`, error);
+      alert(`执行操作失败: ${error.message || '未知错误'}`);
+    }
+  };
+
   useEffect(() => {
     loadProjectContent();
   }, [project]);
+
+  useEffect(() => {
+    // 将插件操作函数暴露给全局，以便内联脚本调用
+    (window as any).pluginActions = {
+      openCalculator: () => handlePluginAction('openProject'),
+      showAbout: () => handlePluginAction('showAbout')
+    };
+    
+    // 清理函数
+    return () => {
+      delete (window as any).pluginActions;
+    };
+  }, []);
 
   const loadProjectContent = async () => {
     try {
@@ -83,7 +110,43 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBack }) => {
           minHeight: '400px'
         }}>
           {content ? (
-            <div dangerouslySetInnerHTML={{ __html: content }} />
+            <div 
+              ref={(el) => {
+                if (el && content) {
+                  // 先设置HTML内容
+                  el.innerHTML = content;
+                  
+                  // 确保全局函数可用
+                  (window as any).pluginActions = {
+                    openCalculator: () => handlePluginAction('openProject'),
+                    showAbout: () => handlePluginAction('showAbout')
+                  };
+                  
+                  // 执行内联脚本
+                  // 执行内联脚本
+                  const scripts = el.querySelectorAll('script');
+                  scripts.forEach(script => {
+                    try {
+                      if (script.src) {
+                        // 外部脚本，创建新的script标签
+                        const newScript = document.createElement('script');
+                        newScript.src = script.src;
+                        script.parentNode?.replaceChild(newScript, script);
+                      } else {
+                        // 内联脚本，直接执行
+                        const scriptContent = script.textContent || script.innerHTML;
+                        if (scriptContent) {
+                          // 使用eval在全局作用域执行，这样函数定义会成为全局函数
+                          (0, eval)(scriptContent);
+                        }
+                      }
+                    } catch (error) {
+                      console.error('执行脚本失败:', error);
+                    }
+                  });
+                }
+              }}
+            />
           ) : (
             <div style={{ 
               textAlign: 'center', 

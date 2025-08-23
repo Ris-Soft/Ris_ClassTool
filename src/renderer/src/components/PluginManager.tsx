@@ -16,7 +16,17 @@ import {
   DeleteOutlined, 
   SettingOutlined,
   ApiOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
+  AppstoreOutlined,
+  CalculatorOutlined,
+  ToolOutlined,
+  BugOutlined,
+  CodeOutlined,
+  DatabaseOutlined,
+  FileTextOutlined,
+  GlobalOutlined,
+  HomeOutlined,
+  SettingFilled
 } from '@ant-design/icons';
 import { Plugin } from '../types/electron';
 
@@ -32,6 +42,40 @@ const PluginManager: React.FC<PluginManagerProps> = ({
   onPluginChange 
 }) => {
   const [loading, setLoading] = useState<string | null>(null);
+
+  // 获取插件图标组件
+  const getPluginIcon = (plugin: Plugin) => {
+    // 根据插件ID或名称返回对应的图标
+    const iconMap: { [key: string]: React.ReactNode } = {
+      'example-calculator': <CalculatorOutlined />,
+      'calculator': <CalculatorOutlined />,
+      'tool': <ToolOutlined />,
+      'debug': <BugOutlined />,
+      'code': <CodeOutlined />,
+      'database': <DatabaseOutlined />,
+      'file': <FileTextOutlined />,
+      'web': <GlobalOutlined />,
+      'home': <HomeOutlined />,
+      'setting': <SettingFilled />,
+      'app': <AppstoreOutlined />
+    };
+
+    // 优先根据插件ID匹配
+    if (iconMap[plugin.id]) {
+      return iconMap[plugin.id];
+    }
+
+    // 根据插件名称关键词匹配
+    const name = plugin.name.toLowerCase();
+    for (const [key, icon] of Object.entries(iconMap)) {
+      if (name.includes(key)) {
+        return icon;
+      }
+    }
+
+    // 默认图标
+    return <ApiOutlined />;
+  };
 
   const handleInstallPlugin = async () => {
     try {
@@ -144,7 +188,7 @@ const PluginManager: React.FC<PluginManagerProps> = ({
                     color: 'white',
                     fontSize: '20px'
                   }}>
-                    <ApiOutlined />
+                    {getPluginIcon(plugin)}
                   </div>
                   <div>
                     <div className="plugin-name">{plugin.name}</div>

@@ -1,0 +1,46 @@
+{
+  "id": "example-calculator",
+  "name": "通用工具插件",
+  "version": "1.0.0",
+  "description": "演示插件系统功能的通用工具集合，包含计算器等实用工具",
+  "author": "RIS ClassTool",
+  "main": "index.js",
+  "permissions": [
+    "storage",
+    "ui",
+    "system",
+    "shortcut"
+  ],
+  "projects": [
+    {
+      "id": "calculator-project",
+      "name": "计算器",
+      "description": "基础数学计算工具",
+      "icon": "CalculatorOutlined",
+      "component": "Calculator"
+    }
+  ],
+  "apis": [
+    {
+      "name": "createWindow",
+      "description": "创建自定义窗口",
+      "parameters": ["windowId", "title", "width", "height", "htmlFile", "html"]
+    },
+    {
+      "name": "closeWindow",
+      "description": "关闭指定窗口",
+      "parameters": ["windowId"]
+    },
+    {
+      "name": "listWindows",
+      "description": "获取窗口列表",
+      "parameters": []
+    },
+    {
+      "name": "createDesktopShortcut",
+      "description": "创建桌面快捷方式",
+      "parameters": ["name", "action", "params", "icon"]
+    }
+  ],
+  "dependencies": []
+}

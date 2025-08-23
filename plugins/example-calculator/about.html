@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>关于计算器</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 30px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+    }
+    .about {
+      background: white;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    p {
+      color: #666;
+      line-height: 1.6;
+      margin: 10px 0;
+    }
+    .version {
+      font-weight: bold;
+      color: #007bff;
+    }
+    .shortcut-section {
+      margin-top: 20px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    .shortcut-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 14px;
+    }
+    .shortcut-btn:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div class="about">
+    <h1>🧮 计算器插件</h1>
+    <p class="version">版本 1.0.0</p>
+    <p>一个简单而实用的计算器工具</p>
+    <p>支持基本的数学运算和键盘操作</p>
+    <p>作者：课堂工具开发团队</p>
+    
+    <div class="shortcut-section">
+      <h3>快捷方式</h3>
+      <p>创建桌面快捷方式以快速访问计算器</p>
+      <button class="shortcut-btn" onclick="createShortcut()">创建桌面快捷方式</button>
+      <button class="shortcut-btn" onclick="removeShortcut()">删除桌面快捷方式</button>
+    </div>
+  </div>
+  
+  <script>
+    async function createShortcut() {
+      try {
+        if (window.electronAPI && window.electronAPI.shortcut) {
+          const result = await window.electronAPI.shortcut.create({
+            name: '计算器',
+            pluginId: 'example-calculator',
+            action: 'openProject',
+            params: {},
+            icon: 'calculator'
+          });
+          
+          if (result.success) {
+            alert('桌面快捷方式创建成功！');
+          } else {
+            alert('创建失败：' + (result.error || '未知错误'));
+          }
+        } else {
+          alert('快捷方式功能不可用');
+        }
+      } catch (error) {
+        alert('创建失败：' + error.message);
+      }
+    }
+    
+    async function removeShortcut() {
+      try {
+        if (window.electronAPI && window.electronAPI.shortcut) {
+          const result = await window.electronAPI.shortcut.remove('计算器');
+          
+          if (result.success) {
+            alert('桌面快捷方式删除成功！');
+          } else {
+            alert('删除失败：' + (result.error || '未知错误'));
+          }
+        } else {
+          alert('快捷方式功能不可用');
+        }
+      } catch (error) {
+        alert('删除失败：' + error.message);
+      }
+    }
+  </script>
+</body>
+</html>

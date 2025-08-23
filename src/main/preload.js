@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   plugin: {
     list: () => ipcRenderer.invoke('plugin:list'),
     install: (pluginPath) => ipcRenderer.invoke('plugin:install', pluginPath),
+    installFromBuffer: (buffer, filename) => ipcRenderer.invoke('plugin:installFromBuffer', buffer, filename),
     uninstall: (pluginId) => ipcRenderer.invoke('plugin:uninstall', pluginId),
     enable: (pluginId) => ipcRenderer.invoke('plugin:enable', pluginId),
     disable: (pluginId) => ipcRenderer.invoke('plugin:disable', pluginId),
@@ -26,8 +27,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
 
   // 系统API
+  // 系统API
   system: {
-    openExternal: (url) => ipcRenderer.invoke('system:openExternal', url)
+    openExternal: (url) => ipcRenderer.invoke('system:openExternal', url),
+    openDataFolder: () => ipcRenderer.invoke('system:openDataFolder')
+  },
+
+  // 桌面快捷方式API
+  shortcut: {
+    create: (options) => ipcRenderer.invoke('shortcut:create', options),
+    remove: (name) => ipcRenderer.invoke('shortcut:remove', name),
+    list: () => ipcRenderer.invoke('shortcut:list')
   },
 
   // 事件监听

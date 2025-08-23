@@ -1,5 +1,5 @@
 {
-  "name": "ris-classtool",
+  "name": "lesson-plugin",
   "version": "1.0.0",
   "description": "基于Electron的课堂工具框架",
   "main": "src/main/main.js",
@@ -17,7 +17,7 @@
     "tools",
     "plugins"
   ],
-  "author": "Your Name",
+  "author": "PYLXU",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^9.2.0",
@@ -26,6 +26,7 @@
     "wait-on": "^8.0.4"
   },
   "dependencies": {
+    "adm-zip": "^0.5.16",
     "electron-store": "^8.1.0",
     "fs-extra": "^11.1.1",
     "semver": "^7.5.4"

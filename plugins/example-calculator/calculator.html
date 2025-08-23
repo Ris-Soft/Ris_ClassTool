@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>计算器</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+    }
+    .calculator {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .display {
+      width: 100%;
+      height: 60px;
+      font-size: 24px;
+      text-align: right;
+      padding: 0 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      background: #f9f9f9;
+      box-sizing: border-box;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    button {
+      height: 50px;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .number, .operator {
+      background: #e9ecef;
+    }
+    .number:hover, .operator:hover {
+      background: #dee2e6;
+    }
+    .equals {
+      background: #007bff;
+      color: white;
+    }
+    .equals:hover {
+      background: #0056b3;
+    }
+    .clear {
+      background: #dc3545;
+      color: white;
+    }
+    .clear:hover {
+      background: #c82333;
+    }
+    .zero {
+      grid-column: span 2;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <input type="text" class="display" id="display" readonly>
+    <div class="buttons">
+      <button class="clear" onclick="clearDisplay()">C</button>
+      <button class="operator" onclick="appendToDisplay('/')">/</button>
+      <button class="operator" onclick="appendToDisplay('*')">×</button>
+      <button class="operator" onclick="deleteLast()">⌫</button>
+      
+      <button class="number" onclick="appendToDisplay('7')">7</button>
+      <button class="number" onclick="appendToDisplay('8')">8</button>
+      <button class="number" onclick="appendToDisplay('9')">9</button>
+      <button class="operator" onclick="appendToDisplay('-')">-</button>
+      
+      <button class="number" onclick="appendToDisplay('4')">4</button>
+      <button class="number" onclick="appendToDisplay('5')">5</button>
+      <button class="number" onclick="appendToDisplay('6')">6</button>
+      <button class="operator" onclick="appendToDisplay('+')">+</button>
+      
+      <button class="number" onclick="appendToDisplay('1')">1</button>
+      <button class="number" onclick="appendToDisplay('2')">2</button>
+      <button class="number" onclick="appendToDisplay('3')">3</button>
+      <button class="equals" onclick="calculate()" style="grid-row: span 2">=</button>
+      
+      <button class="number zero" onclick="appendToDisplay('0')">0</button>
+      <button class="number" onclick="appendToDisplay('.')">.</button>
+    </div>
+  </div>
+  
+  <script src="calculator.js"></script>
+</body>
+</html>

@@ -4,6 +4,7 @@ const fs = require('fs-extra');
 const Store = require('electron-store');
 const PluginManager = require('./plugin-manager');
 const WindowManager = require('./window-manager');
+const os = require('os');
 
 class ClassToolApp {
   constructor() {
@@ -83,7 +84,7 @@ class ClassToolApp {
         }
       ]);
       
-      this.tray.setToolTip('课堂工具');
+      this.tray.setToolTip('LessonPlugin');
       this.tray.setContextMenu(contextMenu);
       
       // 双击托盘图标显示主窗口
@@ -118,7 +119,8 @@ class ClassToolApp {
     });
 
     // 开发环境加载本地服务器，生产环境加载构建文件
-    const isDev = process.env.NODE_ENV === 'development';
+    // 开发环境加载本地服务器，生产环境加载构建文件
+    const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
     if (isDev) {
       this.mainWindow.loadURL('http://localhost:3000');
       this.mainWindow.webContents.openDevTools();
@@ -156,6 +158,11 @@ class ClassToolApp {
     // 设置插件管理器的依赖
     this.pluginManager.setWindowManager(this.windowManager);
     this.pluginManager.setShowMainWindow((page) => this.showMainWindow(page));
+    this.pluginManager.setShortcutManager({
+      create: (options) => this.createDesktopShortcut(options),
+      remove: (name) => this.removeDesktopShortcut(name),
+      list: () => this.listDesktopShortcuts()
+    });
     
     // 初始化插件系统，触发插件的启动事件
     this.pluginManager.initializePlugins();
@@ -167,6 +174,162 @@ class ClassToolApp {
     });
   }
 
+  // 创建桌面快捷方式
+  async createDesktopShortcut(options) {
+    try {
+      const { name, pluginId, action, params = {}, icon } = options;
+      
+      if (!name || !pluginId || !action) {
+        throw new Error('缺少必要参数：name, pluginId, action');
+      }
+
+      const desktopPath = path.join(os.homedir(), 'Desktop');
+      const appPath = process.execPath;
+      
+      if (process.platform === 'win32') {
+        // Windows 快捷方式
+        const shortcutPath = path.join(desktopPath, `${name}.lnk`);
+        const args = `--plugin-action="${pluginId}:${action}" --plugin-params="${JSON.stringify(params).replace(/"/g, '\\"')}"`;
+        
+        // 使用 PowerShell 创建快捷方式
+        const { exec } = require('child_process');
+        const psScript = `
+          $WshShell = New-Object -comObject WScript.Shell
+          $Shortcut = $WshShell.CreateShortcut("${shortcutPath}")
+          $Shortcut.TargetPath = "${appPath}"
+          $Shortcut.Arguments = "${args}"
+          $Shortcut.WorkingDirectory = "${process.cwd()}"
+          $Shortcut.Description = "RIS ClassTool - ${name}"
+          $Shortcut.Save()
+        `;
+        
+        return new Promise((resolve, reject) => {
+          exec(`powershell -Command "${psScript}"`, (error) => {
+            if (error) {
+              reject(new Error(`创建快捷方式失败: ${error.message}`));
+            } else {
+              resolve({ success: true, path: shortcutPath });
+            }
+          });
+        });
+      } else if (process.platform === 'darwin') {
+        // macOS 快捷方式 (.app bundle)
+        const shortcutPath = path.join(desktopPath, `${name}.app`);
+        const contentsPath = path.join(shortcutPath, 'Contents');
+        const macOSPath = path.join(contentsPath, 'MacOS');
+        
+        await fs.ensureDir(macOSPath);
+        
+        // 创建 Info.plist
+        const plistContent = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleExecutable</key>
+  <string>${name}</string>
+  <key>CFBundleIdentifier</key>
+  <string>com.ris.classtool.${pluginId}</string>
+  <key>CFBundleName</key>
+  <string>${name}</string>
+  <key>CFBundleVersion</key>
+  <string>1.0</string>
+</dict>
+</plist>`;
+        
+        await fs.writeFile(path.join(contentsPath, 'Info.plist'), plistContent);
+        
+        // 创建执行脚本
+        const scriptContent = `#!/bin/bash
+"${appPath}" --plugin-action="${pluginId}:${action}" --plugin-params='${JSON.stringify(params)}'`;
+        
+        const scriptPath = path.join(macOSPath, name);
+        await fs.writeFile(scriptPath, scriptContent);
+        await fs.chmod(scriptPath, '755');
+        
+        return { success: true, path: shortcutPath };
+      } else {
+        // Linux 快捷方式 (.desktop)
+        const shortcutPath = path.join(desktopPath, `${name}.desktop`);
+        const desktopContent = `[Desktop Entry]
+Version=1.0
+Type=Application
+Name=${name}
+Comment=RIS ClassTool - ${name}
+Exec="${appPath}" --plugin-action="${pluginId}:${action}" --plugin-params='${JSON.stringify(params)}'
+Icon=${icon || 'application-x-executable'}
+Terminal=false
+Categories=Utility;`;
+        
+        await fs.writeFile(shortcutPath, desktopContent);
+        await fs.chmod(shortcutPath, '755');
+        
+        return { success: true, path: shortcutPath };
+      }
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // 删除桌面快捷方式
+  async removeDesktopShortcut(name) {
+    try {
+      const desktopPath = path.join(os.homedir(), 'Desktop');
+      let shortcutPath;
+      
+      if (process.platform === 'win32') {
+        shortcutPath = path.join(desktopPath, `${name}.lnk`);
+      } else if (process.platform === 'darwin') {
+        shortcutPath = path.join(desktopPath, `${name}.app`);
+      } else {
+        shortcutPath = path.join(desktopPath, `${name}.desktop`);
+      }
+      
+      if (await fs.pathExists(shortcutPath)) {
+        await fs.remove(shortcutPath);
+        return { success: true };
+      } else {
+        return { success: false, error: '快捷方式不存在' };
+      }
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // 列出桌面快捷方式
+  async listDesktopShortcuts() {
+    try {
+      const desktopPath = path.join(os.homedir(), 'Desktop');
+      const files = await fs.readdir(desktopPath);
+      const shortcuts = [];
+      
+      for (const file of files) {
+        const filePath = path.join(desktopPath, file);
+        const stat = await fs.stat(filePath);
+        
+        let isShortcut = false;
+        if (process.platform === 'win32' && file.endsWith('.lnk')) {
+          isShortcut = true;
+        } else if (process.platform === 'darwin' && file.endsWith('.app') && stat.isDirectory()) {
+          isShortcut = true;
+        } else if (process.platform === 'linux' && file.endsWith('.desktop')) {
+          isShortcut = true;
+        }
+        
+        if (isShortcut) {
+          shortcuts.push({
+            name: file.replace(/\.(lnk|app|desktop)$/, ''),
+            path: filePath,
+            created: stat.birthtime
+          });
+        }
+      }
+      
+      return { success: true, shortcuts };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
   setupIPC() {
     // 插件管理相关IPC
     ipcMain.handle('plugin:list', () => {
@@ -176,6 +339,18 @@ class ClassToolApp {
     ipcMain.handle('plugin:install', async (event, pluginPath) => {
       try {
         return await this.pluginManager.installPlugin(pluginPath);
+      } catch (error) {
+        throw error;
+      }
+    });
+
+    ipcMain.handle('plugin:installFromBuffer', async (event, buffer, filename) => {
+      try {
+        const tempPath = path.join(require('os').tmpdir(), filename);
+        await fs.writeFile(tempPath, buffer);
+        const result = await this.pluginManager.installPlugin(tempPath);
+        await fs.remove(tempPath);
+        return result;
       } catch (error) {
         throw error;
       }
@@ -233,6 +408,25 @@ class ClassToolApp {
     // 系统相关IPC
     ipcMain.handle('system:openExternal', async (event, url) => {
       return shell.openExternal(url);
+    });
+
+    ipcMain.handle('system:openDataFolder', async () => {
+      const dataPath = path.join(process.cwd(), 'plugins');
+      await fs.ensureDir(dataPath);
+      return shell.openPath(dataPath);
+    });
+
+    // 桌面快捷方式相关IPC
+    ipcMain.handle('shortcut:create', async (event, options) => {
+      return this.createDesktopShortcut(options);
+    });
+
+    ipcMain.handle('shortcut:remove', async (event, name) => {
+      return this.removeDesktopShortcut(name);
+    });
+
+    ipcMain.handle('shortcut:list', async () => {
+      return this.listDesktopShortcuts();
     });
   }
 }

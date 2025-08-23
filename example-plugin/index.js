@@ -9,27 +9,40 @@ async function initialize(ctx) {
   
   // 监听应用启动事件
   ctx.on('app-started', (data) => {
-    console.log('应用已启动，计算器插件可以创建窗口');
-    // 可以在这里创建插件的主窗口
-    createCalculatorWindow();
+    console.log('应用已启动，计算器插件准备就绪');
+    // 不在初始化时自动创建窗口，等待用户主动打开
   });
 }
 
 // 创建计算器窗口
 function createCalculatorWindow() {
   if (pluginWindow) {
-    pluginWindow.focus();
-    return pluginWindow;
+    // 如果窗口已存在，尝试聚焦
+    try {
+      if (pluginWindow.window && !pluginWindow.window.isDestroyed()) {
+        pluginWindow.window.focus();
+        return pluginWindow;
+      }
+    } catch (error) {
+      console.log('窗口已销毁，重新创建');
+      pluginWindow = null;
+    }
   }
 
-  pluginWindow = context.createWindow({
-    title: '计算器',
-    width: 300,
-    height: 400,
-    minWidth: 250,
-    minHeight: 350,
-    resizable: true,
-    html: `
+  if (!context || !context.createWindow) {
+    console.error('插件上下文或createWindow方法不可用');
+    return null;
+  }
+
+  try {
+    pluginWindow = context.createWindow({
+      title: '计算器',
+      width: 300,
+      height: 400,
+      minWidth: 250,
+      minHeight: 350,
+      resizable: true,
+      html: `
       <!DOCTYPE html>
       <html>
       <head>
@@ -58,6 +71,7 @@ function createCalculatorWindow() {
             border-radius: 5px;
             margin-bottom: 15px;
             background: #f9f9f9;
+            box-sizing: border-box;
           }
           .buttons {
             display: grid;
@@ -92,6 +106,9 @@ function createCalculatorWindow() {
           .clear:hover {
             background: #c82333;
           }
+          .zero {
+            grid-column: span 2;
+          }
         </style>
       </head>
       <body>
@@ -116,9 +133,9 @@ function createCalculatorWindow() {
             <button class="number" onclick="appendToDisplay('1')">1</button>
             <button class="number" onclick="appendToDisplay('2')">2</button>
             <button class="number" onclick="appendToDisplay('3')">3</button>
-            <button class="equals" onclick="calculate()" rowspan="2">=</button>
+            <button class="equals" onclick="calculate()" style="grid-row: span 2">=</button>
             
-            <button class="number" onclick="appendToDisplay('0')" colspan="2">0</button>
+            <button class="number zero" onclick="appendToDisplay('0')">0</button>
             <button class="number" onclick="appendToDisplay('.')">.</button>
           </div>
         </div>
@@ -172,20 +189,32 @@ function createCalculatorWindow() {
       </body>
       </html>
     `
-  });
+    });
 
-  // 窗口关闭时清理引用
-  pluginWindow.window.on('closed', () => {
-    pluginWindow = null;
-  });
+    // 确保窗口对象存在并设置关闭事件
+    if (pluginWindow && pluginWindow.window) {
+      pluginWindow.window.on('closed', () => {
+        pluginWindow = null;
+      });
+    }
 
-  return pluginWindow;
+    return pluginWindow;
+  } catch (error) {
+    console.error('创建计算器窗口失败:', error);
+    return null;
+  }
 }
 
 // 关闭计算器窗口
 function closeCalculatorWindow() {
   if (pluginWindow) {
-    pluginWindow.close();
+    try {
+      if (pluginWindow.window && !pluginWindow.window.isDestroyed()) {
+        pluginWindow.window.close();
+      }
+    } catch (error) {
+      console.error('关闭窗口失败:', error);
+    }
     pluginWindow = null;
   }
 }

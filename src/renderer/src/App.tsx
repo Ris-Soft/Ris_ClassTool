@@ -138,7 +138,7 @@ const App: React.FC = () => {
       <Header>
         <div className="logo">
           <AppstoreOutlined />
-          RIS ClassTool
+          LessonPlugin
         </div>
       </Header>
       <Layout>

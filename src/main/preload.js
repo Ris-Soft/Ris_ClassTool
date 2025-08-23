@@ -42,7 +42,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
 
   // 系统API
-  // 系统API
   system: {
     openExternal: (url) => ipcRenderer.invoke('system:openExternal', url),
     openDataFolder: () => ipcRenderer.invoke('system:openDataFolder')

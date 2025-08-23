@@ -3,8 +3,9 @@
   "name": "通用工具插件",
   "version": "1.0.0",
   "description": "演示插件系统功能的通用工具集合，包含计算器等实用工具",
-  "author": "RIS ClassTool",
+  "author": "LessonPlugin",
   "main": "index.js",
+  "icon": "CalculatorOutlined",
   "permissions": [
     "storage",
     "ui",

@@ -1,4 +1,4 @@
-# RIS ClassTool - 课堂工具框架
+# LessonPlugin - 课堂工具框架
 
 基于Electron的可扩展课堂工具框架，支持插件系统和项目管理。
 
@@ -21,7 +21,7 @@
 ## 项目结构
 
 ```
-Ris_Classtool/
+LessonPlugin/
 ├── package.json                 # 主项目配置
 ├── src/
 │   ├── main/                   # Electron主进程

@@ -26,8 +26,20 @@ import {
   FileTextOutlined,
   GlobalOutlined,
   HomeOutlined,
-  SettingFilled
+  SettingFilled,
+  // 添加更多可能需要的图标
+  CloudOutlined,
+  BookOutlined,
+  EditOutlined,
+  FileOutlined,
+  PictureOutlined,
+  PlayCircleOutlined,
+  QuestionCircleOutlined,
+  SearchOutlined,
+  UserOutlined,
+  VideoCameraOutlined
 } from '@ant-design/icons';
+import * as AntdIcons from '@ant-design/icons';
 import { Plugin } from '../types/electron';
 
 const { Title, Paragraph, Text } = Typography;
@@ -45,6 +57,15 @@ const PluginManager: React.FC<PluginManagerProps> = ({
 
   // 获取插件图标组件
   const getPluginIcon = (plugin: Plugin) => {
+    // 首先检查插件清单中是否指定了图标
+    if (plugin.icon && typeof plugin.icon === 'string') {
+      // 尝试从Ant Design图标库中获取图标
+      const IconComponent = (AntdIcons as any)[plugin.icon];
+      if (IconComponent) {
+        return React.createElement(IconComponent);
+      }
+    }
+    
     // 根据插件ID或名称返回对应的图标
     const iconMap: { [key: string]: React.ReactNode } = {
       'example-calculator': <CalculatorOutlined />,
@@ -160,7 +181,7 @@ const PluginManager: React.FC<PluginManagerProps> = ({
       {plugins.length === 0 ? (
         <div className="empty-state">
           <Empty
-            image={<ApiOutlined />}
+            image={<ApiOutlined style={{ fontSize: '64px', color: '#d9d9d9' }} />}
             description={
               <div>
                 <p>暂无已安装的插件</p>

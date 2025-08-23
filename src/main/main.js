@@ -6,7 +6,7 @@ const PluginManager = require('./plugin-manager');
 const WindowManager = require('./window-manager');
 const os = require('os');
 
-class ClassToolApp {
+class LessonPluginApp {
   constructor() {
     this.store = new Store();
     this.pluginManager = new PluginManager(this.store);
@@ -108,13 +108,14 @@ class ClassToolApp {
       height: 800,
       minWidth: 800,
       minHeight: 600,
+      frame: false, // 禁用原生标题栏
+      titleBarStyle: 'hidden', // 隐藏标题栏
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
         enableRemoteModule: false,
         preload: path.join(__dirname, 'preload.js')
       },
-      titleBarStyle: 'hiddenInset',
       show: false
     });
 
@@ -129,11 +130,21 @@ class ClassToolApp {
     }
 
     // 窗口关闭时隐藏到托盘而不是退出
+    // 窗口关闭时隐藏到托盘而不是退出
     this.mainWindow.on('close', (event) => {
       if (!this.isQuitting) {
         event.preventDefault();
         this.mainWindow.hide();
       }
+    });
+
+    // 监听窗口状态变化
+    this.mainWindow.on('maximize', () => {
+      this.mainWindow.webContents.send('window-maximized');
+    });
+
+    this.mainWindow.on('unmaximize', () => {
+      this.mainWindow.webContents.send('window-unmaximized');
     });
 
     this.windowManager.setMainWindow(this.mainWindow);
@@ -199,7 +210,7 @@ class ClassToolApp {
           $Shortcut.TargetPath = "${appPath}"
           $Shortcut.Arguments = "${args}"
           $Shortcut.WorkingDirectory = "${process.cwd()}"
-          $Shortcut.Description = "RIS ClassTool - ${name}"
+          $Shortcut.Description = "LessonPlugin - ${name}"
           $Shortcut.Save()
         `;
         
@@ -228,7 +239,7 @@ class ClassToolApp {
   <key>CFBundleExecutable</key>
   <string>${name}</string>
   <key>CFBundleIdentifier</key>
-  <string>com.ris.classtool.${pluginId}</string>
+  <string>com.ris.lessonplugin.${pluginId}</string>
   <key>CFBundleName</key>
   <string>${name}</string>
   <key>CFBundleVersion</key>
@@ -254,7 +265,7 @@ class ClassToolApp {
 Version=1.0
 Type=Application
 Name=${name}
-Comment=RIS ClassTool - ${name}
+Comment=LessonPlugin - ${name}
 Exec="${appPath}" --plugin-action="${pluginId}:${action}" --plugin-params='${JSON.stringify(params)}'
 Icon=${icon || 'application-x-executable'}
 Terminal=false
@@ -417,6 +428,7 @@ Categories=Utility;`;
     });
 
     // 桌面快捷方式相关IPC
+    // 桌面快捷方式相关IPC
     ipcMain.handle('shortcut:create', async (event, options) => {
       return this.createDesktopShortcut(options);
     });
@@ -428,7 +440,82 @@ Categories=Utility;`;
     ipcMain.handle('shortcut:list', async () => {
       return this.listDesktopShortcuts();
     });
+
+    // 主窗口控制相关IPC
+    ipcMain.handle('window:minimize', () => {
+      if (this.mainWindow) {
+        this.mainWindow.minimize();
+      }
+    });
+
+    ipcMain.handle('window:maximize', () => {
+      if (this.mainWindow) {
+        if (this.mainWindow.isMaximized()) {
+          this.mainWindow.unmaximize();
+        } else {
+          this.mainWindow.maximize();
+        }
+      }
+    });
+
+    ipcMain.handle('window:unmaximize', () => {
+      if (this.mainWindow) {
+        this.mainWindow.unmaximize();
+      }
+    });
+
+    ipcMain.handle('window:closeApp', () => {
+      if (this.mainWindow) {
+        this.isQuitting = true;
+        this.mainWindow.close();
+      }
+    });
+
+    ipcMain.handle('window:isMaximized', () => {
+      return this.mainWindow ? this.mainWindow.isMaximized() : false;
+    });
+
+    // 插件窗口控制相关IPC
+    ipcMain.handle('plugin-window:minimize', (event, windowId) => {
+      const windowInfo = this.windowManager.windows.get(windowId);
+      if (windowInfo && windowInfo.window) {
+        windowInfo.window.minimize();
+        return { success: true };
+      }
+      return { success: false, error: '窗口不存在' };
+    });
+
+    ipcMain.handle('plugin-window:maximize', (event, windowId) => {
+      const windowInfo = this.windowManager.windows.get(windowId);
+      if (windowInfo && windowInfo.window) {
+        windowInfo.window.maximize();
+        return { success: true };
+      }
+      return { success: false, error: '窗口不存在' };
+    });
+
+    ipcMain.handle('plugin-window:toggleMaximize', (event, windowId) => {
+      const windowInfo = this.windowManager.windows.get(windowId);
+      if (windowInfo && windowInfo.window) {
+        if (windowInfo.window.isMaximized()) {
+          windowInfo.window.unmaximize();
+        } else {
+          windowInfo.window.maximize();
+        }
+        return { success: true };
+      }
+      return { success: false, error: '窗口不存在' };
+    });
+
+    ipcMain.handle('plugin-window:close', (event, windowId) => {
+      const windowInfo = this.windowManager.windows.get(windowId);
+      if (windowInfo && windowInfo.window) {
+        windowInfo.window.close();
+        return { success: true };
+      }
+      return { success: false, error: '窗口不存在' };
+    });
   }
 }
 
-new ClassToolApp();
+new LessonPluginApp();

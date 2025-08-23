@@ -18,8 +18,6 @@ async function initialize(ctx) {
 }
 
 // 通用窗口创建方法
-// 通用窗口创建方法
-// 通用窗口创建方法
 function createWindow(options = {}, ctx = null) {
   const {
     windowId = 'default',
@@ -149,30 +147,33 @@ function getWindows() {
 }
 
 // 项目操作：打开计算器
-// 项目操作：打开计算器
-// 项目操作：打开计算器
-// 项目操作：打开计算器
 async function openProject(params, ctx) {
-  console.log('openProject 被调用，上下文状态:', ctx ? '存在' : '不存在');
+  console.log('openProject 被调用，接收到的参数:', params);
+  console.log('上下文状态:', ctx ? '存在' : '不存在');
   try {
     // 直接使用插件上下文创建窗口，绕过本地createWindow函数
     if (ctx && ctx.createWindow) {
       console.log('使用插件上下文直接创建窗口');
-      const htmlPath = path.join(ctx.pluginPath, 'calculator.html');
+      const htmlPath = path.join(ctx.pluginPath, 'components/calculator.html');
       
       if (!fs.existsSync(htmlPath)) {
         console.error(`HTML文件不存在: ${htmlPath}`);
         return { success: false, error: `HTML文件不存在: ${htmlPath}` };
       }
       
+      // 支持不同的标题栏样式
+      const titleBarStyle = params && params.titleBarStyle ? params.titleBarStyle : 'system'; // 默认使用系统标题栏
+      console.log('最终使用的标题栏样式:', titleBarStyle);
+      
       const windowOptions = {
         title: '计算器',
         width: 300,
-        height: 400,
+        height: titleBarStyle === 'custom' ? 432 : 400, // 自定义标题栏需要额外高度
         minWidth: 250,
-        minHeight: 350,
+        minHeight: titleBarStyle === 'custom' ? 382 : 350,
         file: htmlPath,
-        pluginId: 'example-calculator'
+        pluginId: 'example-calculator',
+        titleBarStyle: titleBarStyle // 'none', 'system', 'custom'
       };
       
       console.log('窗口选项:', JSON.stringify(windowOptions));
@@ -199,126 +200,18 @@ async function openProject(params, ctx) {
 
 // 渲染项目内容
 async function renderProject(params, ctx) {
-  return `
-    <div style="text-align: center; padding: 40px;">
-      <div style="font-size: 48px; margin-bottom: 20px;">🧮</div>
-      <h2 style="color: #333; margin-bottom: 16px;">计算器工具</h2>
-      <p style="color: #666; margin-bottom: 24px;">
-        这是一个简单的计算器工具，支持基本的数学运算。
-      </p>
-      <div style="margin-bottom: 20px;">
-        <button 
-          onclick="openCalculator()" 
-          style="
-            background: #1890ff;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-right: 12px;
-          "
-        >
-          打开计算器
-        </button>
-        <button 
-          onclick="showAbout()" 
-          style="
-            background: #52c41a;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-          "
-        >
-          关于插件
-        </button>
-        <button 
-          onclick="createShortcut()" 
-          style="
-            background: #fa8c16;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-left: 12px;
-          "
-        >
-          创建快捷方式
-        </button>
-      </div>
-      <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin-top: 20px;">
-        <h3 style="color: #333; margin-bottom: 12px;">功能特点</h3>
-        <ul style="text-align: left; color: #666; max-width: 300px; margin: 0 auto;">
-          <li>支持基本四则运算</li>
-          <li>支持键盘快捷键操作</li>
-          <li>简洁美观的界面设计</li>
-          <li>实时计算结果显示</li>
-          <li>支持桌面快捷方式</li>
-        </ul>
-      </div>
-    </div>
-    
-    <script>
-      function openCalculator() {
-        if (window.pluginActions && window.pluginActions.openCalculator) {
-          window.pluginActions.openCalculator();
-        } else {
-          try {
-            window.electronAPI.plugin.executeAction('example-calculator', 'openProject', {});
-          } catch (error) {
-            alert('打开计算器失败: ' + (error.message || '未知错误'));
-          }
-        }
-      }
-      
-      function showAbout() {
-        if (window.pluginActions && window.pluginActions.showAbout) {
-          window.pluginActions.showAbout();
-        } else {
-          try {
-            window.electronAPI.plugin.executeAction('example-calculator', 'showAbout', {});
-          } catch (error) {
-            alert('显示关于信息失败: ' + (error.message || '未知错误'));
-          }
-        }
-      }
-      
-      async function createShortcut() {
-        try {
-          if (window.electronAPI && window.electronAPI.shortcut) {
-            const result = await window.electronAPI.shortcut.create({
-              name: '计算器',
-              pluginId: 'example-calculator',
-              action: 'openProject',
-              params: {},
-              icon: 'calculator'
-            });
-            
-            if (result.success) {
-              alert('桌面快捷方式创建成功！');
-            } else {
-              alert('创建失败：' + (result.error || '未知错误'));
-            }
-          } else {
-            alert('快捷方式功能不可用');
-          }
-        } catch (error) {
-          alert('创建失败：' + error.message);
-        }
-      }
-    </script>
-  `;
+  // 支持外置HTML文件
+  const HtmlLoader = require('../../src/main/html-loader');
+  
+  try {
+    // 尝试加载外部HTML文件
+    const htmlContent = await HtmlLoader.loadHtmlFile(ctx.pluginPath, 'components/project.html');
+    return htmlContent;
+  } catch (error) {
+    console.log('未找到外部HTML文件');
+  }
 }
 
-// 插件操作：显示关于信息
-// 插件操作：显示关于信息
-// 插件操作：显示关于信息
 // 插件操作：显示关于信息
 async function showAbout(params, ctx) {
   console.log('showAbout 被调用，上下文状态:', ctx ? '存在' : '不存在');
@@ -326,20 +219,24 @@ async function showAbout(params, ctx) {
     // 直接使用插件上下文创建窗口
     if (ctx && ctx.createWindow) {
       console.log('使用插件上下文直接创建窗口');
-      const htmlPath = path.join(ctx.pluginPath, 'about.html');
+      const htmlPath = path.join(ctx.pluginPath, 'components/about.html');
       
       if (!fs.existsSync(htmlPath)) {
         console.error(`HTML文件不存在: ${htmlPath}`);
         return { success: false, error: `HTML文件不存在: ${htmlPath}` };
       }
       
+      // 支持不同的标题栏样式
+      const titleBarStyle = params.titleBarStyle || 'system'; // 默认使用系统标题栏
+      
       const windowOptions = {
         title: '关于计算器',
         width: 450,
-        height: 400,
+        height: titleBarStyle === 'custom' ? 432 : 400, // 自定义标题栏需要额外高度
         resizable: false,
         file: htmlPath,
-        pluginId: 'example-calculator'
+        pluginId: 'example-calculator',
+        titleBarStyle: titleBarStyle // 'none', 'system', 'custom'
       };
       
       console.log('窗口选项:', JSON.stringify(windowOptions));
@@ -448,7 +345,7 @@ module.exports = {
         title: '计算器',
         width: 300,
         height: 400,
-        htmlFile: 'calculator.html'
+        htmlFile: 'components/calculator.html'
       }, ctx || context);
       return { success: true, windowId: 'calculator' };
     } catch (error) {

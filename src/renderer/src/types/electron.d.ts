@@ -7,6 +7,7 @@ export interface Plugin {
   enabled: boolean;
   permissions: string[];
   dependencies: Array<{id: string; version?: string}>;
+  icon?: string;
 }
 
 export interface Project {
@@ -31,8 +32,13 @@ export interface ElectronAPI {
     executeAction: (pluginId: string, action: string, params: any) => Promise<any>;
   };
   window: {
-    create: (options: any) => Promise<{windowId: string; success: boolean}>;
-    close: (windowId: string) => Promise<{success: boolean; error?: string}>;
+    create: (options: any) => Promise<{ windowId: string; success: boolean }>;
+    close: (windowId: string) => Promise<{ success: boolean; error?: string }>;
+    minimize: () => Promise<void>;
+    maximize: () => Promise<void>;
+    unmaximize: () => Promise<void>;
+    closeApp: () => Promise<void>;
+    isMaximized: () => Promise<boolean>;
   };
   fs: {
     selectFolder: () => Promise<string>;

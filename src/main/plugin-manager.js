@@ -225,7 +225,8 @@ class PluginManager {
         author: plugin.manifest.author,
         enabled: plugin.enabled,
         permissions: plugin.manifest.permissions || [],
-        dependencies: plugin.manifest.dependencies || []
+        dependencies: plugin.manifest.dependencies || [],
+        icon: plugin.manifest.icon || null
       });
     }
     return plugins;
@@ -289,10 +290,23 @@ class PluginManager {
           return null;
         }
         console.log(`插件 ${plugin.manifest.id} 创建窗口:`, options);
-        return this.windowManager.createWindow({
+        
+        // 默认启用外部HTML文件处理
+        const processExternalFiles = options.processExternalFiles !== false;
+        
+        // 处理标题栏选项
+        const windowOptions = {
           ...options,
-          pluginId: plugin.manifest.id
-        });
+          pluginId: plugin.manifest.id,
+          processExternalFiles
+        };
+        
+        // 如果指定了自定义标题栏，需要注入标题栏组件
+        if (options.titleBarStyle === 'custom') {
+          windowOptions.injectTitleBar = true;
+        }
+        
+        return this.windowManager.createWindow(windowOptions);
       },
       on: (event, handler) => this.registerEventHandler(plugin.manifest.id, event, handler),
       emit: (event, data) => this.broadcastEvent(event, data),

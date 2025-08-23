@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, theme, Spin } from 'antd';
+import { Layout, Menu, Typography, Spin, message, theme } from 'antd';
 import { 
-  SettingOutlined, 
   AppstoreOutlined, 
+  SettingOutlined, 
   FolderOutlined,
-  ApiOutlined 
+  ApiOutlined
 } from '@ant-design/icons';
-import PluginManager from './components/PluginManager';
+import TitleBar from './components/TitleBar';
 import ProjectList from './components/ProjectList';
-import Settings from './components/Settings';
 import ProjectView from './components/ProjectView';
+import PluginManager from './components/PluginManager';
+import Settings from './components/Settings';
 import { Plugin, Project } from './types/electron';
 import './App.css';
 
@@ -22,10 +23,6 @@ const App: React.FC = () => {
   const [plugins, setPlugins] = useState<Plugin[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
-  
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
 
   useEffect(() => {
     loadData();
@@ -43,6 +40,7 @@ const App: React.FC = () => {
       setProjects(projectsData);
     } catch (error) {
       console.error('加载数据失败:', error);
+      message.error('加载数据失败');
     } finally {
       setLoading(false);
     }
@@ -134,47 +132,49 @@ const App: React.FC = () => {
   };
 
   return (
-    <Layout className="App">
-      <Header>
-        <div className="logo">
-          <AppstoreOutlined />
-          LessonPlugin
-        </div>
-      </Header>
-      <Layout>
-        <Sider 
-          width={250} 
-          collapsible 
-          collapsed={collapsed} 
-          onCollapse={setCollapsed}
-          style={{ background: colorBgContainer }}
-        >
-          <Menu
-            mode="inline"
-            selectedKeys={[selectedKey]}
-            items={allMenuItems}
-            onClick={({ key }) => {
-              if (key.startsWith('project-')) {
-                const projectId = key.replace('project-', '');
-                const project = projects.find(p => p.id === projectId);
-                if (project) {
-                  handleProjectSelect(project);
-                }
-              } else {
-                setSelectedKey(key);
-                setSelectedProject(null);
-              }
-            }}
-            className="sidebar-menu"
-          />
-        </Sider>
-        <Content>
-          <div className="content-wrapper">
-            {renderContent()}
+    <div className="App">
+      <TitleBar />
+      <Layout style={{ height: 'calc(100vh - 32px)' }}>
+        <Header>
+          <div className="logo">
+            <AppstoreOutlined />
+            <span>LessonPlugin</span>
           </div>
-        </Content>
+        </Header>
+        <Layout>
+          <Sider 
+            width={250} 
+            collapsible 
+            collapsed={collapsed} 
+            onCollapse={setCollapsed}
+          >
+            <Menu
+              mode="inline"
+              selectedKeys={[selectedKey]}
+              items={allMenuItems}
+              onClick={({ key }) => {
+                if (key.startsWith('project-')) {
+                  const projectId = key.replace('project-', '');
+                  const project = projects.find(p => p.id === projectId);
+                  if (project) {
+                    handleProjectSelect(project);
+                  }
+                } else {
+                  setSelectedKey(key);
+                  setSelectedProject(null);
+                }
+              }}
+              className="sidebar-menu"
+            />
+          </Sider>
+          <Content>
+            <div className="content-wrapper">
+              {renderContent()}
+            </div>
+          </Content>
+        </Layout>
       </Layout>
-    </Layout>
+    </div>
   );
 };
 

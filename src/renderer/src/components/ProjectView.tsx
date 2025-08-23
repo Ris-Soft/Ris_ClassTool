@@ -36,8 +36,8 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBack }) => {
   useEffect(() => {
     // 将插件操作函数暴露给全局，以便内联脚本调用
     (window as any).pluginActions = {
-      openCalculator: () => handlePluginAction('openProject'),
-      showAbout: () => handlePluginAction('showAbout')
+      openCalculator: (params = {}) => handlePluginAction('openProject', params),
+      showAbout: (params = {}) => handlePluginAction('showAbout', params)
     };
     
     // 清理函数
@@ -104,10 +104,11 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBack }) => {
         />
       ) : (
         <div style={{ 
-          background: '#fff', 
+          background: '#1f1f1f', 
           borderRadius: '8px', 
           padding: '24px',
-          minHeight: '400px'
+          minHeight: '400px',
+          border: '1px solid #333333'
         }}>
           {content ? (
             <div 
@@ -118,28 +119,33 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBack }) => {
                   
                   // 确保全局函数可用
                   (window as any).pluginActions = {
-                    openCalculator: () => handlePluginAction('openProject'),
-                    showAbout: () => handlePluginAction('showAbout')
+                    openCalculator: (params = {}) => handlePluginAction('openProject', params),
+                    showAbout: (params = {}) => handlePluginAction('showAbout', params)
                   };
                   
-                  // 执行内联脚本
-                  // 执行内联脚本
+                  // 执行脚本
                   const scripts = el.querySelectorAll('script');
-                  scripts.forEach(script => {
+                  scripts.forEach(oldScript => {
                     try {
-                      if (script.src) {
-                        // 外部脚本，创建新的script标签
-                        const newScript = document.createElement('script');
-                        newScript.src = script.src;
-                        script.parentNode?.replaceChild(newScript, script);
+                      // 创建新的script元素以确保脚本被正确执行
+                      const newScript = document.createElement('script');
+                      
+                      // 复制所有属性
+                      Array.from(oldScript.attributes).forEach(attr => {
+                        newScript.setAttribute(attr.name, attr.value);
+                      });
+                      
+                      // 处理内联脚本或外部脚本
+                      if (oldScript.src) {
+                        newScript.src = oldScript.src;
+                        newScript.async = false; // 确保按顺序执行
                       } else {
-                        // 内联脚本，直接执行
-                        const scriptContent = script.textContent || script.innerHTML;
-                        if (scriptContent) {
-                          // 使用eval在全局作用域执行，这样函数定义会成为全局函数
-                          (0, eval)(scriptContent);
-                        }
+                        // 内联脚本，复制内容
+                        newScript.textContent = oldScript.textContent;
                       }
+                      
+                      // 替换原始脚本
+                      oldScript.parentNode?.replaceChild(newScript, oldScript);
                     } catch (error) {
                       console.error('执行脚本失败:', error);
                     }

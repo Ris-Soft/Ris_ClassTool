@@ -1,7 +1,7 @@
 {
   "name": "lesson-plugin",
   "version": "1.0.0",
-  "description": "基于Electron的课堂工具框架",
+  "description": "基于Electron的插件化课堂工具框架",
   "main": "src/main/main.js",
   "scripts": {
     "start": "electron .",
@@ -32,8 +32,8 @@
     "semver": "^7.5.4"
   },
   "build": {
-    "appId": "com.ris.classtool",
-    "productName": "RIS ClassTool",
+    "appId": "com.ris.lessonplugin",
+    "productName": "LessonPlugin",
     "directories": {
       "output": "dist"
     },

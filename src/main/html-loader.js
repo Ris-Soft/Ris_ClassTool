@@ -1,5 +1,6 @@
 const fs = require('fs-extra');
 const path = require('path');
+const AntDesignProvider = require('./antd-provider');
 
 /**
  * HTML文件加载器
@@ -46,7 +47,34 @@ class HtmlLoader {
     // 处理外部样式引用
     htmlContent = await this.processStyleTags(htmlContent, pluginPath, basePath);
     
+    // 注入Ant Design资源
+    htmlContent = this.injectAntDesignResources(htmlContent);
+    
     return htmlContent;
+  }
+  
+  /**
+   * 注入Ant Design资源到HTML中
+   * @param {string} htmlContent - HTML内容
+   * @returns {string} - 注入后的HTML内容
+   */
+  static injectAntDesignResources(htmlContent) {
+    // 获取Ant Design样式
+    const antdStyle = AntDesignProvider.generateStyleLink();
+    
+    // 构建脚本标签
+    const scriptTags = `
+      <script src="/plugin-resources/react-loader.js"></script>
+      <script src="/plugin-resources/antd-loader.js"></script>
+    `;
+    
+    // 在head标签中注入Ant Design样式
+    let processedHtml = htmlContent.replace(/<head([^>]*)>/i, `<head$1>${antdStyle}`);
+    
+    // 在body结束标签前注入脚本
+    processedHtml = processedHtml.replace(/<\/body>/i, `${scriptTags}</body>`);
+    
+    return processedHtml;
   }
   
   /**

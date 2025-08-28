@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全局通知管理</title>
+    <style>
+        .management-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .section {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #333;
+        }
+        
+        .section h3 {
+            margin: 0 0 16px 0;
+            color: #ffffff;
+            font-size: 16px;
+        }
+        
+        .notification-list {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #333;
+            border-radius: 4px;
+            padding: 8px;
+        }
+        
+        .notification-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #444;
+            font-size: 12px;
+        }
+        
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+        
+        .notification-id {
+            color: #1890ff;
+            font-weight: 500;
+        }
+        
+        .notification-type {
+            color: #52c41a;
+            font-size: 10px;
+            background: rgba(82, 196, 26, 0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        
+        .notification-content {
+            flex: 1;
+            margin: 0 8px;
+            color: #ffffff;
+        }
+        
+        .notification-actions {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .action-button {
+            background: #1890ff;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+        
+        .action-button:hover {
+            background: #40a9ff;
+        }
+        
+        .action-button.danger {
+            background: #ff4d4f;
+        }
+        
+        .action-button.danger:hover {
+            background: #ff7875;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #444;
+            font-size: 12px;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .plugin-name {
+            color: #1890ff;
+            font-weight: 500;
+        }
+        
+        .timestamp {
+            color: #666;
+        }
+        
+        .refresh-button {
+            background: #52c41a;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        
+        .refresh-button:hover {
+            background: #73d13d;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="management-container">
+        <h2>全局通知管理</h2>
+        
+        <!-- 活动通知 -->
+        <div class="section">
+            <h3>活动通知</h3>
+            <button class="refresh-button" onclick="refreshActiveNotifications()">刷新活动通知</button>
+            <div class="notification-list" id="activeNotificationsList">
+                <div class="empty-state">暂无活动通知</div>
+            </div>
+        </div>
+        
+        <!-- 通知历史 -->
+        <div class="section">
+            <h3>通知历史</h3>
+            <button class="refresh-button" onclick="refreshHistory()">刷新历史记录</button>
+            <div class="notification-list" id="historyList">
+                <div class="empty-state">暂无历史记录</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.GlobalNotificationProject = window.GlobalNotificationProject || {};
+        
+        window.GlobalNotificationProject.Manager = class {
+            constructor() {
+                this.init();
+            }
+            
+            async init() {
+                await this.refreshActiveNotifications();
+                await this.refreshHistory();
+            }
+            
+            async refreshActiveNotifications() {
+                try {
+                    if (window.electronAPI && window.electronAPI.plugin) {
+                        const result = await window.electronAPI.plugin.executeAction('global-notification', 'getActiveNotifications', {});
+                        this.displayActiveNotifications(result || {});
+                    }
+                } catch (error) {
+                    console.error('刷新活动通知失败:', error);
+                }
+            }
+            
+            displayActiveNotifications(notifications) {
+                const container = document.getElementById('activeNotificationsList');
+                if (!container) {
+                    console.error('找不到活动通知容器');
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                let hasNotifications = false;
+                
+                // 显示系统通知
+                if (notifications.system && notifications.system.length > 0) {
+                    notifications.system.forEach(notification => {
+                        const item = this.createNotificationItem(notification, 'system');
+                        container.appendChild(item);
+                        hasNotifications = true;
+                    });
+                }
+                
+                // 显示自定义通知
+                if (notifications.custom) {
+                    ['left', 'center', 'right'].forEach(position => {
+                        if (notifications.custom[position] && notifications.custom[position].length > 0) {
+                            notifications.custom[position].forEach(notification => {
+                                const item = this.createNotificationItem(notification, `custom-${position}`);
+                                container.appendChild(item);
+                                hasNotifications = true;
+                            });
+                        }
+                    });
+                }
+                
+                if (!hasNotifications) {
+                    container.innerHTML = '<div class="empty-state">暂无活动通知</div>';
+                }
+            }
+            
+            createNotificationItem(notification, type) {
+                const div = document.createElement('div');
+                div.className = 'notification-item';
+                
+                const idSpan = document.createElement('span');
+                idSpan.className = 'notification-id';
+                idSpan.textContent = notification.id;
+                
+                const typeSpan = document.createElement('span');
+                typeSpan.className = 'notification-type';
+                typeSpan.textContent = type;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'notification-content';
+                
+                if (type === 'system') {
+                    contentDiv.textContent = `${notification.title}${notification.subtitle ? ' - ' + notification.subtitle : ''}`;
+                } else {
+                    // 对于自定义通知，显示HTML内容的摘要
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = notification.content;
+                    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+                    contentDiv.textContent = textContent.substring(0, 50) + (textContent.length > 50 ? '...' : '');
+                }
+                
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'notification-actions';
+                
+                const closeButton = document.createElement('button');
+                closeButton.className = 'action-button danger';
+                closeButton.textContent = '关闭';
+                closeButton.onclick = () => this.closeNotification(notification.id);
+                
+                actionsDiv.appendChild(closeButton);
+                
+                div.appendChild(idSpan);
+                div.appendChild(typeSpan);
+                div.appendChild(contentDiv);
+                div.appendChild(actionsDiv);
+                
+                return div;
+            }
+            
+            async closeNotification(notificationId) {
+                try {
+                    if (window.electronAPI && window.electronAPI.plugin) {
+                        await window.electronAPI.plugin.executeAction('global-notification', 'closeNotification', { id: notificationId });
+                        await this.refreshActiveNotifications();
+                    }
+                } catch (error) {
+                    console.error('关闭通知失败:', error);
+                }
+            }
+            
+            async refreshHistory() {
+                try {
+                    if (window.electronAPI && window.electronAPI.plugin) {
+                        const result = await window.electronAPI.plugin.executeAction('global-notification', 'getHistory', {});
+                        this.displayHistory(result || []);
+                    }
+                } catch (error) {
+                    console.error('刷新历史记录失败:', error);
+                }
+            }
+            
+            displayHistory(history) {
+                const container = document.getElementById('historyList');
+                if (!container) {
+                    console.error('找不到历史记录容器');
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                if (!history || history.length === 0) {
+                    container.innerHTML = '<div class="empty-state">暂无历史记录</div>';
+                    return;
+                }
+                
+                history.forEach(record => {
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
+                    
+                    const pluginSpan = document.createElement('span');
+                    pluginSpan.className = 'plugin-name';
+                    pluginSpan.textContent = record.plugin;
+                    
+                    const typeSpan = document.createElement('span');
+                    typeSpan.className = 'notification-type';
+                    typeSpan.textContent = record.type;
+                    
+                    const timestampSpan = document.createElement('span');
+                    timestampSpan.className = 'timestamp';
+                    timestampSpan.textContent = new Date(record.timestamp).toLocaleString();
+                    
+                    div.appendChild(pluginSpan);
+                    div.appendChild(typeSpan);
+                    div.appendChild(timestampSpan);
+                    
+                    container.appendChild(div);
+                });
+            }
+        }
+        
+        // 全局函数
+        async function refreshActiveNotifications() {
+            await window.notificationManager.refreshActiveNotifications();
+        }
+        
+        async function refreshHistory() {
+            await window.notificationManager.refreshHistory();
+        }
+        
+        // 初始化
+        window.notificationManager = new window.GlobalNotificationProject.Manager();
+    </script>
+</body>
+</html>

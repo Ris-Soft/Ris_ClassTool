@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全局通知栏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 100vw;
+            height: 60px;
+            background: transparent;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            pointer-events: none;
+        }
+        
+        .notification-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            padding: 0 20px;
+            gap: 20px;
+        }
+        
+        .notification-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 40px;
+            flex-wrap: nowrap;
+            overflow: visible;
+        }
+        
+        .notification-area.left {
+            flex: 1;
+            justify-content: flex-start;
+        }
+        
+        .notification-area.center {
+            flex: 2;
+            justify-content: center;
+        }
+        
+        .notification-area.right {
+            flex: 1;
+            justify-content: flex-end;
+        }
+        
+        .notification-item {
+            pointer-events: auto;
+            height: 40px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            background: var(--bg-color, rgba(0, 0, 0, 0.8));
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.2));
+            color: white;
+            font-size: var(--font-size, 14px);
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.3s ease-out;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            max-width: 300px;
+            min-width: 120px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin: 0 4px;
+        }
+        
+        .notification-item:hover {
+            background: rgba(0, 0, 0, 0.9);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .notification-item.system {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .notification-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .notification-content {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .notification-title {
+            font-weight: 500;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .notification-subtitle {
+            font-size: calc(var(--font-size, 14px) - 2px);
+            opacity: 0.8;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .notification-item.has-subtitle .notification-title {
+            font-size: calc(var(--font-size, 14px) - 1px);
+        }
+        
+        .notification-close {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 2px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-left: 8px;
+            flex-shrink: 0;
+        }
+        
+        .notification-item:hover .notification-close {
+            opacity: 1;
+        }
+        
+        .notification-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .notification-item.custom {
+            padding: 0 12px;
+            height: 40px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+        
+        .custom-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            flex: 1;
+        }
+        
+        .custom-close {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 2px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-left: 8px;
+            flex-shrink: 0;
+            background: none;
+            border: none;
+            font-size: 12px;
+        }
+        
+        .notification-item.custom:hover .custom-close {
+            opacity: 1;
+        }
+        
+        .custom-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+        }
+        
+        .notification-item.removing {
+            animation: slideOut 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="notification-container">
+        <div class="notification-area left" id="leftArea"></div>
+        <div class="notification-area center" id="centerArea"></div>
+        <div class="notification-area right" id="rightArea"></div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        
+        console.log('通知窗口脚本开始加载');
+        
+        // 监听通知更新
+        ipcRenderer.on('update-notifications', (event, data) => {
+            console.log('收到通知更新:', data);
+            updateNotifications(data);
+        });
+        
+        function updateNotifications(data) {
+            const { notifications, settings } = data;
+            
+            // 更新CSS变量
+            document.documentElement.style.setProperty('--bg-color', settings.backgroundColor);
+            document.documentElement.style.setProperty('--border-color', settings.borderColor);
+            document.documentElement.style.setProperty('--font-size', settings.fontSize + 'px');
+            
+            // 清空所有区域
+            document.getElementById('leftArea').innerHTML = '';
+            document.getElementById('centerArea').innerHTML = '';
+            document.getElementById('rightArea').innerHTML = '';
+            
+            console.log('开始渲染通知:', notifications);
+            
+            // 渲染系统通知
+            if (notifications.system && notifications.system.length > 0) {
+                console.log('渲染系统通知:', notifications.system.length, '个');
+                renderSystemNotifications(notifications.system, settings.systemNotificationPosition);
+            }
+            
+            // 渲染自定义通知
+            if (notifications.custom) {
+                console.log('渲染自定义通知');
+                renderCustomNotifications(notifications.custom);
+            }
+        }
+        
+        function renderSystemNotifications(systemNotifications, position) {
+            const targetArea = getArea(position);
+            console.log('系统通知目标区域:', position, targetArea);
+            
+            systemNotifications.forEach((notification, index) => {
+                console.log('创建系统通知:', notification);
+                const element = createSystemNotificationElement(notification);
+                targetArea.appendChild(element);
+            });
+        }
+        
+        function renderCustomNotifications(customNotifications) {
+            // 渲染左侧自定义通知
+            if (customNotifications.left && customNotifications.left.length > 0) {
+                customNotifications.left.forEach(notification => {
+                    const element = createCustomNotificationElement(notification);
+                    document.getElementById('leftArea').appendChild(element);
+                });
+            }
+            
+            // 渲染中间自定义通知
+            if (customNotifications.center && customNotifications.center.length > 0) {
+                customNotifications.center.forEach(notification => {
+                    const element = createCustomNotificationElement(notification);
+                    document.getElementById('centerArea').appendChild(element);
+                });
+            }
+            
+            // 渲染右侧自定义通知
+            if (customNotifications.right && customNotifications.right.length > 0) {
+                customNotifications.right.forEach(notification => {
+                    const element = createCustomNotificationElement(notification);
+                    document.getElementById('rightArea').appendChild(element);
+                });
+            }
+        }
+        
+        function createSystemNotificationElement(notification) {
+            const div = document.createElement('div');
+            div.className = `notification-item system ${notification.subtitle ? 'has-subtitle' : ''}`;
+            div.dataset.id = notification.id;
+            
+            const iconHtml = getAntdIcon(notification.iconName);
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'notification-content';
+            
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'notification-title';
+            titleDiv.textContent = notification.title;
+            contentDiv.appendChild(titleDiv);
+            
+            if (notification.subtitle) {
+                const subtitleDiv = document.createElement('div');
+                subtitleDiv.className = 'notification-subtitle';
+                subtitleDiv.textContent = notification.subtitle;
+                contentDiv.appendChild(subtitleDiv);
+            }
+            
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'notification-icon';
+            iconDiv.innerHTML = iconHtml;
+            
+            const closeDiv = document.createElement('div');
+            closeDiv.className = 'notification-close';
+            closeDiv.textContent = '×';
+            closeDiv.onclick = (e) => {
+                e.stopPropagation();
+                closeNotification(notification.id);
+            };
+            
+            div.appendChild(iconDiv);
+            div.appendChild(contentDiv);
+            div.appendChild(closeDiv);
+            
+            div.onclick = () => {
+                ipcRenderer.send('notification-clicked', notification.id);
+            };
+            
+            console.log('系统通知元素已创建:', div);
+            return div;
+        }
+        
+        function createCustomNotificationElement(notification) {
+            const div = document.createElement('div');
+            div.className = 'notification-item custom';
+            div.dataset.id = notification.id;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'custom-content';
+            contentDiv.innerHTML = notification.content;
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'custom-close';
+            closeBtn.textContent = '×';
+            closeBtn.onclick = (e) => {
+                e.stopPropagation();
+                closeNotification(notification.id);
+            };
+            
+            div.appendChild(contentDiv);
+            div.appendChild(closeBtn);
+            
+            return div;
+        }
+        
+        function getArea(position) {
+            switch (position) {
+                case 'left': return document.getElementById('leftArea');
+                case 'center': return document.getElementById('centerArea');
+                case 'right': return document.getElementById('rightArea');
+                default: return document.getElementById('rightArea');
+            }
+        }
+        
+        function getAntdIcon(iconName) {
+            const icons = {
+                'InfoCircleOutlined': '<svg viewBox="64 64 896 896" focusable="false" data-icon="info-circle" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm32 664c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8V456c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v272zm-32-344a48.01 48.01 0 010-96 48.01 48.01 0 010 96z"></path></svg>',
+                'CheckCircleOutlined': '<svg viewBox="64 64 896 896" focusable="false" data-icon="check-circle" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm193.5 301.7l-210.6 292a31.8 31.8 0 01-51.7 0L318.5 484.9c-3.8-5.3 0-12.7 6.5-12.7h46.9c10.2 0 19.9 4.9 25.9 13.3l71.2 98.8 157.2-218c6-8.3 15.6-13.3 25.9-13.3H699c6.5 0 10.3 7.4 6.5 12.7z"></path></svg>',
+                'ExclamationCircleOutlined': '<svg viewBox="64 64 896 896" focusable="false" data-icon="exclamation-circle" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm-32 232c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v272c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8V296zm32 440a48.01 48.01 0 010-96 48.01 48.01 0 010 96z"></path></svg>',
+                'CloseCircleOutlined': '<svg viewBox="64 64 896 896" focusable="false" data-icon="close-circle" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm165.4 618.2l-66-.3L512 563.4l-99.3 118.4-66.1.3c-4.4 0-8-3.5-8-8 0-1.9.7-3.7 1.9-5.2l130.1-155L340.5 359a8.32 8.32 0 01-1.9-5.2c0-4.4 3.6-8 8-8l66.1.3L512 464.6l99.3-118.4 66-.3c4.4 0 8 3.5 8 8 0 1.9-.7 3.7-1.9 5.2L553.5 514l130 155c1.2 1.5 1.9 3.3 1.9 5.2 0 4.4-3.6 8-8 8z"></path></svg>',
+                'BellOutlined': '<svg viewBox="64 64 896 896" focusable="false" data-icon="bell" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M816 768h-24V428c0-141.1-104.3-257.7-240-277.1V112c0-22.1-17.9-40-40-40s-40 17.9-40 40v38.9c-135.7 19.4-240 136-240 277.1v340h-24c-17.7 0-32 14.3-32 32v32c0 4.4 3.6 8 8 8h216c0 61.8 50.2 112 112 112s112-50.2 112-112h216c4.4 0 8-3.6 8-8v-32c0-17.7-14.3-32-32-32zM512 888c-26.5 0-48-21.5-48-48h96c0 26.5-21.5 48-48 48z"></path></svg>',
+                'MessageOutlined': '<svg viewBox="64 64 896 896" focusable="false" data-icon="message" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M464 512a48 48 0 1096 0 48 48 0 10-96 0zm200 0a48 48 0 1096 0 48 48 0 10-96 0zm-400 0a48 48 0 1096 0 48 48 0 10-96 0zm661.2-173.6c-22.6-53.7-55-101.9-96.3-143.3a444.35 444.35 0 00-143.3-96.3C630.6 75.7 572.2 64 512 64h-2c-60.6.3-119.3 12.3-174.5 35.9a445.35 445.35 0 00-142 96.5c-40.9 41.3-73 89.3-95.2 142.8-23 55.4-34.6 114.3-34.3 174.9A449.4 449.4 0 00112 714.1a380.29 380.29 0 00-112 145.4c2.4 23.2 13.1 33.9 24.6 33.9 4.9 0 9.5-1.4 13.7-4.1 8.1-5.2 15.2-11.1 21.4-17.8l34.3-37.6C188.3 929 504.2 929 512 929c56.4 0 113.1-10.7 168.4-31.9a444.4 444.4 0 00142.8-95.2c41.3-40.9 73.8-88.7 96.5-142 23.6-55.2 35.6-113.9 35.9-174.5.3-60.9-11.5-120-34.9-175.3zm-151.1 438C704 845.8 608 864 512 864c-96 0-192-18.2-279.1-86.4l-43.1 47.4c-2.4 2.6-5.1 5-8.1 7.1 19.9-94.9 63.9-183.6 125.1-252.7a443.23 443.23 0 01-35.6-142.9c0-109.8 43.7-213.2 123.1-291.3 79.6-78.2 185.2-121.4 297.6-121.7 112.4-.3 218.3 42.1 298.2 119.6 79.9 77.5 124.6 180.2 125.9 289.2 1.3 109-41.7 213.7-121.1 292.9z"></path></svg>',
+                'NotificationOutlined': '<svg viewBox="64 64 896 896" focusable="false" data-icon="notification" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32zm-40 728H184V184h656v656zM492 400h184c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8H492c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8zm0 144h184c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8H492c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8zm0 144h184c4.4 0 8-3.6 8-8v-48c0-4.4-3.6-8-8-8H492c-4.4 0-8 3.6-8 8v48c0 4.4 3.6 8 8 8zM340 368a40 40 0 1080 0 40 40 0 10-80 0zm0 144a40 40 0 1080 0 40 40 0 10-80 0zm0 144a40 40 0 1080 0 40 40 0 10-80 0z"></path></svg>'
+            };
+            
+            return icons[iconName] || icons['NotificationOutlined'];
+        }
+        
+        function closeNotification(notificationId) {
+            console.log('关闭通知:', notificationId);
+            ipcRenderer.send('notification-closed', notificationId);
+        }
+        
+        console.log('通知窗口已加载完成');
+    </script>
+</body>
+</html>

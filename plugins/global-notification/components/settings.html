@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全局通知设置</title>
+    <script src="../../../src/renderer/public/plugin-resources/antd-loader.js"></script>
+    <script src="../../../src/renderer/public/plugin-resources/antd-icons-loader.js"></script>
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .setting-group {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #333;
+        }
+        
+        .setting-group h3 {
+            margin: 0 0 16px 0;
+            color: #ffffff;
+            font-size: 16px;
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .setting-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .setting-label {
+            flex: 1;
+        }
+        
+        .setting-label .title {
+            color: #ffffff;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .setting-label .description {
+            color: #a0a0a0;
+            font-size: 12px;
+        }
+        
+        .setting-control {
+            margin-left: 16px;
+        }
+        
+        .color-input {
+            width: 60px;
+            height: 32px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: transparent;
+            cursor: pointer;
+        }
+        
+        .range-input {
+            width: 120px;
+        }
+        
+        .select-input {
+            min-width: 120px;
+            background: #333;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 4px;
+            padding: 4px 8px;
+        }
+        
+        .preview-area {
+            background: #333;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            border: 1px solid #555;
+        }
+        
+        .preview-notification {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            max-width: 300px;
+            margin-bottom: 8px;
+        }
+        
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #333;
+            border-radius: 4px;
+            padding: 8px;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #444;
+            font-size: 12px;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .plugin-name {
+            color: #1890ff;
+            font-weight: 500;
+        }
+        
+        .notification-type {
+            color: #52c41a;
+            font-size: 10px;
+            background: rgba(82, 196, 26, 0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        
+        .timestamp {
+            color: #666;
+        }
+        
+        .save-button {
+            background: #1890ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .save-button:hover {
+            background: #40a9ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="settings-container">
+        <h2>全局通知设置</h2>
+        
+        <!-- 外观设置 -->
+        <div class="setting-group">
+            <h3>外观设置</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <div class="title">背景颜色</div>
+                    <div class="description">设置通知栏的背景颜色和透明度</div>
+                </div>
+                <div class="setting-control">
+                    <input type="color" id="backgroundColor" class="color-input" value="#000000">
+                    <input type="range" id="backgroundOpacity" min="0" max="100" value="80" class="range-input">
+                    <span id="backgroundOpacityValue">80%</span>
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <div class="title">边框颜色</div>
+                    <div class="description">设置通知栏的边框颜色和透明度</div>
+                </div>
+                <div class="setting-control">
+                    <input type="color" id="borderColor" class="color-input" value="#ffffff">
+                    <input type="range" id="borderOpacity" min="0" max="100" value="20" class="range-input">
+                    <span id="borderOpacityValue">20%</span>
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <div class="title">字体大小</div>
+                    <div class="description">设置通知文字的默认大小</div>
+                </div>
+                <div class="setting-control">
+                    <input type="range" id="fontSize" min="10" max="20" value="14" class="range-input">
+                    <span id="fontSizeValue">14px</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 系统通知设置 -->
+        <div class="setting-group">
+            <h3>系统通知设置</h3>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <div class="title">显示位置</div>
+                    <div class="description">系统通知在通知栏中的显示位置</div>
+                </div>
+                <div class="setting-control">
+                    <select id="systemNotificationPosition" class="select-input">
+                        <option value="left">左侧</option>
+                        <option value="center">中间</option>
+                        <option value="right" selected>右侧</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 预览区域 -->
+        <div class="setting-group">
+            <h3>预览</h3>
+            <div class="preview-area" id="previewArea">
+                <div class="preview-notification" id="previewNotification">
+                    <span class="icon">📢</span>
+                    <div class="content">
+                        <div class="title">示例通知标题</div>
+                        <div class="subtitle">这是一个副标题示例</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 保存按钮 -->
+        <div style="text-align: center; margin-top: 24px;">
+            <button class="save-button" onclick="saveSettings()">保存设置</button>
+        </div>
+    </div>
+
+    <script>
+        class GlobalNotificationSettings {
+            constructor() {
+                this.settings = {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    fontSize: 14,
+                    systemNotificationPosition: 'right'
+                };
+                
+                this.init();
+            }
+            
+            async init() {
+                await this.loadSettings();
+                this.setupEventListeners();
+                this.updatePreview();
+            }
+            
+            async loadSettings() {
+                try {
+                    if (window.electronAPI && window.electronAPI.plugin) {
+                        const result = await window.electronAPI.plugin.executeAction('global-notification', 'getSettings', {});
+                        if (result) {
+                            this.settings = { ...this.settings, ...result };
+                        }
+                    }
+                    this.updateUI();
+                } catch (error) {
+                    console.error('加载设置失败:', error);
+                }
+            }
+            
+            updateUI() {
+                // 解析背景颜色和透明度
+                const bgMatch = this.settings.backgroundColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+                if (bgMatch) {
+                    const [, r, g, b, a] = bgMatch;
+                    const hex = '#' + [r, g, b].map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+                    document.getElementById('backgroundColor').value = hex;
+                    document.getElementById('backgroundOpacity').value = Math.round((a || 1) * 100);
+                    document.getElementById('backgroundOpacityValue').textContent = Math.round((a || 1) * 100) + '%';
+                }
+                
+                // 解析边框颜色和透明度
+                const borderMatch = this.settings.borderColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+                if (borderMatch) {
+                    const [, r, g, b, a] = borderMatch;
+                    const hex = '#' + [r, g, b].map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+                    document.getElementById('borderColor').value = hex;
+                    document.getElementById('borderOpacity').value = Math.round((a || 1) * 100);
+                    document.getElementById('borderOpacityValue').textContent = Math.round((a || 1) * 100) + '%';
+                }
+                
+                document.getElementById('fontSize').value = this.settings.fontSize;
+                document.getElementById('fontSizeValue').textContent = this.settings.fontSize + 'px';
+                document.getElementById('systemNotificationPosition').value = this.settings.systemNotificationPosition;
+            }
+            
+            setupEventListeners() {
+                // 背景颜色和透明度
+                document.getElementById('backgroundColor').addEventListener('change', () => this.updatePreview());
+                document.getElementById('backgroundOpacity').addEventListener('input', (e) => {
+                    document.getElementById('backgroundOpacityValue').textContent = e.target.value + '%';
+                    this.updatePreview();
+                });
+                
+                // 边框颜色和透明度
+                document.getElementById('borderColor').addEventListener('change', () => this.updatePreview());
+                document.getElementById('borderOpacity').addEventListener('input', (e) => {
+                    document.getElementById('borderOpacityValue').textContent = e.target.value + '%';
+                    this.updatePreview();
+                });
+                
+                // 字体大小
+                document.getElementById('fontSize').addEventListener('input', (e) => {
+                    document.getElementById('fontSizeValue').textContent = e.target.value + 'px';
+                    this.updatePreview();
+                });
+                
+                // 系统通知位置
+                document.getElementById('systemNotificationPosition').addEventListener('change', () => this.updatePreview());
+            }
+            
+            updatePreview() {
+                const bgColor = document.getElementById('backgroundColor').value;
+                const bgOpacity = document.getElementById('backgroundOpacity').value / 100;
+                const borderColor = document.getElementById('borderColor').value;
+                const borderOpacity = document.getElementById('borderOpacity').value / 100;
+                const fontSize = document.getElementById('fontSize').value;
+                
+                // 转换颜色格式
+                const bgRgb = this.hexToRgb(bgColor);
+                const borderRgb = this.hexToRgb(borderColor);
+                
+                const backgroundColor = `rgba(${bgRgb.r}, ${bgRgb.g}, ${bgRgb.b}, ${bgOpacity})`;
+                const borderColorRgba = `rgba(${borderRgb.r}, ${borderRgb.g}, ${borderRgb.b}, ${borderOpacity})`;
+                
+                // 更新预览样式
+                const preview = document.getElementById('previewNotification');
+                preview.style.background = backgroundColor;
+                preview.style.border = `1px solid ${borderColorRgba}`;
+                preview.style.fontSize = fontSize + 'px';
+                
+                // 更新预览区域背景
+                const previewArea = document.getElementById('previewArea');
+                previewArea.style.background = backgroundColor;
+                previewArea.style.border = `1px solid ${borderColorRgba}`;
+            }
+            
+            hexToRgb(hex) {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : null;
+            }
+            
+            async saveSettings() {
+                try {
+                    const bgColor = document.getElementById('backgroundColor').value;
+                    const bgOpacity = document.getElementById('backgroundOpacity').value / 100;
+                    const borderColor = document.getElementById('borderColor').value;
+                    const borderOpacity = document.getElementById('borderOpacity').value / 100;
+                    const fontSize = parseInt(document.getElementById('fontSize').value);
+                    const systemNotificationPosition = document.getElementById('systemNotificationPosition').value;
+                    
+                    const bgRgb = this.hexToRgb(bgColor);
+                    const borderRgb = this.hexToRgb(borderColor);
+                    
+                    const newSettings = {
+                        backgroundColor: `rgba(${bgRgb.r}, ${bgRgb.g}, ${bgRgb.b}, ${bgOpacity})`,
+                        borderColor: `rgba(${borderRgb.r}, ${borderRgb.g}, ${borderRgb.b}, ${borderOpacity})`,
+                        fontSize,
+                        systemNotificationPosition
+                    };
+                    
+                    if (window.electronAPI && window.electronAPI.plugin) {
+                        const result = await window.electronAPI.plugin.executeAction('global-notification', 'updateSettings', newSettings);
+                        if (result) {
+                            alert('设置已保存');
+                        }
+                    }
+                } catch (error) {
+                    console.error('保存设置失败:', error);
+                    alert('保存设置失败');
+                }
+            }
+        }
+        
+        // 全局函数
+        async function saveSettings() {
+            await window.settingsManager.saveSettings();
+        }
+        
+        // 初始化
+        window.settingsManager = new GlobalNotificationSettings();
+    </script>
+</body>
+</html>

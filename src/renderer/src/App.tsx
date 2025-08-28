@@ -26,6 +26,35 @@ const App: React.FC = () => {
 
   useEffect(() => {
     loadData();
+    
+    // 监听插件UI消息
+    window.electronAPI.on('plugin:ui-message', (event, data) => {
+      const { type, content, duration } = data;
+      // 使用类型安全的方式调用message方法
+      switch (type) {
+        case 'success':
+          message.success(content, duration);
+          break;
+        case 'error':
+          message.error(content, duration);
+          break;
+        case 'warning':
+          message.warning(content, duration);
+          break;
+        case 'loading':
+          message.loading(content, duration);
+          break;
+        case 'info':
+        default:
+          message.info(content, duration);
+          break;
+      }
+    });
+    
+    return () => {
+      // 清理监听器
+      window.electronAPI.removeListener('plugin:ui-message', () => {});
+    };
   }, []);
 
   const loadData = async () => {

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通知演示</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1f1f1f;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .demo-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .section {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #333;
+        }
+        
+        .section h3 {
+            margin: 0 0 16px 0;
+            color: #ffffff;
+            font-size: 16px;
+        }
+        
+        .demo-area {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .demo-button {
+            background: #1890ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .demo-button:hover {
+            background: #40a9ff;
+        }
+        
+        .demo-button.success {
+            background: #52c41a;
+        }
+        
+        .demo-button.success:hover {
+            background: #73d13d;
+        }
+        
+        .demo-button.warning {
+            background: #faad14;
+        }
+        
+        .demo-button.warning:hover {
+            background: #ffc53d;
+        }
+        
+        .demo-button.danger {
+            background: #ff4d4f;
+        }
+        
+        .demo-button.danger:hover {
+            background: #ff7875;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .input-group label {
+            min-width: 60px;
+            color: #ffffff;
+            font-size: 14px;
+        }
+        
+        .input-group input {
+            background: #333;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 4px;
+            padding: 6px 8px;
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h2>通知演示插件</h2>
+        
+        <!-- 快速演示 -->
+        <div class="section">
+            <h3>快速演示</h3>
+            <div class="demo-area">
+                <button class="demo-button" onclick="testInfoNotification()">信息通知</button>
+                <button class="demo-button success" onclick="testSuccessNotification()">成功通知</button>
+                <button class="demo-button warning" onclick="testWarningNotification()">警告通知</button>
+                <button class="demo-button danger" onclick="testErrorNotification()">错误通知</button>
+            </div>
+        </div>
+        
+        <!-- 自定义通知 -->
+        <div class="section">
+            <h3>自定义通知</h3>
+            <div class="input-group">
+                <label>标题:</label>
+                <input type="text" id="customTitle" value="自定义通知标题" />
+            </div>
+            <div class="input-group">
+                <label>副标题:</label>
+                <input type="text" id="customSubtitle" value="这是副标题" />
+            </div>
+            <div class="demo-area">
+                <button class="demo-button" onclick="testCustomInfo()">自定义信息</button>
+                <button class="demo-button success" onclick="testCustomSuccess()">自定义成功</button>
+                <button class="demo-button warning" onclick="testCustomWarning()">自定义警告</button>
+                <button class="demo-button danger" onclick="testCustomError()">自定义错误</button>
+            </div>
+        </div>
+        
+        <!-- 横幅演示 -->
+        <div class="section">
+            <h3>横幅演示</h3>
+            <div class="demo-area">
+                <button class="demo-button" onclick="testLeftBanner()">左侧横幅</button>
+                <button class="demo-button" onclick="testCenterBanner()">中间横幅</button>
+                <button class="demo-button" onclick="testRightBanner()">右侧横幅</button>
+                <button class="demo-button danger" onclick="clearAllDemo()">清除演示</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function testInfoNotification() {
+            try {
+                if (window.electronAPI && window.electronAPI.plugin) {
+                    const result = await window.electronAPI.plugin.executeAction('notification-demo', 'createInfoNotification', {
+                        title: '信息通知',
+                        subtitle: '这是一个信息通知示例'
+                    });
+                    console.log('信息通知结果:', result);
+                }
+            } catch (error) {
+                console.error('创建信息通知失败:', error);
+            }
+        }
+        
+        async function testSuccessNotification() {
+            try {
+                if (window.electronAPI && window.electronAPI.plugin) {
+                    const result = await window.electronAPI.plugin.executeAction('notification-demo', 'createSuccessNotification', {
+                        title: '操作成功',
+                        subtitle: '任务已成功完成'
+                    });
+                    console.log('成功通知结果:', result);
+                }
+            } catch (error) {
+                console.error('创建成功通知失败:', error);
+            }
+        }
+        
+        async function testWarningNotification() {
+            try {
+                if (window.electronAPI && window.electronAPI.plugin) {
+                    const result = await window.electronAPI.plugin.executeAction('notification-demo', 'createWarningNotification', {
+                        title: '警告提示',
+                        subtitle: '请注意相关事项'
+                    });
+                    console.log('警告通知结果:', result);
+                }
+            } catch (error) {
+                console.error('创建警告通知失败:', error);
+            }
+        }
+        
+        async function testErrorNotification() {
+            try {
+                if (window.electronAPI && window.electronAPI.plugin) {
+                    const result = await window.electronAPI.plugin.executeAction('notification-demo', 'createErrorNotification', {
+                        title: '操作失败',
+                        subtitle: '请检查并重试'
+                    });
+                    console.log('错误通知结果:', result);
+                }
+            } catch (error) {
+                console.error('创建错误通知失败:', error);
+            }
+        }
+        
+        async function testCustomInfo() {
+            const title = document.getElementById('customTitle').value;
+            const subtitle = document.getElementById('customSubtitle').value;
+            
+            try {
+                if (window.electronAPI && window.electronAPI.plugin) {
+                    const result = await window.electronAPI.plugin.executeAction('notification-demo', 'createInfoNotification', {
+                        title,
+                        subtitle
+                    });
+                    console.log('自定义信息通知结果:', result);
+                }
+            } catch (error) {
+                console.error('创建自定义信息通知失败:', error);
+            }
+        }
+        
+        async function testCustomSuccess() {
+            const title = document.getElementById('customTitle').value;
+            const subtitle = document.getElementById('customSubtitle').value;
+            
+            try {
+                if (window.electronAPI && window.electronAPI.plugin) {
+                    const result = await window.electronAPI.plugin.executeAction('notification-demo', 'createSuccessNotification', {
+                        title,
+                        subtitle
+                    });
+                    console.log('自定义成功通知结果:', result);
+                }
+            } catch (error) {
+                console.error('创建自定义成功通知失败:', error);
+            }
+        }
+        
+        async function testCustomWarning() {
+            const title = document.getElementById('customTitle').value;
+            const subtitle = document.getElementById('customSubtitle').value;
+            
+            try {
+                if (window.electronAPI && window.electronAPI.plugin) {
+                    const result = await window.electronAPI.plugin.executeAction('notification-demo', 'createWarningNotification', {
+                        title,
+                        subtitle
+                    });
+                    console.log('自定义警告通知结果:', result);
+                }
+            } catch (error) {
+                console.error('创建自定义警告通知失败:', error);
+            }
+        }
+        
+        async function testCustomError() {
+            const title = document.getElementById('customTitle').value;
+            const subtitle = document.getElementById('customSubtitle').value;
+            
+            try {
+                if (window.electronAPI && window.electronAPI.plugin) {
+                    const result = await window.electronAPI.plugin.executeAction('notification-demo', 'createErrorNotification', {
+                        title,
+                        subtitle
+                    });
+                    console.log('自定义错误通知结果:', result);
+                }
+            } catch (error) {
+                console.error('创建自定义错误通知失败:', error);
+            }
+        }
+        
+        async function testLeftBanner() {
+            try {
+                if (window.electronAPI && window.electronAPI.plugin) {
+                    const result = await window.electronAPI.plugin.executeAction('notification-demo', 'createCustomBanner', {
+                        content: '<div style="padding: 6px 12px; background: #1890ff; color: white; border-radius: 4px; font-size: 12px;"><strong>左侧横幅</strong><br><small>这是一个左侧横幅通知</small></div>',
+                        position: 'left'
+                    });
+                    console.log('左侧横幅结果:', result);
+                }
+            } catch (error) {
+                console.error('创建左侧横幅失败:', error);
+            }
+        }
+        
+        async function testCenterBanner() {
+            try {
+                if (window.electronAPI && window.electronAPI.plugin) {
+                    const result = await window.electronAPI.plugin.executeAction('notification-demo', 'createCustomBanner', {
+                        content: '<div style="padding: 8px 16px; background: #52c41a; color: white; border-radius: 6px; font-size: 14px; text-align: center;"><strong>🎉 中间横幅通知</strong><br><small>重要信息展示区域</small></div>',
+                        position: 'center'
+                    });
+                    console.log('中间横幅结果:', result);
+                }
+            } catch (error) {
+                console.error('创建中间横幅失败:', error);
+            }
+        }
+        
+        async function testRightBanner() {
+            try {
+                if (window.electronAPI && window.electronAPI.plugin) {
+                    const result = await window.electronAPI.plugin.executeAction('notification-demo', 'createCustomBanner', {
+                        content: '<div style="padding: 6px 12px; background: #faad14; color: white; border-radius: 4px; font-size: 12px;"><strong>右侧横幅</strong><br><small>这是一个右侧横幅通知</small></div>',
+                        position: 'right'
+                    });
+                    console.log('右侧横幅结果:', result);
+                }
+            } catch (error) {
+                console.error('创建右侧横幅失败:', error);
+            }
+        }
+        
+        async function clearAllDemo() {
+            try {
+                if (window.electronAPI && window.electronAPI.plugin) {
+                    const result = await window.electronAPI.plugin.executeAction('notification-demo', 'clearDemoNotifications', {});
+                    console.log('清除演示结果:', result);
+                }
+            } catch (error) {
+                console.error('清除演示失败:', error);
+            }
+        }
+    </script>
+</body>
+</html>

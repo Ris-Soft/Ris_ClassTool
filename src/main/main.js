@@ -1,14 +1,17 @@
-const { app, BrowserWindow, ipcMain, dialog, shell, Tray, Menu, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, Tray, Menu, nativeImage, protocol } = require('electron');
 const path = require('path');
 const fs = require('fs-extra');
 const Store = require('electron-store');
 const PluginManager = require('./plugin-manager');
+const PluginInterfaceManager = require('./plugin-interface-manager');
 const WindowManager = require('./window-manager');
+const AntDesignProvider = require('./antd-provider');
 const os = require('os');
 
 class LessonPluginApp {
   constructor() {
     this.store = new Store();
+    this.interfaceManager = new PluginInterfaceManager();
     this.pluginManager = new PluginManager(this.store);
     this.windowManager = new WindowManager();
     this.mainWindow = null;
@@ -20,6 +23,9 @@ class LessonPluginApp {
 
   setupApp() {
     app.whenReady().then(() => {
+      // 注册自定义协议，用于加载Ant Design资源
+      this.registerProtocols();
+      
       this.createTray();
       this.initializePlugins();
       
@@ -165,6 +171,104 @@ class LessonPluginApp {
     }
   }
 
+  /**
+   * 注册插件接口
+   * 这些接口可以被所有插件通过 api.xxx 的方式调用
+   */
+  registerPluginInterfaces() {
+    // 窗口管理接口
+    this.interfaceManager.registerInterfaces({
+      // 窗口操作
+      createWindow: (params, context) => {
+        if (!this.windowManager) {
+          throw new Error('WindowManager 未设置');
+        }
+        
+        // 默认启用外部HTML文件处理
+        const processExternalFiles = params.processExternalFiles !== false;
+        
+        // 处理标题栏选项
+        const windowOptions = {
+          ...params,
+          pluginId: context.pluginId,
+          processExternalFiles
+        };
+        
+        // 如果指定了自定义标题栏，需要注入标题栏组件
+        if (params.titleBarStyle === 'custom') {
+          windowOptions.injectTitleBar = true;
+        }
+        
+        return this.windowManager.createWindow(windowOptions);
+      },
+      
+      closeWindow: (params) => {
+        return this.windowManager.closeWindow(params.windowId);
+      },
+      
+      listWindows: () => {
+        return this.windowManager.getAllWindows();
+      },
+      
+      // 主窗口操作
+      showMainWindow: (params) => {
+        const page = params && params.page ? params.page : null;
+        this.showMainWindow(page);
+        return { success: true };
+      },
+      
+      // 快捷方式管理
+      createShortcut: (params) => {
+        return this.createDesktopShortcut(params);
+      },
+      
+      removeShortcut: (params) => {
+        return this.removeDesktopShortcut(params.name);
+      },
+      
+      listShortcuts: () => {
+        return this.listDesktopShortcuts();
+      },
+      
+      // 插件间通信
+      callPluginMethod: async (params, context) => {
+        const { pluginId, method, params: methodParams } = params;
+        return await this.pluginManager.executePluginAction(pluginId, method, methodParams);
+      },
+      
+      // 文件系统操作
+      readFile: async (params) => {
+        try {
+          const { filePath, encoding = 'utf8' } = params;
+          const content = await fs.readFile(filePath, encoding);
+          return { success: true, content };
+        } catch (error) {
+          return { success: false, error: error.message };
+        }
+      },
+      
+      writeFile: async (params) => {
+        try {
+          const { filePath, content, encoding = 'utf8' } = params;
+          await fs.outputFile(filePath, content, encoding);
+          return { success: true };
+        } catch (error) {
+          return { success: false, error: error.message };
+        }
+      },
+      
+      // 系统操作
+      openExternal: async (params) => {
+        try {
+          await shell.openExternal(params.url);
+          return { success: true };
+        } catch (error) {
+          return { success: false, error: error.message };
+        }
+      }
+    });
+  }
+
   initializePlugins() {
     // 设置插件管理器的依赖
     this.pluginManager.setWindowManager(this.windowManager);
@@ -175,13 +279,19 @@ class LessonPluginApp {
       list: () => this.listDesktopShortcuts()
     });
     
+    // 注册插件接口（在依赖设置完成后）
+    this.registerPluginInterfaces();
+    
+    // 设置插件接口管理器
+    this.pluginManager.setInterfaceManager(this.interfaceManager);
+    
     // 初始化插件系统，触发插件的启动事件
     this.pluginManager.initializePlugins();
     
     // 通知所有插件应用已启动
     this.pluginManager.broadcastEvent('app-started', {
-      createWindow: (options) => this.windowManager.createWindow(options),
-      showMainWindow: (page) => this.showMainWindow(page)
+      version: app.getVersion(),
+      platform: process.platform
     });
   }
 
@@ -341,7 +451,94 @@ Categories=Utility;`;
     }
   }
 
+  // 注册自定义协议
+  registerProtocols() {
+    // 注册antd://协议，用于加载Ant Design资源
+    protocol.registerFileProtocol('antd', (request, callback) => {
+      const url = request.url.substring(7); // 去掉 'antd://'
+      
+      // 处理CSS文件请求
+      if (url.startsWith('css/')) {
+        const cssPath = path.join(process.cwd(), 'src/renderer/node_modules/antd/dist', url);
+        callback({ path: cssPath });
+        return;
+      }
+      
+      // 处理JavaScript文件请求
+      if (url.startsWith('js/')) {
+        const jsFile = url.replace('js/', '');
+        
+        // 根据请求的文件名确定路径
+        let jsPath;
+        switch (jsFile) {
+          case 'react.production.min.js':
+            jsPath = path.join(process.cwd(), 'src/renderer/node_modules/react/umd/react.production.min.js');
+            break;
+          case 'react-dom.production.min.js':
+            jsPath = path.join(process.cwd(), 'src/renderer/node_modules/react-dom/umd/react-dom.production.min.js');
+            break;
+          case 'antd.min.js':
+            jsPath = path.join(process.cwd(), 'src/renderer/node_modules/antd/dist/antd.min.js');
+            break;
+          case 'icons.min.js':
+            jsPath = path.join(process.cwd(), 'src/renderer/node_modules/@ant-design/icons/dist/index.umd.js');
+            break;
+          default:
+            jsPath = null;
+        }
+        
+        if (jsPath && fs.existsSync(jsPath)) {
+          callback({ path: jsPath });
+          return;
+        }
+      }
+      
+      // 处理图标文件请求
+      if (url.startsWith('icons/')) {
+        const iconName = url.replace('icons/', '').replace('.js', '');
+        const iconPath = path.join(process.cwd(), 'src/renderer/node_modules/@ant-design/icons/es/icons', `${iconName}.js`);
+        if (fs.existsSync(iconPath)) {
+          callback({ path: iconPath });
+          return;
+        }
+      }
+      
+      console.error('资源未找到:', request.url);
+      callback({ error: -2 }); // 文件不存在
+    });
+    
+    // 注册插件资源协议
+    protocol.registerFileProtocol('plugin-resources', (request, callback) => {
+      const url = request.url.substring(17); // 去掉 'plugin-resources://'
+      const resourcePath = path.join(process.cwd(), 'src/renderer/public/plugin-resources', url);
+      
+      if (fs.existsSync(resourcePath)) {
+        callback({ path: resourcePath });
+      } else {
+        console.error('插件资源未找到:', request.url);
+        callback({ error: -2 }); // 文件不存在
+      }
+    });
+  }
+
   setupIPC() {
+    // Ant Design相关IPC
+    ipcMain.handle('antd:getComponents', () => {
+      return { available: true, message: '通过window.antd访问组件' };
+    });
+    
+    ipcMain.handle('antd:getIcons', () => {
+      return { available: true, message: '通过window.antdIcons访问图标' };
+    });
+    
+    ipcMain.handle('antd:getIconNames', () => {
+      return AntDesignProvider.getIconNames();
+    });
+    
+    ipcMain.handle('antd:hasIcon', (event, iconName) => {
+      return AntDesignProvider.hasIcon(iconName);
+    });
+    
     // 插件管理相关IPC
     ipcMain.handle('plugin:list', () => {
       return this.pluginManager.getInstalledPlugins();
@@ -387,8 +584,25 @@ Categories=Utility;`;
       return this.pluginManager.getPluginProjects();
     });
 
+    ipcMain.handle('plugin:setHotReloadEnabled', async (event, enabled) => {
+      return this.pluginManager.setHotReloadEnabled(enabled);
+    });
+    
+    ipcMain.handle('plugin:getHotReloadEnabled', () => {
+      return this.pluginManager.getHotReloadEnabled();
+    });
+    
+    ipcMain.handle('plugin:reloadPlugin', async (event, pluginId) => {
+      return this.pluginManager.reloadPlugin(pluginId);
+    });
+
     ipcMain.handle('plugin:executeAction', async (event, pluginId, action, params) => {
       return this.pluginManager.executePluginAction(pluginId, action, params);
+    });
+    
+    // 插件接口相关IPC
+    ipcMain.handle('plugin:getAvailableInterfaces', () => {
+      return this.pluginManager.getAvailableInterfaces();
     });
 
     // 窗口管理相关IPC

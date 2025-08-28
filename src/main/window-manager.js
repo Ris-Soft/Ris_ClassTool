@@ -7,7 +7,19 @@ class WindowManager {
     this.windows = new Map();
     this.mainWindow = null;
     this.windowCounter = 0;
-    this.setupIPC();
+    
+    // 只在 Electron 环境中设置 IPC
+    if (typeof require !== 'undefined') {
+      try {
+        const { ipcMain } = require('electron');
+        if (ipcMain) {
+          this.setupIPC();
+        }
+      } catch (error) {
+        // 非 Electron 环境，跳过 IPC 设置
+        console.log('非 Electron 环境，跳过窗口管理器 IPC 设置');
+      }
+    }
   }
 
   setMainWindow(mainWindow) {
@@ -54,7 +66,7 @@ class WindowManager {
       height: 600,
       minWidth: 400,
       minHeight: 300,
-      show: false,
+      show: true,  // 默认显示窗口
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,

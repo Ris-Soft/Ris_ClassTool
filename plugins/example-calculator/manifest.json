@@ -21,27 +21,5 @@
       "component": "Calculator"
     }
   ],
-  "apis": [
-    {
-      "name": "createWindow",
-      "description": "创建自定义窗口",
-      "parameters": ["windowId", "title", "width", "height", "htmlFile", "html"]
-    },
-    {
-      "name": "closeWindow",
-      "description": "关闭指定窗口",
-      "parameters": ["windowId"]
-    },
-    {
-      "name": "listWindows",
-      "description": "获取窗口列表",
-      "parameters": []
-    },
-    {
-      "name": "createDesktopShortcut",
-      "description": "创建桌面快捷方式",
-      "parameters": ["name", "action", "params", "icon"]
-    }
-  ],
   "dependencies": []
 }

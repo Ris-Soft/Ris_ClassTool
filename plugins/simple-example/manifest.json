@@ -1,0 +1,23 @@
+{
+  "id": "simple-example",
+  "name": "简单示例插件",
+  "version": "1.0.0",
+  "description": "展示新的事件化插件接口使用方法",
+  "author": "LessonPlugin",
+  "main": "index.js",
+  "icon": "AppstoreOutlined",
+  "permissions": [
+    "ui",
+    "system"
+  ],
+  "projects": [
+    {
+      "id": "simple-project",
+      "name": "简单工具",
+      "description": "演示插件接口使用",
+      "icon": "ToolOutlined",
+      "component": "SimpleTool"
+    }
+  ],
+  "dependencies": []
+}

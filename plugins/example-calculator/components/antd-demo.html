@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ant Design 演示</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f0f2f5;
+      color: rgba(0, 0, 0, 0.85);
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      background-color: #fff;
+      padding: 16px;
+      border-radius: 2px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      margin-bottom: 16px;
+    }
+    
+    .title {
+      margin: 0;
+      color: rgba(0, 0, 0, 0.85);
+      font-weight: 500;
+      font-size: 20px;
+    }
+    
+    .subtitle {
+      margin: 8px 0 0;
+      color: rgba(0, 0, 0, 0.45);
+      font-size: 14px;
+    }
+    
+    .card {
+      background-color: #fff;
+      padding: 24px;
+      border-radius: 2px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      margin-bottom: 16px;
+    }
+    
+    .card-title {
+      margin-top: 0;
+      margin-bottom: 16px;
+      color: rgba(0, 0, 0, 0.85);
+      font-weight: 500;
+      font-size: 16px;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .button {
+      padding: 4px 15px;
+      font-size: 14px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .button-primary {
+      background-color: #1890ff;
+      color: #fff;
+      border: 1px solid #1890ff;
+    }
+    
+    .button-primary:hover {
+      background-color: #40a9ff;
+      border-color: #40a9ff;
+    }
+    
+    .button-default {
+      background-color: #fff;
+      color: rgba(0, 0, 0, 0.85);
+      border: 1px solid #d9d9d9;
+    }
+    
+    .button-default:hover {
+      color: #40a9ff;
+      border-color: #40a9ff;
+    }
+    
+    .search-box {
+      padding: 8px;
+      border: 1px solid #d9d9d9;
+      border-radius: 2px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+    
+    .search-box:focus {
+      border-color: #40a9ff;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    }
+    
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 16px;
+    }
+    
+    .icon-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 8px;
+      background-color: #fafafa;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .icon-item:hover {
+      background-color: #e6f7ff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+    }
+    
+    .icon-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    
+    .icon-name {
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.65);
+      text-align: center;
+      word-break: break-all;
+    }
+    
+    /* Ant Design 按钮样式 */
+    .ant-btn {
+      line-height: 1.5715;
+      position: relative;
+      display: inline-block;
+      font-weight: 400;
+      white-space: nowrap;
+      text-align: center;
+      background-image: none;
+      border: 1px solid transparent;
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+      user-select: none;
+      touch-action: manipulation;
+      height: 32px;
+      padding: 4px 15px;
+      font-size: 14px;
+      border-radius: 2px;
+      color: rgba(0, 0, 0, 0.85);
+      background: #fff;
+      border-color: #d9d9d9;
+    }
+    
+    .ant-btn-primary {
+      color: #fff;
+      background: #1890ff;
+      border-color: #1890ff;
+      text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12);
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+    }
+    
+    .ant-btn:hover,
+    .ant-btn:focus {
+      color: #40a9ff;
+      border-color: #40a9ff;
+    }
+    
+    .ant-btn-primary:hover,
+    .ant-btn-primary:focus {
+      color: #fff;
+      background: #40a9ff;
+      border-color: #40a9ff;
+    }
+    
+    .demo-section {
+      margin-bottom: 24px;
+    }
+    
+    .demo-title {
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.45);
+      margin-bottom: 12px;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    .status-success {
+      background-color: #52c41a;
+    }
+    
+    .status-error {
+      background-color: #ff4d4f;
+    }
+    
+    .status-warning {
+      background-color: #faad14;
+    }
+    
+    .status-info {
+      background-color: #1890ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="title">Ant Design 演示</h1>
+      <p class="subtitle">展示如何在插件中使用 Ant Design 组件和图标</p>
+    </div>
+    
+    <div class="card">
+      <h2 class="card-title">组件演示</h2>
+      
+      <div class="demo-section">
+        <div class="demo-title">按钮组件</div>
+        <div id="button-demo"></div>
+      </div>
+      
+      <div class="demo-section">
+        <div class="demo-title">消息通知</div>
+        <div class="button-group">
+          <button class="button button-primary" id="show-message">显示消息通知</button>
+        </div>
+      </div>
+      
+      <div class="demo-section">
+        <div class="demo-title">加载状态</div>
+        <div>
+          <p><span class="status-indicator status-success"></span> React 加载状态: <span id="react-status">检查中...</span></p>
+          <p><span class="status-indicator status-info"></span> Ant Design 加载状态: <span id="antd-status">检查中...</span></p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2 class="card-title">图标演示</h2>
+      <div class="button-group">
+        <button class="button button-primary" id="load-icons">加载所有图标</button>
+        <button class="button button-default" id="clear-icons">清除图标</button>
+      </div>
+      <input type="text" class="search-box" id="icon-search" placeholder="搜索图标...">
+      <div class="icon-grid" id="icon-grid">
+        <div class="icon-item">
+          <div class="icon-display">
+            <span id="loading-icon">⏳</span>
+          </div>
+          <div class="icon-name">点击"加载所有图标"按钮</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 当页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', function() {
+      // 监听React和Ant Design加载完成事件
+      document.addEventListener('react-ready', function() {
+        console.log('React 已加载完成');
+        document.getElementById('react-status').textContent = '已加载';
+        document.getElementById('react-status').parentNode.querySelector('.status-indicator').className = 'status-indicator status-success';
+      });
+      
+      document.addEventListener('antd-ready', function() {
+        console.log('Ant Design 已加载完成');
+        document.getElementById('antd-status').textContent = '已加载';
+        document.getElementById('antd-status').parentNode.querySelector('.status-indicator').className = 'status-indicator status-success';
+        initPage();
+      });
+      
+      // 如果已经加载了React和Ant Design，直接初始化页面
+      if (window.React && window.AntDesign) {
+        initPage();
+      } else {
+        // 设置超时检查
+        setTimeout(function() {
+          if (!window.React) {
+            document.getElementById('react-status').textContent = '加载失败';
+            document.getElementById('react-status').parentNode.querySelector('.status-indicator').className = 'status-indicator status-error';
+          }
+          if (!window.AntDesign) {
+            document.getElementById('antd-status').textContent = '加载失败';
+            document.getElementById('antd-status').parentNode.querySelector('.status-indicator').className = 'status-indicator status-error';
+          }
+        }, 3000);
+      }
+    });
+    
+    // 初始化页面
+    function initPage() {
+      console.log('初始化页面');
+      
+      // 加载图标按钮点击事件
+      document.getElementById('load-icons').addEventListener('click', loadIcons);
+      
+      // 清除图标按钮点击事件
+      document.getElementById('clear-icons').addEventListener('click', clearIcons);
+      
+      // 图标搜索事件
+      document.getElementById('icon-search').addEventListener('input', filterIcons);
+      
+      // 显示消息按钮点击事件
+      document.getElementById('show-message').addEventListener('click', showMessage);
+      
+      // 渲染按钮组件示例
+      renderButtonDemo();
+    }
+    
+    // 渲染按钮组件示例
+    function renderButtonDemo() {
+      if (!window.React || !window.AntDesign) return;
+      
+      const buttonContainer = document.getElementById('button-demo');
+      if (!buttonContainer) return;
+      
+      // 创建一个按钮
+      const button = React.createElement(
+        AntDesign.Button,
+        { 
+          type: 'primary',
+          onClick: () => showNotification('按钮被点击了!', 'success')
+        },
+        '点击我'
+      );
+      
+      // 渲染按钮
+      try {
+        // 创建一个简单的渲染函数
+        const renderElement = (element, container) => {
+          // 创建一个简单的DOM结构
+          const domElement = document.createElement('div');
+          domElement.className = element.props.className || '';
+          domElement.textContent = element.children || '';
+          
+          // 添加点击事件
+          if (element.props.onClick) {
+            domElement.addEventListener('click', element.props.onClick);
+          }
+          
+          // 应用样式
+          if (element.props.style) {
+            Object.assign(domElement.style, element.props.style);
+          }
+          
+          // 清空容器并添加元素
+          container.innerHTML = '';
+          container.appendChild(domElement);
+        };
+        
+        renderElement(button, buttonContainer);
+      } catch (error) {
+        console.error('渲染按钮失败:', error);
+      }
+    }
+    
+    // 加载所有图标
+    async function loadIcons() {
+      try {
+        // 显示加载中状态
+        const iconGrid = document.getElementById('icon-grid');
+        iconGrid.innerHTML = '<div class="icon-item"><div class="icon-display">⏳</div><div class="icon-name">加载中...</div></div>';
+        
+        // 获取图标名称列表
+        let iconNames = [];
+        
+        // 尝试从AntIcons获取
+        if (window.AntIcons && window.AntIcons.availableIcons) {
+          iconNames = window.AntIcons.availableIcons;
+        } else {
+          // 否则从API获取
+          iconNames = await window.electronAPI.antd.getIconNames();
+        }
+        
+        console.log(`获取到 ${iconNames.length} 个图标`);
+        
+        // 如果没有图标，显示提示
+        if (!iconNames || iconNames.length === 0) {
+          iconGrid.innerHTML = '<div class="icon-item"><div class="icon-display">❌</div><div class="icon-name">未找到图标</div></div>';
+          return;
+        }
+        
+        // 清空图标网格
+        iconGrid.innerHTML = '';
+        
+        // 添加图标到网格
+        iconNames.forEach(iconName => {
+          const iconItem = document.createElement('div');
+          iconItem.className = 'icon-item';
+          iconItem.dataset.iconName = iconName;
+          
+          // 创建图标显示
+          const iconDisplay = document.createElement('div');
+          iconDisplay.className = 'icon-display';
+          
+          // 尝试使用AntIcons渲染图标
+          if (window.AntIcons && typeof window.AntIcons[iconName] === 'function') {
+            try {
+              // 创建一个简单的图标元素
+              const iconElement = document.createElement('span');
+              iconElement.className = `anticon anticon-${iconName.toLowerCase()}`;
+              iconElement.textContent = iconName.charAt(0);
+              iconDisplay.appendChild(iconElement);
+            } catch (err) {
+              console.error(`渲染图标 ${iconName} 失败:`, err);
+              iconDisplay.textContent = iconName.charAt(0);
+            }
+          } else {
+            // 回退到显示首字母
+            iconDisplay.textContent = iconName.charAt(0);
+          }
+          
+          // 创建图标名称
+          const iconNameElement = document.createElement('div');
+          iconNameElement.className = 'icon-name';
+          iconNameElement.textContent = iconName;
+          
+          // 组装图标项
+          iconItem.appendChild(iconDisplay);
+          iconItem.appendChild(iconNameElement);
+          
+          // 点击图标时复制图标名称
+          iconItem.addEventListener('click', () => {
+            try {
+              // 尝试使用剪贴板API
+              navigator.clipboard.writeText(iconName).then(() => {
+                showNotification(`已复制: ${iconName}`, 'success');
+              }).catch(err => {
+                // 回退方法
+                const textarea = document.createElement('textarea');
+                textarea.value = iconName;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showNotification(`已复制: ${iconName}`, 'success');
+              });
+            } catch (err) {
+              showNotification('复制失败', 'error');
+            }
+          });
+          
+          iconGrid.appendChild(iconItem);
+        });
+        
+        // 应用当前搜索过滤
+        filterIcons();
+      } catch (error) {
+        console.error('加载图标失败:', error);
+        showNotification('加载图标失败', 'error');
+        
+        // 显示错误状态
+        const iconGrid = document.getElementById('icon-grid');
+        iconGrid.innerHTML = `
+          <div class="icon-item">
+            <div class="icon-display">❌</div>
+            <div class="icon-name">加载失败: ${error.message || '未知错误'}</div>
+          </div>
+        `;
+      }
+    }
+    
+    // 清除图标
+    function clearIcons() {
+      const iconGrid = document.getElementById('icon-grid');
+      iconGrid.innerHTML = `
+        <div class="icon-item">
+          <div class="icon-display">
+            <span id="loading-icon">⏳</span>
+          </div>
+          <div class="icon-name">点击"加载所有图标"按钮</div>
+        </div>
+      `;
+      
+      // 清空搜索框
+      document.getElementById('icon-search').value = '';
+    }
+    
+    // 过滤图标
+    function filterIcons() {
+      const searchTerm = document.getElementById('icon-search').value.toLowerCase();
+      const iconItems = document.querySelectorAll('.icon-item');
+      let visibleCount = 0;
+      
+      iconItems.forEach(item => {
+        const iconName = item.dataset.iconName;
+        if (!iconName) return;
+        
+        if (iconName.toLowerCase().includes(searchTerm)) {
+          item.style.display = '';
+          visibleCount++;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      
+      // 如果没有匹配项，显示提示
+      if (visibleCount === 0 && searchTerm) {
+        const iconGrid = document.getElementById('icon-grid');
+        const noResultItem = document.createElement('div');
+        noResultItem.className = 'icon-item';
+        noResultItem.innerHTML = `
+          <div class="icon-display">🔍</div>
+          <div class="icon-name">未找到匹配"${searchTerm}"的图标</div>
+        `;
+        iconGrid.appendChild(noResultItem);
+      }
+    }
+    
+    // 显示消息通知
+    function showMessage() {
+      const messageTypes = ['success', 'info', 'warning', 'error', 'loading'];
+      const randomType = messageTypes[Math.floor(Math.random() * messageTypes.length)];
+      const messages = {
+        success: '操作成功完成！',
+        info: '这是一条信息通知',
+        warning: '请注意这个警告信息',
+        error: '操作失败，请重试',
+        loading: '正在加载中...'
+      };
+      
+      showNotification(messages[randomType], randomType);
+    }
+    
+    // 显示通知
+    function showNotification(message, type = 'info') {
+      try {
+        // 使用插件的UI消息API
+        window.electronAPI.plugin.executeAction('example-calculator', 'showMessage', {
+          type,
+          content: message,
+          duration: 3
+        });
+      } catch (error) {
+        console.error('显示通知失败:', error);
+        
+        // 回退方案：创建一个简单的通知元素
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          padding: 10px 20px;
+          background: #262626;
+          border: 1px solid #434343;
+          border-radius: 4px;
+          color: #fff;
+          z-index: 1000;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        `;
+        
+        // 根据类型设置颜色
+        let iconHtml = '';
+        switch (type) {
+          case 'success':
+            notification.style.borderLeft = '4px solid #52c41a';
+            iconHtml = '<span style="color: #52c41a; margin-right: 8px;">✓</span>';
+            break;
+          case 'error':
+            notification.style.borderLeft = '4px solid #ff4d4f';
+            iconHtml = '<span style="color: #ff4d4f; margin-right: 8px;">✕</span>';
+            break;
+          case 'warning':
+            notification.style.borderLeft = '4px solid #faad14';
+            iconHtml = '<span style="color: #faad14; margin-right: 8px;">⚠</span>';
+            break;
+          case 'loading':
+            notification.style.borderLeft = '4px solid #1890ff';
+            iconHtml = '<span style="color: #1890ff; margin-right: 8px;">⏳</span>';
+            break;
+          default:
+            notification.style.borderLeft = '4px solid #1890ff';
+            iconHtml = '<span style="color: #1890ff; margin-right: 8px;">ℹ</span>';
+        }
+        
+        notification.innerHTML = iconHtml + message;
+        document.body.appendChild(notification);
+        
+        // 3秒后移除通知
+        setTimeout(() => {
+          notification.style.opacity = '0';
+          notification.style.transform = 'translateX(-50%) translateY(-20px)';
+          notification.style.transition = 'all 0.3s ease-out';
+          
+          setTimeout(() => {
+            if (notification.parentNode) {
+              document.body.removeChild(notification);
+            }
+          }, 300);
+        }, 3000);
+      }
+    }
+  </script>
+</body>
+</html>

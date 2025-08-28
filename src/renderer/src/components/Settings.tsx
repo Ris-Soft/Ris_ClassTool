@@ -174,6 +174,7 @@ const Settings: React.FC = () => {
           </div>
         </Card>
 
+        {/* 全局通知设置 */}
         {/* 插件设置 */}
         <Card 
           title="插件设置" 

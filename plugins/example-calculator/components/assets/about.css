@@ -8,9 +8,6 @@ body {
 }
 
 .about {
-  background: #1f1f1f;
-  border: 1px solid #333333;
-  border-radius: 10px;
   padding: 30px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }

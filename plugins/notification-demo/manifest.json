@@ -1,0 +1,28 @@
+{
+  "id": "notification-demo",
+  "name": "通知演示插件",
+  "version": "1.0.0",
+  "description": "演示如何使用全局通知插件的功能",
+  "author": "System",
+  "main": "index.js",
+  "icon": "BellOutlined",
+  "permissions": [
+    "ui",
+    "storage"
+  ],
+  "dependencies": [
+    {
+      "id": "global-notification",
+      "version": "^1.0.0"
+    }
+  ],
+  "projects": [
+    {
+      "id": "demo-project",
+      "name": "通知演示",
+      "description": "演示各种通知功能",
+      "icon": "BellOutlined",
+      "component": "demo.html"
+    }
+  ]
+}

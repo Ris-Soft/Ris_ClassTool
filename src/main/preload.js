@@ -2,6 +2,13 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 // 暴露安全的API给渲染进程
 contextBridge.exposeInMainWorld('electronAPI', {
+  // Ant Design API
+  antd: {
+    getComponents: () => ipcRenderer.invoke('antd:getComponents'),
+    getIcons: () => ipcRenderer.invoke('antd:getIcons'),
+    getIconNames: () => ipcRenderer.invoke('antd:getIconNames'),
+    hasIcon: (iconName) => ipcRenderer.invoke('antd:hasIcon', iconName)
+  },
   // 插件管理API
   plugin: {
     list: () => ipcRenderer.invoke('plugin:list'),
@@ -11,7 +18,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     enable: (pluginId) => ipcRenderer.invoke('plugin:enable', pluginId),
     disable: (pluginId) => ipcRenderer.invoke('plugin:disable', pluginId),
     getProjects: () => ipcRenderer.invoke('plugin:getProjects'),
-    executeAction: (pluginId, action, params) => ipcRenderer.invoke('plugin:executeAction', pluginId, action, params)
+    executeAction: (pluginId, action, params) => ipcRenderer.invoke('plugin:executeAction', pluginId, action, params),
+    setHotReloadEnabled: (enabled) => ipcRenderer.invoke('plugin:setHotReloadEnabled', enabled),
+    getHotReloadEnabled: () => ipcRenderer.invoke('plugin:getHotReloadEnabled'),
+    reloadPlugin: (pluginId) => ipcRenderer.invoke('plugin:reloadPlugin', pluginId),
+    callInterface: (interfaceName, params) => ipcRenderer.invoke('plugin:callInterface', interfaceName, params),
+    getAvailableInterfaces: () => ipcRenderer.invoke('plugin:getAvailableInterfaces')
   },
 
   // 窗口管理API
@@ -56,7 +68,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // 事件监听
   on: (channel, callback) => {
-    const validChannels = ['plugin:updated', 'window:closed', 'window-maximized', 'window-unmaximized', 'navigate-to'];
+    const validChannels = ['plugin:updated', 'window:closed', 'window-maximized', 'window-unmaximized', 'navigate-to', 'plugin:ui-message'];
     if (validChannels.includes(channel)) {
       ipcRenderer.on(channel, callback);
     }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Card, 
   Button, 
@@ -9,7 +9,9 @@ import {
   Modal, 
   message,
   Empty,
-  Popconfirm
+  Popconfirm,
+  Tooltip,
+  Divider
 } from 'antd';
 import { 
   PlusOutlined, 
@@ -27,6 +29,8 @@ import {
   GlobalOutlined,
   HomeOutlined,
   SettingFilled,
+  ReloadOutlined,
+  ThunderboltOutlined,
   // 添加更多可能需要的图标
   CloudOutlined,
   BookOutlined,
@@ -54,6 +58,22 @@ const PluginManager: React.FC<PluginManagerProps> = ({
   onPluginChange 
 }) => {
   const [loading, setLoading] = useState<string | null>(null);
+  const [hotReloadEnabled, setHotReloadEnabled] = useState<boolean>(true);
+  const [reloadingPlugin, setReloadingPlugin] = useState<string | null>(null);
+
+  // 初始化时获取热重载状态
+  useEffect(() => {
+    const fetchHotReloadStatus = async () => {
+      try {
+        const enabled = await window.electronAPI.plugin.getHotReloadEnabled();
+        setHotReloadEnabled(enabled);
+      } catch (error) {
+        console.error('获取热重载状态失败:', error);
+      }
+    };
+    
+    fetchHotReloadStatus();
+  }, []);
 
   // 获取插件图标组件
   const getPluginIcon = (plugin: Plugin) => {
@@ -157,6 +177,42 @@ const PluginManager: React.FC<PluginManagerProps> = ({
     }
   };
 
+  const handleToggleHotReload = async (enabled: boolean) => {
+    try {
+      setLoading('hotReload');
+      const result = await window.electronAPI.plugin.setHotReloadEnabled(enabled);
+      
+      if (result.success) {
+        setHotReloadEnabled(result.enabled);
+        message.success(result.enabled ? '插件热重载已启用' : '插件热重载已禁用');
+      } else {
+        message.error('设置热重载状态失败');
+      }
+    } catch (error: any) {
+      message.error(error.message || '设置热重载状态失败');
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleReloadPlugin = async (pluginId: string) => {
+    try {
+      setReloadingPlugin(pluginId);
+      const success = await window.electronAPI.plugin.reloadPlugin(pluginId);
+      
+      if (success) {
+        message.success('插件已重新加载');
+        onPluginChange();
+      } else {
+        message.error('重新加载插件失败');
+      }
+    } catch (error: any) {
+      message.error(error.message || '重新加载插件失败');
+    } finally {
+      setReloadingPlugin(null);
+    }
+  };
+
   return (
     <div className="content-container">
       <div className="page-header">
@@ -167,15 +223,34 @@ const PluginManager: React.FC<PluginManagerProps> = ({
               安装、管理和配置课堂工具插件
             </Paragraph>
           </div>
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />}
-            onClick={handleInstallPlugin}
-            loading={loading === 'install'}
-          >
-            安装插件
-          </Button>
+          <Space>
+            <Tooltip title={hotReloadEnabled ? '禁用插件热重载' : '启用插件热重载'}>
+              <Button
+                type={hotReloadEnabled ? 'primary' : 'default'}
+                icon={<ThunderboltOutlined />}
+                onClick={() => handleToggleHotReload(!hotReloadEnabled)}
+                loading={loading === 'hotReload'}
+              >
+                热重载
+              </Button>
+            </Tooltip>
+            <Button 
+              type="primary" 
+              icon={<PlusOutlined />}
+              onClick={handleInstallPlugin}
+              loading={loading === 'install'}
+            >
+              安装插件
+            </Button>
+          </Space>
         </div>
+        {hotReloadEnabled && (
+          <div style={{ marginTop: '8px' }}>
+            <Text type="secondary" style={{ fontSize: '13px' }}>
+              <ThunderboltOutlined /> 热重载已启用：编辑插件文件时将自动重新加载插件
+            </Text>
+          </div>
+        )}
       </div>
 
       {plugins.length === 0 ? (
@@ -266,6 +341,19 @@ const PluginManager: React.FC<PluginManagerProps> = ({
 
               <div className="plugin-meta">
                 <Space>
+                  {plugin.enabled && (
+                    <Tooltip title="手动重新加载插件">
+                      <Button 
+                        type="text" 
+                        size="small" 
+                        icon={<ReloadOutlined spin={reloadingPlugin === plugin.id} />}
+                        onClick={() => handleReloadPlugin(plugin.id)}
+                        disabled={!plugin.enabled}
+                      >
+                        重新加载
+                      </Button>
+                    </Tooltip>
+                  )}
                   <Button 
                     type="text" 
                     size="small" 
